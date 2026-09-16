@@ -2,26 +2,36 @@
 
 릴리스마다 이 파일의 해당 절이 GitHub Release 노트로 올라갑니다. Each release's section is published as its GitHub Release notes.
 
+## v0.6.3
+
+**한국어**
+- "정보 · 문의"가 관리 화면 오른쪽에 붙어 함께 움직이는 사이드 창으로 바뀌었습니다(오른쪽에 공간이 없으면 왼쪽). 버전, 문의 메일(bsj_2200@naver.com, 메일 앱 열기·주소 복사), Instagram @Rinsomnia__, GitHub 저장소, 버그 신고·제안(Issues), 릴리스 노트, 데이터·로그 폴더 열기, 조작 방법을 섹션으로 정리했습니다. 만든 사람 표기를 박상준으로 바로잡고, 주소의 밑줄(_)이 버튼에서 사라지던 표시 오류를 고쳤습니다.
+- 쩡을 다시 그렸습니다: 생머리에 가까운 긴 검은 머리, 다른 사람 캐릭터와 같은 또렷한 얼굴, 빨간 상의와 네이비 H라인 롱스커트. 지또는 흰 티 + 회색 셔츠 + 짙은 청바지로 옷을 바꿨습니다.
+- 클릭하면 캐릭터마다 다른 인사·응원·취미 한마디를 합니다(공통 8개 + 종류별 전용 문구, 연속 반복 없음). 신체 접촉을 연상시키는 표현은 쓰지 않습니다.
+- 이름 표시 설정: 숨기기 / 기본(작게) / 크게(배경 라벨). 크게를 고르면 굵은 글자를 밝은 라벨 위에 올려 어떤 배경에서도 읽힙니다.
+
+**English**
+- About · Contact is now a side panel docked to the main window (moves with it; docks left when there is no room): version, email (mail app, copy), Instagram, GitHub repo, Issues, releases, data/log folders and a controls guide. Author credit corrected to Sangjun Park; underscores in the addresses no longer disappear from the buttons.
+- Jjeong redrawn: long nearly-straight black hair, a clear youthful face matching the other humans, red top and navy H-line long skirt. Jitto's outfit is now a white tee, gray shirt and dark jeans.
+- Clicking the character now gives a per-character greeting, cheer or hobby line (shared pool plus species lines, never repeated back to back); no physical-contact wording.
+- Name display setting: hidden / small / large on a label (bold text on a light rounded label, readable on any wallpaper).
+
 ## v0.6.2
 
 **한국어**
-- 새 캐릭터 4종: **여디니**(밝은 갈색 단발, 머리 위 수영안경, 테니스 라켓 · 테니스 스윙/물안경 쓰기), **지또**(검은 히피펌과 앞머리, 두부처럼 하얀 피부 · 머리 빙글/브이 포즈), **쩡**(생머리에 가까운 긴 검은 머리, 빨간 상의와 네이비 H라인 롱스커트 · 빙글 돌기/신나는 박수), **승현**(키 크고 안경, 투블럭, 밝은 청바지 · 안경 고쳐 쓰기/어깨 스트레칭).
+- 새 캐릭터 4종: **여디니**(밝은 갈색 단발, 머리 위 수영안경, 테니스 라켓 · 테니스 스윙/물안경 쓰기), **지또**(검은 히피펌과 앞머리, 두부처럼 하얀 피부 · 머리 빙글/브이 포즈), **쩡**(약한 파마, 원색 상의와 긴 치마 · 치마 빙글/신나는 박수), **승현**(키 크고 안경, 투블럭, 밝은 청바지 · 안경 고쳐 쓰기/어깨 스트레칭).
 - 비동물 캐릭터는 로봇만 남기고 슬라임·유령·버섯·아기 드래곤·선인장은 선택 목록에서 숨겼습니다. 이미 그 종류를 쓰는 친구의 캐릭터는 그대로 보입니다. 선택 가능 25종.
 - 픽셀이 깨져 보이던 문제 수정: 스프라이트를 화면 픽셀 정수(또는 0.5) 배율로만 그립니다. 100%는 1:1(지금보다 약 1.3배 크게), 150%는 1.5배, 200%는 2배이며 위치도 픽셀 격자에 맞춥니다.
-- "정보 · 문의" 버튼을 누르면 관리 화면 오른쪽에 붙어 함께 움직이는 사이드 창이 열립니다(오른쪽에 공간이 없으면 왼쪽). 버전, 문의 메일(bsj_2200@naver.com, 메일 앱 열기·주소 복사), Instagram @Rinsomnia__, GitHub 저장소, 버그 신고·제안(Issues), 릴리스 노트, 데이터·로그 폴더 열기, 조작 방법 안내를 섹션으로 정리했습니다.
+- 설정 아래 "정보 · 문의" 카드: 문의 메일(bsj_2200@naver.com, 클릭하면 메일 앱·주소 복사), Instagram @Rinsomnia__, GitHub 저장소, 버그 신고·제안(Issues), 릴리스 노트, 데이터·로그 폴더 열기.
 - 버그 수정: 낙하산으로 떨어지는 중에 클릭(또는 더블클릭의 첫 클릭)하면 공중에 멈춘 채 걷던 문제. 클릭 후 낙하를 재개하고, 공중에 있는데 낙하 중이 아니면 자동으로 낙하를 시작합니다.
-- 클릭하면 캐릭터마다 다른 인사·응원·취미 한마디를 합니다(공통 8개 + 종류별 전용 문구, 연속 반복 없음). 신체 접촉을 연상시키는 표현은 쓰지 않습니다.
-- 이름 표시 설정: 숨기기 / 기본(작게) / 크게(배경 라벨). 크게를 고르면 굵은 글자를 밝은 라벨 위에 올려 어떤 배경에서도 읽힙니다.
 - 캐릭터가 40~90초마다 정면을 보며 상황에 맞는 말을 합니다(아침·점심·밤 인사, 배고픔, 잡담). 마우스를 올리면 정면을 보고, 빠른 말풍선을 열면 나를 쳐다봅니다. 정면 상태는 방 친구에게도 전달됩니다.
 
 **English**
-- Four new human characters: **Yeodini** (light-brown bob, swim goggles, tennis racket), **Jitto** (black hippie perm with bangs, porcelain skin), **Jjeong** (long nearly-straight black hair, red top, navy H-line long skirt), **Seunghyeon** (tall, glasses, two-block cut, light jeans), each with two motions.
+- Four new human characters: **Yeodini** (light-brown bob, swim goggles, tennis racket), **Jitto** (black hippie perm with bangs, porcelain skin), **Jjeong** (light perm, primary-color top, long skirt), **Seunghyeon** (tall, glasses, two-block cut, light jeans), each with two motions.
 - Creature kinds other than the robot (slime, ghost, mushroom, dragon, cactus) are hidden from the picker; friends already using them still render. 25 selectable kinds.
 - Crisp pixels: sprites are drawn at whole/half device-pixel multiples only (100% = 1:1, about 1.3x larger than before; 150% = 1.5x; 200% = 2x), snapped to the pixel grid.
-- About · Contact opens as a side panel docked to the main window (moves with it): version, email (mail app, copy), Instagram, GitHub repo, Issues, releases, data/log folders and a controls guide.
+- About · Contact card under Settings: email (opens mail app, copy button), Instagram, GitHub repo, Issues, release notes, open data/log folders.
 - Fix: clicking the character mid-parachute (including the first click of a double-click) left it hovering and walking in the air; the fall now resumes.
-- Clicking the character now gives a per-character greeting, cheer or hobby line (shared pool plus species lines, never repeated back to back); no physical-contact wording.
-- Name display setting: hidden / small / large on a label (bold text on a light rounded label, readable on any wallpaper).
 - The character now turns to face you every 40-90 s and says something fitting (time of day, hunger, small talk), faces you on hover and when the quick bubble opens; friends see it too.
 
 ## v0.6.1
