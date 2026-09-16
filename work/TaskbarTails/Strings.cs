@@ -18,6 +18,22 @@ public static class L
     public static string F(string key, params object[] args) => string.Format(Get(key), args);
     public static string Species(PetKind k) => Lang == "en" && SpeciesEn.TryGetValue(k.Id, out var n) ? n : k.Label;
     public static string Group(string ko) => Lang == "en" && GroupEn.TryGetValue(ko, out var n) ? n : ko;
+    // A touch reaction: species lines, then group lines, then the shared pool; never the same line twice in a row.
+    static readonly Random touchRandom = new();
+    static string lastTouch = "";
+    public static string Touch(string species, string group)
+    {
+        var keys = new List<string>();
+        for (int i = 0; i < 4; i++) { if (Table.ContainsKey("touch_" + species + "_" + i)) keys.Add("touch_" + species + "_" + i); }
+        for (int i = 0; i < 4; i++) { if (Table.ContainsKey("touch_" + group + "_" + i)) keys.Add("touch_" + group + "_" + i); }
+        for (int i = 0; i < 8; i++) keys.Add("touch_" + i);
+        // species lines get extra weight so the character's own voice shows up often
+        var weighted = new List<string>();
+        foreach (var k in keys) { weighted.Add(k); if (k.StartsWith("touch_" + species + "_")) { weighted.Add(k); weighted.Add(k); } }
+        string pick = weighted[touchRandom.Next(weighted.Count)];
+        if (pick == lastTouch && weighted.Count > 1) pick = weighted[(weighted.IndexOf(pick) + 1) % weighted.Count];
+        lastTouch = pick; return Get(pick);
+    }
     public static string Action(string species, string key, string koLabel) => Lang == "en" && ActionEn.TryGetValue(species + ":" + key, out var n) ? n : koLabel;
 
     static readonly Dictionary<string, (string ko, string en)> Table = new()
@@ -74,6 +90,10 @@ public static class L
         ["set_stretch"] = ("50분마다 스트레칭 알림", "Stretch reminder every 50 min"),
         ["set_sound"] = ("클릭 효과음", "Click sound"),
         ["set_greet"] = ("친구 캐릭터와 마주치면 인사", "Greet friends' characters when passing"),
+        ["set_name_style"] = ("캐릭터 이름 표시", "Character name display"),
+        ["name_hidden"] = ("숨기기", "Hidden"),
+        ["name_small"] = ("기본 (작게)", "Default (small)"),
+        ["name_large"] = ("크게 · 배경 라벨", "Large · on a label"),
         ["set_bubble_style"] = ("말풍선 스타일 (레벨로 해금)", "Bubble style (unlocked by level)"),
         ["style_0"] = ("크림", "Cream"),
         ["style_1"] = ("민트", "Mint"),
@@ -209,6 +229,63 @@ public static class L
         ["copied"] = ("복사했어요: {0}", "Copied: {0}"),
         ["open_failed"] = ("열 수 없어요 · {0}", "Could not open · {0}"),
         ["about_made"] = ("만든 사람 bsj901022-web · {0} · 캐릭터 그림은 PixelLab으로 만든 오리지널 디자인입니다.", "Made by bsj901022-web · {0} · Character art is original, generated with PixelLab."),
+        ["touch_0"] = ("쓰담쓰담, 좋아요 ♥", "Pets! I love it ♥"),
+        ["touch_1"] = ("히히, 거기 좋아", "Hehe, right there"),
+        ["touch_2"] = ("간지러워! 그래도 좋아", "That tickles! But I like it"),
+        ["touch_3"] = ("더 만져 줘~", "More, please~"),
+        ["touch_4"] = ("오늘도 고마워", "Thanks for today, too"),
+        ["touch_5"] = ("기분이 좋아졌어!", "That cheered me up!"),
+        ["touch_6"] = ("우리 친하지?", "We're close, right?"),
+        ["touch_7"] = ("잠깐 쉬었다 해도 돼", "It's okay to take a break"),
+        ["touch_사람_0"] = ("고마워, 힘이 나!", "Thanks, that helps!"),
+        ["touch_사람_1"] = ("어깨 두드려 줘서 고마워", "Thanks for the pat"),
+        ["touch_사람_2"] = ("오늘 잘하고 있어", "You're doing great today"),
+        ["touch_cat_0"] = ("골골골…", "Purrrr…"),
+        ["touch_cat_1"] = ("턱 밑을 긁어 줘", "Scratch under my chin"),
+        ["touch_cat_2"] = ("…한 번만 더", "…once more"),
+        ["touch_dog_0"] = ("헥헥! 최고야!", "Yay! You're the best!"),
+        ["touch_dog_1"] = ("꼬리가 멈추지 않아!", "My tail won't stop!"),
+        ["touch_dog_2"] = ("산책도 갈래?", "Walk too?"),
+        ["touch_rabbit_0"] = ("귀는 살짝만…", "Gently on the ears…"),
+        ["touch_rabbit_1"] = ("코가 간질간질", "My nose is twitchy"),
+        ["touch_hamster_0"] = ("볼주머니는 만지지 마!", "Not my cheek pouches!"),
+        ["touch_hamster_1"] = ("해바라기씨 있어?", "Got sunflower seeds?"),
+        ["touch_fox_0"] = ("여우도 쓰담을 좋아해", "Foxes like pets too"),
+        ["touch_fox_1"] = ("꼬리 만지면 도망갈 거야", "Touch my tail and I'm gone"),
+        ["touch_penguin_0"] = ("뒤뚱뒤뚱, 좋아", "Waddle-y happy"),
+        ["touch_penguin_1"] = ("손이 차갑네?", "Cold hands?"),
+        ["touch_duck_0"] = ("꽥! 좋아", "Quack! Nice"),
+        ["touch_duck_1"] = ("깃털이 부스스해졌어", "You ruffled my feathers"),
+        ["touch_bear_0"] = ("꿀 있어?", "Got honey?"),
+        ["touch_bear_1"] = ("포옹은 곰이 최고야", "Bears hug best"),
+        ["touch_frog_0"] = ("개굴! 좋아", "Ribbit! Nice"),
+        ["touch_frog_1"] = ("미끌미끌해도 괜찮지?", "Slippery but fine, right?"),
+        ["touch_panda_0"] = ("대나무 주면 더 좋아", "Bamboo would make it better"),
+        ["touch_panda_1"] = ("뒹굴뒹굴하고 싶다", "I want to roll around"),
+        ["touch_robot_0"] = ("삐빅. 만족도 12% 상승", "Beep. Satisfaction +12%"),
+        ["touch_robot_1"] = ("센서가 따뜻해졌어요", "My sensors feel warm"),
+        ["touch_cloudpup_0"] = ("헤헤헤…", "Hehehe…"),
+        ["touch_cloudpup_1"] = ("몽실몽실~", "So fluffy~"),
+        ["touch_puffball_0"] = ("글썽… 고마워", "Sniff… thank you"),
+        ["touch_puffball_1"] = ("만세!", "Yay!"),
+        ["touch_bluecat_0"] = ("히히, 노래해 줄까?", "Hehe, want a song?"),
+        ["touch_bluecat_1"] = ("도도해 보여도 좋아해", "I act aloof but I like it"),
+        ["touch_yellowbunny_0"] = ("야하!! 좋아!!", "Yaha!! Love it!!"),
+        ["touch_yellowbunny_1"] = ("빙글 돌아버릴 것 같아", "I might spin right off"),
+        ["touch_yeodini_0"] = ("테니스 한 게임?", "Tennis, anyone?"),
+        ["touch_yeodini_1"] = ("이따 수영 갈래?", "Swim later?"),
+        ["touch_jitto_0"] = ("헤헤, 부끄러워", "Hehe, embarrassing"),
+        ["touch_jitto_1"] = ("머리 만지면 안 돼~", "Not my hair~"),
+        ["touch_jjeong_0"] = ("고마워 :)", "Thanks :)"),
+        ["touch_jjeong_1"] = ("오늘 옷 어때?", "How's my outfit today?"),
+        ["touch_seunghyeon_0"] = ("안경 조심!", "Careful with the glasses!"),
+        ["touch_seunghyeon_1"] = ("음, 나쁘지 않네", "Hm, not bad"),
+        ["touch_boy_0"] = ("오, 고마워!", "Oh, thanks!"),
+        ["touch_girl_0"] = ("기분 좋다~", "Feels nice~"),
+        ["touch_bobgirl_0"] = ("살짝 웃음이 나네", "That made me smile a little"),
+        ["touch_ponygirl_0"] = ("좋아, 에너지 충전!", "Nice, energy recharged!"),
+        ["touch_hoodieboy_0"] = ("오케이, 좋아", "Okay, nice"),
+        ["touch_suitboy_0"] = ("감사합니다, 정말로", "Thank you, truly"),
         ["rc_anon"] = ("Supabase에서 Anonymous Sign-Ins를 켜 주세요.", "Enable Anonymous Sign-Ins in Supabase."),
         ["rc_setup"] = ("먼저 Supabase setup.sql을 실행해 주세요.", "Run Supabase setup.sql first."),
         ["rc_species"] = ("서버가 이 캐릭터 종류를 아직 몰라요. supabase/upgrade-v05.sql을 실행해 주세요.", "The server does not know this character kind yet. Run supabase/upgrade-v05.sql."),

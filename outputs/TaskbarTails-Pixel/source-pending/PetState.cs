@@ -29,6 +29,7 @@ public sealed class PetState
     public string LastRoomCode { get; set; } = "";
     public int MonitorIndex { get; set; }             // 0 = primary
     public int BubbleStyle { get; set; }              // cosmetic, unlocked by level
+    public int NameStyle { get; set; } = 1;           // 0 hidden, 1 small, 2 large label with background
     public DateTime LastSeenUtc { get; set; }
     [JsonIgnore] public double HoursAway { get; private set; }
 
@@ -73,6 +74,7 @@ public static class StateStore
             state.IdleMinutes = state.IdleMinutes is 0 or 3 or 5 or 10 or 15 ? state.IdleMinutes : 5;
             state.MonitorIndex = Math.Clamp(state.MonitorIndex, 0, 8);
             state.BubbleStyle = Math.Clamp(state.BubbleStyle, 0, 3);
+            state.NameStyle = Math.Clamp(state.NameStyle, 0, 2);
             state.ChatHotkey = Hotkeys.IsValid(state.ChatHotkey) ? state.ChatHotkey : Hotkeys.Default;
             state.LastRoomCode = (state.LastRoomCode ?? "").Trim().ToUpperInvariant(); if (state.LastRoomCode.Length > 16) state.LastRoomCode = "";
             state.ApplyOfflineTime(DateTime.UtcNow);

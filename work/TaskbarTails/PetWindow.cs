@@ -111,7 +111,7 @@ public sealed class PetWindow : Window
  void ResetMotion(){Visual.ActionKey="";fetchStage=0;Visual.BallVisible=false;if(ballStage==0)ball?.Hide();}
  public void Step(double dt)
  {
-  phase+=dt;Visual.SizeFactor=app.State.Scale/100.0;Visual.BubbleStyle=app.State.EffectiveBubbleStyle;Visual.GoldName=!IsRemote&&!demo&&app.State.Level>=10;
+  phase+=dt;Visual.SizeFactor=app.State.Scale/100.0;Visual.BubbleStyle=app.State.EffectiveBubbleStyle;Visual.NameStyle=app.State.NameStyle;Visual.ShowName=app.State.NameStyle>0;Visual.GoldName=!IsRemote&&!demo&&app.State.Level>=10;
   if(!demo&&!IsRemote){Visual.PetName=app.State.Name;Visual.Species=app.State.Species;Visual.Sleeping=app.State.Sleeping;}
   // A new kind has its own motion set; never keep playing the previous kind's action key.
   if(Visual.Species!=lastSpecies){lastSpecies=Visual.Species;ResetMotion();}
@@ -159,7 +159,7 @@ public sealed class PetWindow : Window
   Visual.Phase=phase;Visual.ActionTime=phase-actionStart;Visual.Walking=walking;Visual.FaceLeft=direction<0;
   Place();
   // Redraw only when something visible changed (sprite frame, bubble, jump, parachute...), not 60 times a second.
-  int signature=HashCode.Combine((int)(phase*SpriteSet.WalkFps),(int)(Visual.ActionTime*SpriteSet.ActionFps),Visual.Bubble,Visual.ActionKey,HashCode.Combine(Visual.Walking,Visual.FaceLeft,Visual.Sleeping,Visual.Parachute,(int)(Visual.Jump*4),(int)(Visual.Sway*4),Visual.Species,Visual.SizeFactor),HashCode.Combine(Visual.BubbleStyle,Visual.GoldName,Visual.PetName,Visual.FaceFront));
+  int signature=HashCode.Combine((int)(phase*SpriteSet.WalkFps),(int)(Visual.ActionTime*SpriteSet.ActionFps),Visual.Bubble,Visual.ActionKey,HashCode.Combine(Visual.Walking,Visual.FaceLeft,Visual.Sleeping,Visual.Parachute,(int)(Visual.Jump*4),(int)(Visual.Sway*4),Visual.Species,Visual.SizeFactor),HashCode.Combine(Visual.BubbleStyle,Visual.GoldName,Visual.PetName,Visual.FaceFront,Visual.NameStyle,Visual.ShowName));
   if(signature!=lastSignature){lastSignature=signature;Visual.InvalidateVisual();}
  }
  // Moves the overlay only when its pixel position changed. assertTop re-applies the top-most z-order (done every few seconds by App).

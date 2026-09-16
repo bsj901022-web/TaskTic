@@ -35,6 +35,7 @@ public partial class MainWindow : Window
         StartupCheck.IsChecked = s.StartWithWindows; HotkeyCheck.IsChecked = s.HotkeysEnabled; NightCheck.IsChecked = s.NightSleep;
         StretchCheck.IsChecked = s.StretchReminder; SoundCheck.IsChecked = s.ClickSound; GreetCheck.IsChecked = s.GreetFriends; RejoinCheck.IsChecked = s.AutoRejoin;
         FillBubbleStyles();
+        NameStyleBox.SelectedIndex = Math.Clamp(s.NameStyle, 0, 2);
         UpdateHotkeyTexts(); PreviewKeyDown += Window_PreviewKeyDown;
         foreach (var r in QuickChatWindow.Reactions)
         {
@@ -135,6 +136,7 @@ public partial class MainWindow : Window
         app.State.ChatHotkey = combo; Save(); UpdateHotkeyTexts(); app.RegisterHotkeys(); app.RefreshTrayMenu();
         Notice.Text = L.F("hotkey_saved", Hotkeys.Label(combo));
     }
+    void NameStyle_Changed(object sender, SelectionChangedEventArgs e) { if (!ready) return; app.State.NameStyle = Math.Clamp(NameStyleBox.SelectedIndex, 0, 2); Save(); }
     void Startup_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.StartWithWindows = StartupCheck.IsChecked == true; Save(); app.ApplyStartup(app.State.StartWithWindows); }
     void Hotkey_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.HotkeysEnabled = HotkeyCheck.IsChecked == true; Save(); app.RegisterHotkeys(); }
     void Night_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.NightSleep = NightCheck.IsChecked == true; Save(); }

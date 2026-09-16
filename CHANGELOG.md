@@ -10,6 +10,8 @@
 - 픽셀이 깨져 보이던 문제 수정: 스프라이트를 화면 픽셀 정수(또는 0.5) 배율로만 그립니다. 100%는 1:1(지금보다 약 1.3배 크게), 150%는 1.5배, 200%는 2배이며 위치도 픽셀 격자에 맞춥니다.
 - "정보 · 문의" 버튼을 누르면 관리 화면 오른쪽에 붙어 함께 움직이는 사이드 창이 열립니다(오른쪽에 공간이 없으면 왼쪽). 버전, 문의 메일(bsj_2200@naver.com, 메일 앱 열기·주소 복사), Instagram @Rinsomnia__, GitHub 저장소, 버그 신고·제안(Issues), 릴리스 노트, 데이터·로그 폴더 열기, 조작 방법 안내를 섹션으로 정리했습니다.
 - 버그 수정: 낙하산으로 떨어지는 중에 클릭(또는 더블클릭의 첫 클릭)하면 공중에 멈춘 채 걷던 문제. 클릭 후 낙하를 재개하고, 공중에 있는데 낙하 중이 아니면 자동으로 낙하를 시작합니다.
+- 만질 때 반응이 캐릭터마다 다릅니다: 공통 문구 8개에 종류별 전용 문구(고양이 "골골골…", 강아지 "꼬리가 멈추지 않아!", 로봇 "삐빅. 만족도 12% 상승" 등)를 섞어 무작위로 고르고 같은 말은 연달아 나오지 않습니다.
+- 이름 표시 설정: 숨기기 / 기본(작게) / 크게(배경 라벨). 크게를 고르면 굵은 글자를 밝은 라벨 위에 올려 어떤 배경에서도 읽힙니다.
 - 캐릭터가 40~90초마다 정면을 보며 상황에 맞는 말을 합니다(아침·점심·밤 인사, 배고픔, 잡담). 마우스를 올리면 정면을 보고, 빠른 말풍선을 열면 나를 쳐다봅니다. 정면 상태는 방 친구에게도 전달됩니다.
 
 **English**
@@ -18,6 +20,8 @@
 - Crisp pixels: sprites are drawn at whole/half device-pixel multiples only (100% = 1:1, about 1.3x larger than before; 150% = 1.5x; 200% = 2x), snapped to the pixel grid.
 - About · Contact opens as a side panel docked to the main window (moves with it): version, email (mail app, copy), Instagram, GitHub repo, Issues, releases, data/log folders and a controls guide.
 - Fix: clicking the character mid-parachute (including the first click of a double-click) left it hovering and walking in the air; the fall now resumes.
+- Touch reactions now vary per character (shared pool plus species lines), never the same line twice in a row.
+- Name display setting: hidden / small / large on a label (bold text on a light rounded label, readable on any wallpaper).
 - The character now turns to face you every 40-90 s and says something fitting (time of day, hunger, small talk), faces you on hover and when the quick bubble opens; friends see it too.
 
 ## v0.6.1

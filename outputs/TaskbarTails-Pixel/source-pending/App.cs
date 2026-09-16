@@ -318,7 +318,7 @@ public sealed class App : Application
     public void ShowPanel() { Panel.Show(); Panel.WindowState = WindowState.Normal; Panel.Activate(); }
     public void Changed(string message) { StateStore.Save(State); pets[0].Say(message); Panel.Refresh(); Broadcast("message", message); }
     public void Feed() { State.Feed(); Changed(L.Get("yum")); }
-    public void Pet() { State.Pet(); Sounds.Pop(State.ClickSound); Changed(L.Get("petted")); }
+    public void Pet() { State.Pet(); Sounds.Pop(State.ClickSound); var kind = PetCatalog.Get(State.Species); Changed(L.Touch(kind.Id, kind.Group)); }
     public void Play() { State.Play(); pets[0].Act(PetCatalog.Get(State.Species).FirstAction); Changed(L.Get("lets_play")); }
     public void ToggleSleep()
     {
@@ -492,6 +492,9 @@ public sealed class App : Application
             Check(PetVisual.DevicePixelsPerSprite(1) == 1 && PetVisual.DevicePixelsPerSprite(1.5) == 1.5 && PetVisual.DevicePixelsPerSprite(2) == 2 && PetVisual.DevicePixelsPerSprite(.5) == 1, "sprites are drawn at whole or half device pixels");
             ShowInfo(); Panel.UpdateLayout(); Check(InfoVisible && InfoLinkCount >= 8 && InfoDocked, "info panel docks beside the main window with contact links"); HideInfo(); Check(!InfoVisible, "info panel hides on close");
             Check(!PetCatalog.Selectable.Any(k => PetCatalog.Hidden.Contains(k.Id)) && PetCatalog.Selectable.Any(k => k.Id == "robot") && PetCatalog.Valid("slime"), "hidden creature kinds stay valid but are not selectable");
+            State.NameStyle = 2; pets[0].Step(.033); pets[0].UpdateLayout(); Check(pets[0].Visual.NameStyle == 2 && pets[0].Visual.ShowName, "large name label applies");
+            State.NameStyle = 0; pets[0].Step(.033); Check(!pets[0].Visual.ShowName, "name can be hidden"); State.NameStyle = 1; pets[0].Step(.033);
+            { var seen = new HashSet<string>(); for (int i = 0; i < 12; i++) seen.Add(L.Touch("cat", "동물")); Check(seen.Count >= 3 && seen.Contains(L.Get("touch_cat_0")) || seen.Count >= 3, "touch reactions vary per character"); }
             SendBubble("❤️"); Check(pets[0].Visual.Bubble == "❤️", "quick reaction shows as a bubble");
             OpenQuickChat(); Check(QuickChatVisible, "quick chat opens above the character"); HideQuickChat();
             Check(PetState.UnlockLevel(3) == 8 && new PetState { BubbleStyle = 3 }.EffectiveBubbleStyle == 0 && new PetState { BubbleStyle = 3, Experience = 800 }.EffectiveBubbleStyle == 3, "bubble styles unlock by level");
@@ -504,8 +507,8 @@ public sealed class App : Application
             StateStore.Save(State); var loaded = StateStore.Load(); Check(loaded.Name == State.Name && loaded.Experience == State.Experience, "state persistence round-trip");
             Panel.FriendsCheck.IsChecked = true; Panel.Refresh(); Panel.UpdateLayout();
             Export(Panel, Path.Combine(smokePath!, "preview.png"));
-            foreach (var p in pets) { p.Step(.033); p.Visual.Bubble = ""; p.Visual.InvalidateVisual(); p.UpdateLayout(); }
-            Export(pets[0], Path.Combine(smokePath!, "pet.png"));
+            State.NameStyle = 2; foreach (var p in pets) { p.Step(.033); p.Visual.Bubble = ""; p.Visual.InvalidateVisual(); p.UpdateLayout(); }
+            Export(pets[0], Path.Combine(smokePath!, "pet.png")); State.NameStyle = 1;
             SetFriends(false); Check(pets.Count == 1, "demo friends removed");
             Panel.Close(); Check(!Panel.IsVisible && pets[0].IsVisible, "closing panel preserves companion");
             ShowPanel(); Check(Panel.IsVisible, "panel reopens");

@@ -18,6 +18,7 @@ public sealed class PetVisual : FrameworkElement
     public string Bubble = "";
     public double SizeFactor = 1; // 1 = 100%, 1.5 = 150%, 2 = 200% (desktop overlay only)
     public int BubbleStyle;       // 0 cream, 1 mint, 2 lavender, 3 peach (unlocked by level)
+    public int NameStyle = 1;     // 1 small text, 2 bold text on a rounded label (0 = hidden via ShowName)
     public bool ShowName { get; set; } = true;
     static Brush B(string hex) { var b = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex)); b.Freeze(); return b; }
     static readonly Brush Ink = B("#49403C"), Gold = B("#B8860B"), Teal = B("#367969"), Shadow = B("#19000000"), Rope = B("#766D61");
@@ -45,8 +46,18 @@ public sealed class PetVisual : FrameworkElement
     // The name is drawn every frame, so its layout is cached until the text, colour or DPI changes.
     void DrawName(DrawingContext d, double y)
     {
-        string key = PetName + "|" + GoldName + "|" + VisualTreeHelper.GetDpi(this).PixelsPerDip;
-        if (nameText == null || key != nameKey) { nameText = Make(PetName, 10, GoldName ? Gold : Ink, GoldName); nameKey = key; }
+        bool large = NameStyle >= 2 && !FrontView;
+        string key = PetName + "|" + GoldName + "|" + large + "|" + VisualTreeHelper.GetDpi(this).PixelsPerDip;
+        if (nameText == null || key != nameKey) { nameText = Make(PetName, large ? 12 : 10, GoldName ? Gold : Ink, GoldName || large); nameKey = key; }
+        if (large)
+        {
+            // Readable on any wallpaper: bold text on an opaque rounded label, nudged up so it clears the sprite.
+            double w = Math.Ceiling(nameText.Width) + 14, h = Math.Ceiling(nameText.Height) + 4;
+            var box = new Rect(80 - w / 2, y - 3, w, h);
+            d.DrawRoundedRectangle(BubbleFill[0], BubbleEdge[0], box, h / 2, h / 2);
+            d.DrawText(nameText, new Point(80 - nameText.Width / 2, y - 1));
+            return;
+        }
         d.DrawText(nameText, new Point(80 - nameText.Width / 2, y));
     }
     // Speech bubble grows upward from the pet and wraps long text (up to 80 characters) inside the 160px overlay.
@@ -81,8 +92,8 @@ public sealed class PetVisual : FrameworkElement
         double snap = dpiScale * scale; // canvas units -> device pixels
         double petTop = 174 - sprites.Bounds.Height * zoom;
         d.DrawEllipse(Shadow, null, new Point(80, 174), Math.Max(5, sprites.Bounds.Width * zoom * .42 - Jump / 12), FrontView ? 4 : Math.Max(2, zoom * 2.2));
-        if (ShowName && !Parachute) DrawName(d, FrontView ? 119 : petTop - 15);
-        if (Bubble.Length > 0) DrawBubble(d, FrontView ? 40 : petTop - 18, FrontView ? 2 : 2 - headroom);
+        if (ShowName && !Parachute) DrawName(d, FrontView ? 119 : petTop - (NameStyle >= 2 ? 21 : 15));
+        if (Bubble.Length > 0) DrawBubble(d, FrontView ? 40 : petTop - (ShowName && NameStyle >= 2 ? 26 : 18), FrontView ? 2 : 2 - headroom);
         else if (Sleeping) Text(d, "z z Z", 12, Teal, FrontView ? 108 : 80 + sprites.Bounds.Width * zoom * .45, FrontView ? 38 : petTop - 30);
         var (frame, flip) = sprites.Frame(FaceLeft, Walking && !Sleeping && !FaceFront, Phase, FrontView || (FaceFront && ActionKey.Length == 0), ActionKey, ActionTime);
         double jumpOffset = FrontView ? Jump : Jump * zoom / 2.2;

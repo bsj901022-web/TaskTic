@@ -161,6 +161,9 @@ PASS: sprites are drawn at whole or half device pixels
 PASS: info panel docks beside the main window with contact links
 PASS: info panel hides on close
 PASS: hidden creature kinds stay valid but are not selectable
+PASS: large name label applies
+PASS: name can be hidden
+PASS: touch reactions vary per character
 PASS: quick reaction shows as a bubble
 PASS: quick chat opens above the character
 PASS: bubble styles unlock by level
