@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "character: ac6198e7-f2f8-490a-bee7-ac862ab69d98\nanimation: v3 custom (A shy friendly penguin gives a small polite bow, slowly lowering its round head and body, then returns upright and wiggles one flipper, stays in place)\ndirections: east (1 jobs)\ngroup: f4cf40e2-bf88-4d84-ba9a-25b45cae8449\nframes: 16 (reference stripped, keep_first_frame=false)\ncost: 1 generation (1/dir x 1)\neta: ~30-60s/direction\n\nhint: get_character(character_id=\"ac6198e7-f2f8-490a-bee7-ac862ab69d98\")\nadd more directions to this group: animate_character(character_id=\"ac6198e7-f2f8-490a-bee7-ac862ab69d98\", action_description=\"A shy friendly penguin gives a small polite bow, slowly lowering its round head and body, then returns upright and wiggles one flipper, stays in place\", animation_group_id=\"f4cf40e2-bf88-4d84-ba9a-25b45cae8449\", directions=[...])"
+    }
+  ],
+  "isError": false
+}

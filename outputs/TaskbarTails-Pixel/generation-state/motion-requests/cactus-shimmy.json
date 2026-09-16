@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "character: 27f94f02-e83b-413d-a7ab-95d06d914010\nanimation: v3 custom (Playful little shimmy dance shaking its arm branches and hips side to side with a cheerful face, returns to original pose, stays in place)\ndirections: east (1 jobs)\ngroup: e320872b-59de-40c0-b06c-e1345709a24a\nframes: 16 (reference stripped, keep_first_frame=false)\ncost: 1 generation (1/dir x 1)\neta: ~30-60s/direction\n\nhint: get_character(character_id=\"27f94f02-e83b-413d-a7ab-95d06d914010\")\nadd more directions to this group: animate_character(character_id=\"27f94f02-e83b-413d-a7ab-95d06d914010\", action_description=\"Playful little shimmy dance shaking its arm branches and hips side to side with a cheerful face, returns to original pose, stays in place\", animation_group_id=\"e320872b-59de-40c0-b06c-e1345709a24a\", directions=[...])"
+    }
+  ],
+  "isError": false
+}

@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "character: 27f94f02-e83b-413d-a7ab-95d06d914010\nanimation: v3 custom (The small pink flower on top of its head opens wider and glows softly while it sways proudly side to side, stays in place)\ndirections: east (1 jobs)\ngroup: 010944f0-d6bf-4eb2-a871-c560bf72c869\nframes: 16 (reference stripped, keep_first_frame=false)\ncost: 1 generation (1/dir x 1)\neta: ~30-60s/direction\n\nhint: get_character(character_id=\"27f94f02-e83b-413d-a7ab-95d06d914010\")\nadd more directions to this group: animate_character(character_id=\"27f94f02-e83b-413d-a7ab-95d06d914010\", action_description=\"The small pink flower on top of its head opens wider and glows softly while it sways proudly side to side, stays in place\", animation_group_id=\"010944f0-d6bf-4eb2-a871-c560bf72c869\", directions=[...])"
+    }
+  ],
+  "isError": false
+}

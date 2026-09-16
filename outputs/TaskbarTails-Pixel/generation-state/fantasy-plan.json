@@ -1,0 +1,26 @@
+[
+  {
+    "description": "Original cozy virtual desktop companion mascot, oversized round head or body, very small body, stubby limbs, friendly dot eyes, charming cute expression. Clean readable 64x64 pixel art, warm dark brown single-pixel outline, limited soft pastel palette, simple two-tone shading, no antialiasing, no text, no floor, transparent background. Full body centered, eye-level view. Small translucent mint green jelly slime creature, one soft rounded dome blob body, two tiny rounded nubs acting as feet, two dark dot eyes and a tiny smiling mouth, rosy cheeks, a single white specular highlight, no humanoid torso, no clothing.",
+    "view": "side",
+    "detail": "low detail",
+    "name": "Jelly - Taskbar Tails",
+    "outline": "single color outline",
+    "slug": "slime",
+    "n_directions": 8,
+    "mode": "v3",
+    "body_type": "humanoid",
+    "size": 64
+  },
+  {
+    "description": "Original cozy virtual desktop companion mascot, oversized round head or body, very small body, stubby limbs, friendly dot eyes, charming cute expression. Clean readable 64x64 pixel art, warm dark brown single-pixel outline, limited soft pastel palette, simple two-tone shading, no antialiasing, no text, no floor, transparent background. Full body centered, eye-level view. Tiny friendly toy robot, large rounded ivory square head with a dark teal screen face showing two cyan dot eyes, tiny cream body, short chunky arms and feet, pale blue joints, one short antenna topped with a tiny warm yellow bulb.",
+    "view": "side",
+    "detail": "low detail",
+    "name": "Bolt - Taskbar Tails",
+    "outline": "single color outline",
+    "slug": "robot",
+    "n_directions": 8,
+    "mode": "v3",
+    "body_type": "humanoid",
+    "size": 64
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "view": "side",
+    "n_directions": 8,
+    "slug": "cat",
+    "detail": "low detail",
+    "description": "Original cozy virtual desktop pet mascot, adorable tiny biped animal standing on two short hind paws, oversized round head, very small round body, stubby paws, friendly dot eyes, blush cheeks. Clean readable 64x64 pixel art, warm dark brown single-pixel outline, limited soft pastel palette, simple two-tone shading, no antialiasing, no text, no props, no floor, transparent background. Full body centered, eye-level view. Cream orange tabby kitten, two triangular ears, curled tail, ivory muzzle and belly, three orange forehead stripes, a small sage green neck scarf.",
+    "mode": "v3",
+    "body_type": "humanoid",
+    "outline": "single color outline",
+    "size": 64,
+    "name": "Mochi - Taskbar Tails"
+  },
+  {
+    "view": "side",
+    "n_directions": 8,
+    "slug": "rabbit",
+    "detail": "low detail",
+    "description": "Original cozy virtual desktop pet mascot, adorable tiny biped animal standing on two short hind paws, oversized round head, very small round body, stubby paws, friendly dot eyes, blush cheeks. Clean readable 64x64 pixel art, warm dark brown single-pixel outline, limited soft pastel palette, simple two-tone shading, no antialiasing, no text, no props, no floor, transparent background. Full body centered, eye-level view. Snow white baby bunny with long upright ears and soft pink inner ears, cotton round tail, a tiny lavender neck scarf, short round paws.",
+    "mode": "v3",
+    "body_type": "humanoid",
+    "outline": "single color outline",
+    "size": 64,
+    "name": "Cloud - Taskbar Tails"
+  },
+  {
+    "view": "side",
+    "n_directions": 8,
+    "slug": "dog",
+    "detail": "low detail",
+    "description": "Original cozy virtual desktop pet mascot, adorable tiny biped animal standing on two short hind paws, oversized round head, very small round body, stubby paws, friendly dot eyes, blush cheeks. Clean readable 64x64 pixel art, warm dark brown single-pixel outline, limited soft pastel palette, simple two-tone shading, no antialiasing, no text, no props, no floor, transparent background. Full body centered, eye-level view. Honey tan baby corgi puppy, triangular upright ears, ivory muzzle and belly, short fluffy tail, a tiny dusty blue neck scarf, very short legs.",
+    "mode": "v3",
+    "body_type": "humanoid",
+    "outline": "single color outline",
+    "size": 64,
+    "name": "Bori - Taskbar Tails"
+  }
+]

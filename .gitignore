@@ -1,0 +1,18 @@
+# build intermediates
+**/bin/
+**/obj/
+work/publish-v05/
+work/pixel-preview-app/
+work/release-verification/
+work/verification/
+# node
+**/node_modules/
+work/npm-cache/
+# logs & local state
+*.log
+work/pixellab/token.dpapi
+**/data/session.json
+crash.log
+# OS
+Thumbs.db
+desktop.ini

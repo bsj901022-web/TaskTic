@@ -1,0 +1,15 @@
+PASS: pet overlay created
+PASS: overlay aligned with primary work-area bottom
+PASS: feed increases XP
+PASS: fullness capped at 100
+PASS: play wakes pet
+PASS: sleep toggles on
+PASS: two local demo friends added
+PASS: demo toggle is idempotent
+PASS: hide all overlays
+PASS: show all overlays
+PASS: species applied to overlay
+PASS: state persistence round-trip
+PASS: demo friends removed
+PASS: closing panel preserves companion
+PASS: panel reopens

@@ -1,0 +1,7 @@
+PASS: anonymous auth and private room creation
+PASS: invitation join and authorized private subscription
+PASS: cat loaf motion delivered to another member with server-stamped sender ID
+PASS: Korean speech bubble delivered in reverse direction
+PASS: both participants appear in room roster
+PASS: leave room
+checked_at: 2026-09-16T08:01:46Z (NetworkCheck v0.5 · dotvwacwqzwpkklsijyg.supabase.co · 2 anonymous clients in one process)

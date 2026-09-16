@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "character: 50e66c97-26a1-4f40-8607-24b5452b4947\nanimation: v3 custom (Cheerful little duck waddle dance in place, shifting weight side to side with tiny wing flaps and a happy head bob, keeps facing the same side, stays in place)\ndirections: east (1 jobs)\ngroup: bfd76621-9402-4dfd-a2b6-29276594a105\nframes: 16 (reference stripped, keep_first_frame=false)\ncost: 1 generation (1/dir x 1)\neta: ~30-60s/direction\n\nhint: get_character(character_id=\"50e66c97-26a1-4f40-8607-24b5452b4947\")\nadd more directions to this group: animate_character(character_id=\"50e66c97-26a1-4f40-8607-24b5452b4947\", action_description=\"Cheerful little duck waddle dance in place, shifting weight side to side with tiny wing flaps and a happy head bob, keeps facing the same side, stays in place\", animation_group_id=\"bfd76621-9402-4dfd-a2b6-29276594a105\", directions=[...])"
+    }
+  ],
+  "isError": false
+}

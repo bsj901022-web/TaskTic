@@ -1,0 +1,38 @@
+[
+  {
+    "detail": "low detail",
+    "n_directions": 8,
+    "view": "side",
+    "size": 64,
+    "slug": "hamster",
+    "name": "Pudding - Taskbar Tails",
+    "outline": "single color outline",
+    "mode": "v3",
+    "body_type": "humanoid",
+    "description": "Original cozy virtual desktop pet mascot, adorable tiny biped animal standing on two short hind paws, oversized round head, very small round body, stubby paws, friendly dot eyes, blush cheeks. Clean readable 64x64 pixel art, warm dark brown single-pixel outline, limited soft pastel palette, simple two-tone shading, no antialiasing, no text, no props, no floor, transparent background. Full body centered, eye-level view. Round golden beige baby hamster with very small round ears, puffy cream cheeks, tiny pink nose and paws, ivory belly, a tiny peach neck scarf."
+  },
+  {
+    "detail": "low detail",
+    "n_directions": 8,
+    "view": "side",
+    "size": 64,
+    "slug": "fox",
+    "name": "Maple - Taskbar Tails",
+    "outline": "single color outline",
+    "mode": "v3",
+    "body_type": "humanoid",
+    "description": "Original cozy virtual desktop pet mascot, adorable tiny biped animal standing on two short hind paws, oversized round head, very small round body, stubby paws, friendly dot eyes, blush cheeks. Clean readable 64x64 pixel art, warm dark brown single-pixel outline, limited soft pastel palette, simple two-tone shading, no antialiasing, no text, no props, no floor, transparent background. Full body centered, eye-level view. Small cinnamon orange baby fox with oversized pointy ears, cream muzzle and chest, a fluffy orange tail with a large ivory tip, tiny dark brown paws and a sage green neck scarf."
+  },
+  {
+    "detail": "low detail",
+    "n_directions": 8,
+    "view": "side",
+    "size": 64,
+    "slug": "penguin",
+    "name": "Pebble - Taskbar Tails",
+    "outline": "single color outline",
+    "mode": "v3",
+    "body_type": "humanoid",
+    "description": "Original cozy virtual desktop pet mascot, adorable tiny biped animal standing on two short hind paws, oversized round head, very small round body, stubby paws, friendly dot eyes, blush cheeks. Clean readable 64x64 pixel art, warm dark brown single-pixel outline, limited soft pastel palette, simple two-tone shading, no antialiasing, no text, no props, no floor, transparent background. Full body centered, eye-level view. Round baby penguin with blue gray back, ivory face and oval belly, tiny orange beak and orange feet, short side flippers, a tiny lavender neck scarf."
+  }
+]

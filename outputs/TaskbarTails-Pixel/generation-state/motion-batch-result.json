@@ -1,0 +1,27 @@
+{
+  "completed": [
+    "cat",
+    "rabbit",
+    "dog",
+    "hamster",
+    "fox",
+    "penguin",
+    "slime",
+    "robot",
+    "boy",
+    "girl",
+    "duck",
+    "bear",
+    "frog",
+    "panda",
+    "ghost",
+    "mushroom",
+    "dragon",
+    "cactus",
+    "cloudpup",
+    "puffball",
+    "bluecat",
+    "yellowbunny"
+  ],
+  "expected": 22
+}

@@ -1,0 +1,266 @@
+{
+  "cat": [
+    {
+      "key": "loaf",
+      "label": "식빵 굽기",
+      "prompt": "Slowly folds both front paws neatly beneath its chest and lowers into a cozy compact cat loaf pose, relaxed ears and sleepy blinking, holds the loaf pose at the end"
+    },
+    {
+      "key": "groom",
+      "label": "세수하기",
+      "prompt": "Sits down, licks one front paw and gently wipes its cheek and ear twice, cute natural cat grooming, stays in place"
+    }
+  ],
+  "rabbit": [
+    {
+      "key": "hop",
+      "label": "깡총깡총",
+      "prompt": "Two cheerful small rabbit hops in place, crouches before takeoff, both hind feet push together, soft landing with a little ear bounce, keeps facing the same side"
+    },
+    {
+      "key": "ears",
+      "label": "귀 쫑긋",
+      "prompt": "Pauses curiously, one long rabbit ear twitches then both ears perk upright, small nose wiggle, gentle alert head tilt, stays in place"
+    }
+  ],
+  "dog": [
+    {
+      "key": "fetch",
+      "label": "공 물어오기",
+      "prompt": "Cheerful puppy trotting in place while gently carrying one tiny coral red ball in its mouth, short alternating paw steps, happy tail wag, consistent side-facing direction"
+    },
+    {
+      "key": "wag",
+      "label": "꼬리 흔들기",
+      "prompt": "Sits happily and wags its short fluffy tail rapidly side to side, small excited front paw lift, bright happy face, stays in place"
+    }
+  ],
+  "hamster": [
+    {
+      "key": "nibble",
+      "label": "오물오물",
+      "prompt": "Sits holding one tiny sunflower seed between both front paws and nibbles it, puffy cheeks gently moving, tiny nose twitch, stays in place"
+    },
+    {
+      "key": "curl",
+      "label": "동글 휴식",
+      "prompt": "Slowly tucks tiny paws in and curls into a small round sleeping hamster ball, relaxed sleepy eyes, gentle breathing, stays in place"
+    }
+  ],
+  "fox": [
+    {
+      "key": "pounce",
+      "label": "폴짝 사냥놀이",
+      "prompt": "Crouches playfully with fluffy tail raised, makes one small fox pounce in place and lands softly with both front paws together, then returns to ready pose"
+    },
+    {
+      "key": "tail",
+      "label": "꼬리 이불",
+      "prompt": "Sits down and wraps its large fluffy tail around its front paws like a cozy blanket, closes eyes briefly and tilts head contentedly, stays in place"
+    }
+  ],
+  "penguin": [
+    {
+      "key": "flap",
+      "label": "날개 파닥",
+      "prompt": "Excited baby penguin flaps its tiny side flippers, makes two tiny happy bounces and settles, upright body and consistent facing, stays in place"
+    },
+    {
+      "key": "bow",
+      "label": "꾸벅 인사",
+      "prompt": "A shy friendly penguin gives a small polite bow, slowly lowering its round head and body, then returns upright and wiggles one flipper, stays in place"
+    }
+  ],
+  "slime": [
+    {
+      "key": "squish",
+      "label": "말랑말랑",
+      "prompt": "Soft jelly slime squashes very flat then stretches tall and gently settles to its original rounded blob shape, elastic squash and stretch, face stays coherent, stays in place"
+    },
+    {
+      "key": "jiggle",
+      "label": "통통 젤리",
+      "prompt": "Jelly slime does two soft small bounces in place with a wobbly jelly landing, springy cheerful rounded body, ends in original shape"
+    }
+  ],
+  "robot": [
+    {
+      "key": "wave",
+      "label": "삐빅 인사",
+      "prompt": "Friendly tiny robot raises one short arm and waves twice, screen eyes smile and antenna bulb glows softly, then lowers the arm, stays in place"
+    },
+    {
+      "key": "dance",
+      "label": "로봇 댄스",
+      "prompt": "Cute toy robot performs a small rhythmic side-to-side dance in place, alternating short arm lifts and tiny foot taps, gentle head bob, returns to original stance"
+    }
+  ],
+  "boy": [
+    {
+      "key": "wave",
+      "prompt": "Friendly small wave with one hand, relaxed smile and gentle head tilt, lowers hand back to original pose, stays in place",
+      "label": "손 흔들기"
+    },
+    {
+      "key": "cheer",
+      "prompt": "A cheerful little celebration, raises both hands and does two tiny joyful bounces then settles to original pose, stays in place",
+      "label": "신나는 응원"
+    }
+  ],
+  "girl": [
+    {
+      "key": "wave",
+      "prompt": "Friendly small wave with one hand, relaxed smile and gentle head tilt, lowers hand back to original pose, stays in place",
+      "label": "손 흔들기"
+    },
+    {
+      "key": "cheer",
+      "prompt": "A cheerful little celebration, raises both hands and does two tiny joyful bounces then settles to original pose, stays in place",
+      "label": "신나는 응원"
+    }
+  ],
+  "duck": [
+    {
+      "key": "waddle",
+      "label": "뒤뚱 댄스",
+      "prompt": "Cheerful little duck waddle dance in place, shifting weight side to side with tiny wing flaps and a happy head bob, keeps facing the same side, stays in place"
+    },
+    {
+      "key": "preen",
+      "label": "깃털 정리",
+      "prompt": "Turns its head and gently preens its wing feathers with its beak twice, then shakes its tail feathers and returns to standing, stays in place"
+    }
+  ],
+  "bear": [
+    {
+      "key": "honey",
+      "label": "꿀 먹기",
+      "prompt": "Holds a tiny honey pot with both paws and happily licks honey from one paw, content sleepy eyes, small satisfied wiggle, stays in place"
+    },
+    {
+      "key": "stretch",
+      "label": "기지개",
+      "prompt": "Yawns wide and stretches both arms up high with closed eyes, then relaxes back down to the original pose with a happy face, stays in place"
+    }
+  ],
+  "frog": [
+    {
+      "key": "leap",
+      "label": "폴짝",
+      "prompt": "Crouches low and makes one small frog hop in place, lands softly with a tiny wobble, returns to standing, keeps facing the same side"
+    },
+    {
+      "key": "tongue",
+      "label": "혀 내밀기",
+      "prompt": "Puffs its cheeks, quickly flicks out a tiny pink tongue toward the side and pulls it back, blinks happily, stays in place"
+    }
+  ],
+  "panda": [
+    {
+      "key": "bamboo",
+      "label": "대나무 먹기",
+      "prompt": "Sits down holding a small green bamboo stalk with both paws and munches it slowly with puffy cheeks, content eyes, stays in place"
+    },
+    {
+      "key": "roll",
+      "label": "뒹굴뒹굴",
+      "prompt": "Playfully tumbles backward into a small round roll and pops back up to standing with a happy bounce, stays in place"
+    }
+  ],
+  "ghost": [
+    {
+      "key": "float",
+      "label": "둥실둥실",
+      "prompt": "Gently bobs up and down while floating, wavy hem sways softly, stubby arms spread slightly, calm friendly face, seamless loop, stays in place"
+    },
+    {
+      "key": "peek",
+      "label": "까꿍",
+      "prompt": "Covers its eyes with both stubby arms, then pulls them away wide with a surprised happy face like peekaboo, stays in place"
+    }
+  ],
+  "mushroom": [
+    {
+      "key": "bounce",
+      "label": "톡톡 점프",
+      "prompt": "Two small springy bounces in place with the cap wobbling softly on each landing, happy face, returns to original pose"
+    },
+    {
+      "key": "spore",
+      "label": "반짝 포자",
+      "prompt": "Gives its cap a gentle shake releasing a few tiny sparkly pale dots that drift upward and fade, then stands still with a proud smile, stays in place"
+    }
+  ],
+  "dragon": [
+    {
+      "key": "puff",
+      "label": "불 뿜기",
+      "prompt": "Puffs its cheeks and blows out a tiny harmless puff of warm orange flame that quickly fades, then grins proudly, stays in place"
+    },
+    {
+      "key": "wings",
+      "label": "날개 파닥",
+      "prompt": "Flutters its small wings quickly and lifts a few pixels off the ground for a moment, then settles back down gently to standing, stays in place"
+    }
+  ],
+  "cactus": [
+    {
+      "key": "bloom",
+      "label": "꽃 피우기",
+      "prompt": "The small pink flower on top of its head opens wider and glows softly while it sways proudly side to side, stays in place"
+    },
+    {
+      "key": "shimmy",
+      "label": "살랑 댄스",
+      "prompt": "Playful little shimmy dance shaking its arm branches and hips side to side with a cheerful face, returns to original pose, stays in place"
+    }
+  ],
+  "cloudpup": [
+    {
+      "key": "smile",
+      "label": "헤헤 웃기",
+      "prompt": "Squeezes its eyes shut even tighter and gives a huge content smile with its tiny tongue out, cheeks lift, small happy body wiggle, returns to original pose, stays in place"
+    },
+    {
+      "key": "flop",
+      "label": "엎드려 쉬기",
+      "prompt": "Slowly flops forward onto its belly with legs spread out flat like a pancake, sleepy content smile, holds the flat resting pose at the end, stays in place"
+    }
+  ],
+  "puffball": [
+    {
+      "key": "teary",
+      "label": "글썽글썽",
+      "prompt": "Eyes grow big and sparkly with tiny wobbling tears at the corners, body trembles cutely, small worried mouth, then sniffs and returns to normal, stays in place"
+    },
+    {
+      "key": "yay",
+      "label": "만세",
+      "prompt": "Raises both stubby arms straight up and does two tiny joyful bounces with a wide happy open mouth, settles back down, stays in place"
+    }
+  ],
+  "bluecat": [
+    {
+      "key": "sing",
+      "label": "노래하기",
+      "prompt": "Sways side to side happily with mouth wide open as if singing, eyes closed in joy, one paw raised like holding a microphone, small rhythmic head bob, stays in place"
+    },
+    {
+      "key": "grin",
+      "label": "히히 웃기",
+      "prompt": "Tilts its head and breaks into a big mischievous toothy grin, eyes squint happily, small shoulder shake like giggling, returns to original pose, stays in place"
+    }
+  ],
+  "yellowbunny": [
+    {
+      "key": "yaha",
+      "label": "야하 점프",
+      "prompt": "Shouts with a wide open mouth and leaps high in place with arms thrown up and ears flying, lands with a bounce, wild joyful energy, keeps facing the same side"
+    },
+    {
+      "key": "spin",
+      "label": "빙글 돌기",
+      "prompt": "Does one quick playful spin in place with arms out and ears swinging, then stops facing the original side with a big excited grin, stays in place"
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "1fb0aa60-deae-4d1f-b82d-73ba98976d96",
+    "slug": "cat"
+  },
+  {
+    "id": "78bb2719-937f-44d8-95dc-21626d839e29",
+    "slug": "rabbit"
+  },
+  {
+    "id": "975ce366-ad50-44df-a643-a06a70e748c8",
+    "slug": "dog"
+  },
+  {
+    "slug": "hamster",
+    "id": "8b71d8a3-6247-489c-ba6d-17414f860736"
+  },
+  {
+    "slug": "fox",
+    "id": "ad3ea79a-f6e9-4b88-8f2c-6f53890ced6c"
+  },
+  {
+    "slug": "penguin",
+    "id": "ac6198e7-f2f8-490a-bee7-ac862ab69d98"
+  },
+  {
+    "slug": "slime",
+    "id": "73c683f7-be70-4131-99ee-4b1834eaf41c"
+  },
+  {
+    "slug": "robot",
+    "id": "3352d2c7-4c49-4a69-b345-f2b51700c77a"
+  },
+  {
+    "id": "78885bb5-b364-4499-8050-b4fbf43ba005",
+    "slug": "boy"
+  },
+  {
+    "id": "f7f4339f-92a6-43fc-b6a8-34204cfba11b",
+    "slug": "girl"
+  },
+  {
+    "slug": "duck",
+    "id": "50e66c97-26a1-4f40-8607-24b5452b4947"
+  },
+  {
+    "slug": "bear",
+    "id": "b2c3de53-3dcc-4480-8c35-c22937709495"
+  },
+  {
+    "slug": "frog",
+    "id": "8de073d0-fb28-45cc-a7ce-fbbeec616b10"
+  },
+  {
+    "slug": "panda",
+    "id": "fc2f5799-4500-428b-a5bf-091cb76236b7"
+  },
+  {
+    "slug": "ghost",
+    "id": "27684bbb-6bae-4442-8938-d6e4ed5fcefe"
+  },
+  {
+    "slug": "mushroom",
+    "id": "37077923-b97e-4948-b783-f9f933afa792"
+  },
+  {
+    "slug": "dragon",
+    "id": "b944db0d-7917-470a-b5f8-312a8817b6c7"
+  },
+  {
+    "slug": "cactus",
+    "id": "27f94f02-e83b-413d-a7ab-95d06d914010"
+  },
+  {
+    "slug": "cloudpup",
+    "id": "feb6aba3-5cac-4390-b365-065b498f9fbf"
+  },
+  {
+    "slug": "puffball",
+    "id": "dcc9b909-b6fe-47fd-94df-231ba2e8020a"
+  },
+  {
+    "slug": "bluecat",
+    "id": "34343f8e-4a64-4298-85bd-a64ee9d3e4c1"
+  },
+  {
+    "slug": "yellowbunny",
+    "id": "b0dc5cc9-daf9-479d-95ed-c1426b2cca5d"
+  }
+]

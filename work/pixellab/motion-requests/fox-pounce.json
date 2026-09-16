@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "character: ad3ea79a-f6e9-4b88-8f2c-6f53890ced6c\nanimation: v3 custom (Crouches playfully with fluffy tail raised, makes one small fox pounce in place and lands softly with both front paws together, then returns to ready pose)\ndirections: east (1 jobs)\ngroup: ec6b25c8-2aa7-44e0-8e41-a4b26adc270a\nframes: 16 (reference stripped, keep_first_frame=false)\ncost: 1 generation (1/dir x 1)\neta: ~30-60s/direction\n\nhint: get_character(character_id=\"ad3ea79a-f6e9-4b88-8f2c-6f53890ced6c\")\nadd more directions to this group: animate_character(character_id=\"ad3ea79a-f6e9-4b88-8f2c-6f53890ced6c\", action_description=\"Crouches playfully with fluffy tail raised, makes one small fox pounce in place and lands softly with both front paws together, then returns to ready pose\", animation_group_id=\"ec6b25c8-2aa7-44e0-8e41-a4b26adc270a\", directions=[...])"
+    }
+  ],
+  "isError": false
+}

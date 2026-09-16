@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "character: 8de073d0-fb28-45cc-a7ce-fbbeec616b10\nanimation: v3 custom (Puffs its cheeks, quickly flicks out a tiny pink tongue toward the side and pulls it back, blinks happily, stays in place)\ndirections: east (1 jobs)\ngroup: a3824552-8320-4cbe-8abe-ebe6d27e8758\nframes: 16 (reference stripped, keep_first_frame=false)\ncost: 1 generation (1/dir x 1)\neta: ~30-60s/direction\n\nhint: get_character(character_id=\"8de073d0-fb28-45cc-a7ce-fbbeec616b10\")\nadd more directions to this group: animate_character(character_id=\"8de073d0-fb28-45cc-a7ce-fbbeec616b10\", action_description=\"Puffs its cheeks, quickly flicks out a tiny pink tongue toward the side and pulls it back, blinks happily, stays in place\", animation_group_id=\"a3824552-8320-4cbe-8abe-ebe6d27e8758\", directions=[...])"
+    }
+  ],
+  "isError": false
+}

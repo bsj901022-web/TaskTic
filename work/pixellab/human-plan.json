@@ -1,0 +1,26 @@
+[
+  {
+    "outline": "single color outline",
+    "n_directions": 8,
+    "view": "side",
+    "detail": "low detail",
+    "slug": "boy",
+    "mode": "v3",
+    "description": "Original cozy virtual desktop companion, cute chibi adult human character with oversized round head and very short body and limbs. Clean readable 64x64 pixel art, warm dark brown single-pixel outline, limited soft pastel palette, simple two-tone shading, no antialiasing, no text, no floor, transparent background. Full body centered, eye-level view. Young adult man with short tousled dark brown hair, friendly dot eyes, a sage green oversized sweater, beige trousers and cream sneakers, warm cheerful expression.",
+    "size": 64,
+    "body_type": "humanoid",
+    "name": "Jun - Taskbar Tails"
+  },
+  {
+    "outline": "single color outline",
+    "n_directions": 8,
+    "view": "side",
+    "detail": "low detail",
+    "slug": "girl",
+    "mode": "v3",
+    "description": "Original cozy virtual desktop companion, cute chibi adult human character with oversized round head and very short body and limbs. Clean readable 64x64 pixel art, warm dark brown single-pixel outline, limited soft pastel palette, simple two-tone shading, no antialiasing, no text, no floor, transparent background. Full body centered, eye-level view. Young adult woman with a short chestnut bob haircut, friendly dot eyes, a muted lavender oversized cardigan over a cream shirt, blue jeans and cream sneakers, warm cheerful expression.",
+    "size": 64,
+    "body_type": "humanoid",
+    "name": "Hana - Taskbar Tails"
+  }
+]

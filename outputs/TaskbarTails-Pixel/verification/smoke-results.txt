@@ -1,0 +1,111 @@
+PASS: pet overlay created
+PASS: overlay aligned with primary work-area bottom
+PASS: feed increases XP
+PASS: fullness capped at 100
+PASS: play wakes pet
+PASS: sleep toggles on
+PASS: two local demo friends added
+PASS: demo toggle is idempotent
+PASS: hide all overlays
+PASS: show all overlays
+PASS: species applied to overlay
+PASS: sprites load for cat
+PASS: 16-frame walk east/west for cat
+PASS: special motions loaf/groom for cat
+PASS: motion starts for cat
+PASS: sprites load for rabbit
+PASS: 16-frame walk east/west for rabbit
+PASS: special motions hop/ears for rabbit
+PASS: motion starts for rabbit
+PASS: sprites load for dog
+PASS: 16-frame walk east/west for dog
+PASS: special motions fetch/wag for dog
+PASS: motion starts for dog
+PASS: sprites load for hamster
+PASS: 16-frame walk east/west for hamster
+PASS: special motions nibble/curl for hamster
+PASS: motion starts for hamster
+PASS: sprites load for fox
+PASS: 16-frame walk east/west for fox
+PASS: special motions pounce/tail for fox
+PASS: motion starts for fox
+PASS: sprites load for penguin
+PASS: 16-frame walk east/west for penguin
+PASS: special motions flap/bow for penguin
+PASS: motion starts for penguin
+PASS: sprites load for duck
+PASS: 16-frame walk east/west for duck
+PASS: special motions waddle/preen for duck
+PASS: motion starts for duck
+PASS: sprites load for bear
+PASS: 16-frame walk east/west for bear
+PASS: special motions honey/stretch for bear
+PASS: motion starts for bear
+PASS: sprites load for frog
+PASS: 16-frame walk east/west for frog
+PASS: special motions leap/tongue for frog
+PASS: motion starts for frog
+PASS: sprites load for panda
+PASS: 16-frame walk east/west for panda
+PASS: special motions bamboo/roll for panda
+PASS: motion starts for panda
+PASS: sprites load for slime
+PASS: 16-frame walk east/west for slime
+PASS: special motions squish/jiggle for slime
+PASS: motion starts for slime
+PASS: sprites load for robot
+PASS: 16-frame walk east/west for robot
+PASS: special motions wave/dance for robot
+PASS: motion starts for robot
+PASS: sprites load for ghost
+PASS: 16-frame walk east/west for ghost
+PASS: special motions float/peek for ghost
+PASS: motion starts for ghost
+PASS: sprites load for mushroom
+PASS: 16-frame walk east/west for mushroom
+PASS: special motions bounce/spore for mushroom
+PASS: motion starts for mushroom
+PASS: sprites load for dragon
+PASS: 16-frame walk east/west for dragon
+PASS: special motions puff/wings for dragon
+PASS: motion starts for dragon
+PASS: sprites load for cactus
+PASS: 16-frame walk east/west for cactus
+PASS: special motions bloom/shimmy for cactus
+PASS: motion starts for cactus
+PASS: sprites load for cloudpup
+PASS: 16-frame walk east/west for cloudpup
+PASS: special motions smile/flop for cloudpup
+PASS: motion starts for cloudpup
+PASS: sprites load for puffball
+PASS: 16-frame walk east/west for puffball
+PASS: special motions teary/yay for puffball
+PASS: motion starts for puffball
+PASS: sprites load for bluecat
+PASS: 16-frame walk east/west for bluecat
+PASS: special motions sing/grin for bluecat
+PASS: motion starts for bluecat
+PASS: sprites load for yellowbunny
+PASS: 16-frame walk east/west for yellowbunny
+PASS: special motions yaha/spin for yellowbunny
+PASS: motion starts for yellowbunny
+PASS: sprites load for boy
+PASS: 16-frame walk east/west for boy
+PASS: special motions wave/cheer for boy
+PASS: motion starts for boy
+PASS: sprites load for girl
+PASS: 16-frame walk east/west for girl
+PASS: special motions wave/cheer for girl
+PASS: motion starts for girl
+PASS: species change resets the running motion
+PASS: dog throws, fetches and returns the ball
+PASS: parachute opens after drop
+PASS: parachute lands on the work area
+PASS: 80-character bubble renders
+PASS: sleeping cat rests in loaf pose
+PASS: remote parachute stays visible between snapshots
+PASS: remote parachute closes on land
+PASS: state persistence round-trip
+PASS: demo friends removed
+PASS: closing panel preserves companion
+PASS: panel reopens

@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "character: 73c683f7-be70-4131-99ee-4b1834eaf41c\nanimation: v3 custom (Jelly slime does two soft small bounces in place with a wobbly jelly landing, springy cheerful rounded body, ends in original shape)\ndirections: east (1 jobs)\ngroup: 3f3a5323-0d2b-4401-ac1f-00b776df26c2\nframes: 16 (reference stripped, keep_first_frame=false)\ncost: 1 generation (1/dir x 1)\neta: ~30-60s/direction\n\nhint: get_character(character_id=\"73c683f7-be70-4131-99ee-4b1834eaf41c\")\nadd more directions to this group: animate_character(character_id=\"73c683f7-be70-4131-99ee-4b1834eaf41c\", action_description=\"Jelly slime does two soft small bounces in place with a wobbly jelly landing, springy cheerful rounded body, ends in original shape\", animation_group_id=\"3f3a5323-0d2b-4401-ac1f-00b776df26c2\", directions=[...])"
+    }
+  ],
+  "isError": false
+}

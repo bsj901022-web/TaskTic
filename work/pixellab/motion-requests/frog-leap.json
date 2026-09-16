@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "character: 8de073d0-fb28-45cc-a7ce-fbbeec616b10\nanimation: v3 custom (Crouches low and makes one small frog hop in place, lands softly with a tiny wobble, returns to standing, keeps facing the same side)\ndirections: east (1 jobs)\ngroup: 27ebf17f-3d2f-45e8-be24-e1d10c8dd9eb\nframes: 16 (reference stripped, keep_first_frame=false)\ncost: 1 generation (1/dir x 1)\neta: ~30-60s/direction\n\nhint: get_character(character_id=\"8de073d0-fb28-45cc-a7ce-fbbeec616b10\")\nadd more directions to this group: animate_character(character_id=\"8de073d0-fb28-45cc-a7ce-fbbeec616b10\", action_description=\"Crouches low and makes one small frog hop in place, lands softly with a tiny wobble, returns to standing, keeps facing the same side\", animation_group_id=\"27ebf17f-3d2f-45e8-be24-e1d10c8dd9eb\", directions=[...])"
+    }
+  ],
+  "isError": false
+}

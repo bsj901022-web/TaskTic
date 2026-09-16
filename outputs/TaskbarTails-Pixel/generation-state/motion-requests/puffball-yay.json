@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "character: dcc9b909-b6fe-47fd-94df-231ba2e8020a\nanimation: v3 custom (Raises both stubby arms straight up and does two tiny joyful bounces with a wide happy open mouth, settles back down, stays in place)\ndirections: east (1 jobs)\ngroup: 74a51efa-7126-4954-8c39-fc654cd2701a\nframes: 16 (reference stripped, keep_first_frame=false)\ncost: 1 generation (1/dir x 1)\neta: ~30-60s/direction\n\nhint: get_character(character_id=\"dcc9b909-b6fe-47fd-94df-231ba2e8020a\")\nadd more directions to this group: animate_character(character_id=\"dcc9b909-b6fe-47fd-94df-231ba2e8020a\", action_description=\"Raises both stubby arms straight up and does two tiny joyful bounces with a wide happy open mouth, settles back down, stays in place\", animation_group_id=\"74a51efa-7126-4954-8c39-fc654cd2701a\", directions=[...])"
+    }
+  ],
+  "isError": false
+}

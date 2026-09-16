@@ -1,0 +1,1 @@
+{"content":[{"type":"text","text":"id: ac6198e7-f2f8-490a-bee7-ac862ab69d98\nname: Pebble - Taskbar Tails\nmode: v3 (2 generations, 8 directions)\nbody: humanoid\nsize: 64x64px\nview: side\nstyle: single color outline, low detail\nstatus: processing (~3-5 min)\n\nhint: get_character(character_id=\"ac6198e7-f2f8-490a-bee7-ac862ab69d98\")"}],"isError":false}

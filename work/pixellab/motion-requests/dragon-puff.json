@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "character: b944db0d-7917-470a-b5f8-312a8817b6c7\nanimation: v3 custom (Puffs its cheeks and blows out a tiny harmless puff of warm orange flame that quickly fades, then grins proudly, stays in place)\ndirections: east (1 jobs)\ngroup: 0a9ee742-fe79-44ae-8048-5c87e5d0f1e5\nframes: 16 (reference stripped, keep_first_frame=false)\ncost: 1 generation (1/dir x 1)\neta: ~30-60s/direction\n\nhint: get_character(character_id=\"b944db0d-7917-470a-b5f8-312a8817b6c7\")\nadd more directions to this group: animate_character(character_id=\"b944db0d-7917-470a-b5f8-312a8817b6c7\", action_description=\"Puffs its cheeks and blows out a tiny harmless puff of warm orange flame that quickly fades, then grins proudly, stays in place\", animation_group_id=\"0a9ee742-fe79-44ae-8048-5c87e5d0f1e5\", directions=[...])"
+    }
+  ],
+  "isError": false
+}

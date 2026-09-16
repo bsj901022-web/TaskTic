@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "character: 37077923-b97e-4948-b783-f9f933afa792\nanimation: v3 custom (Two small springy bounces in place with the cap wobbling softly on each landing, happy face, returns to original pose)\ndirections: east (1 jobs)\ngroup: 58ebe0e8-751a-4233-975a-508b76d921ba\nframes: 16 (reference stripped, keep_first_frame=false)\ncost: 1 generation (1/dir x 1)\neta: ~30-60s/direction\n\nhint: get_character(character_id=\"37077923-b97e-4948-b783-f9f933afa792\")\nadd more directions to this group: animate_character(character_id=\"37077923-b97e-4948-b783-f9f933afa792\", action_description=\"Two small springy bounces in place with the cap wobbling softly on each landing, happy face, returns to original pose\", animation_group_id=\"58ebe0e8-751a-4233-975a-508b76d921ba\", directions=[...])"
+    }
+  ],
+  "isError": false
+}
