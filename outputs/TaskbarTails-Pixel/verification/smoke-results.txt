@@ -1,5 +1,5 @@
 PASS: pet overlay created
-PASS: overlay aligned with primary work-area bottom
+PASS: overlay aligned with the selected work-area bottom
 PASS: feed increases XP
 PASS: fullness capped at 100
 PASS: play wakes pet
@@ -124,6 +124,26 @@ PASS: 200% size applies and keeps the feet on the work area
 PASS: size setting persists
 PASS: remote parachute stays visible between snapshots
 PASS: remote parachute closes on land
+PASS: monitor enumeration and ground line
+PASS: night hours
+PASS: offline hours lower fullness and happiness
+PASS: offline decay stops at the friendly floor
+PASS: idle for 10 minutes starts a nap
+PASS: input after a nap wakes the pet
+PASS: night check puts the pet to sleep at 23:00
+PASS: morning check wakes the pet
+PASS: stretch reminder fires a bubble
+PASS: characters greet when they meet
+PASS: poke from a friend shows on my character
+PASS: incoming ball starts rolling
+PASS: incoming ball is caught
+PASS: outgoing ball leaves the screen
+PASS: quick reaction shows as a bubble
+PASS: quick chat opens above the character
+PASS: bubble styles unlock by level
+PASS: english ui rebuilds the panel
+PASS: korean ui restored
+PASS: settings persist
 PASS: state persistence round-trip
 PASS: demo friends removed
 PASS: closing panel preserves companion

@@ -10,6 +10,9 @@ using System.Threading;
 using System.Threading.Tasks;
 namespace TaskbarTails;
 public sealed record RoomMember(string UserId,string Name,string Species);
+public sealed record RoomInfo(string Id,string Name,string Code);
+// One anonymous Supabase user, one live room at a time. Membership in other rooms is kept on the server,
+// so switching rooms only moves the realtime channel; LeaveRoom removes a membership for good.
 public sealed class RoomClient:IDisposable
 {
  readonly HttpClient http=new(){Timeout=TimeSpan.FromSeconds(20)};
@@ -42,7 +45,7 @@ public sealed class RoomClient:IDisposable
  {
   var config=JsonDocument.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"supabase.json"))).RootElement;
   url=config.GetProperty("url").GetString()!.TrimEnd('/');key=config.GetProperty("anonKey").GetString()!;
-  if(!Uri.TryCreate(url,UriKind.Absolute,out var u)||u.Scheme!="https")throw new InvalidOperationException("Supabase HTTPS 주소를 확인해 주세요.");
+  if(!Uri.TryCreate(url,UriKind.Absolute,out var u)||u.Scheme!="https")throw new InvalidOperationException(L.Get("rc_https"));
   http.DefaultRequestHeaders.Add("apikey",key);
   // v0.5.0 kept the session next to pet.json; remove it so a shared app folder never carries an identity.
   try{var legacy=Path.Combine(Path.GetDirectoryName(StateStore.PathName)!,"session.json");if(File.Exists(legacy))File.Delete(legacy);}catch(Exception e)when(e is IOException or UnauthorizedAccessException){}
@@ -54,11 +57,11 @@ public sealed class RoomClient:IDisposable
   if(body!=null)req.Content=new StringContent(JsonSerializer.Serialize(body),Encoding.UTF8,"application/json");
   using var res=await http.SendAsync(req);string text=await res.Content.ReadAsStringAsync();
   if(!res.IsSuccessStatusCode){
-   if(text.Contains("anonymous_provider_disabled"))throw new InvalidOperationException("Supabase에서 Anonymous Sign-Ins를 켜 주세요.");
-   if(text.Contains("PGRST202")||text.Contains("PGRST205"))throw new InvalidOperationException("먼저 Supabase setup.sql을 실행해 주세요.");
-   if(text.Contains("tt_members_species_check"))throw new InvalidOperationException("서버가 이 캐릭터 종류를 아직 몰라요. supabase/upgrade-v05.sql을 실행해 주세요.");
+   if(text.Contains("anonymous_provider_disabled"))throw new InvalidOperationException(L.Get("rc_anon"));
+   if(text.Contains("PGRST202")||text.Contains("PGRST205"))throw new InvalidOperationException(L.Get("rc_setup"));
+   if(text.Contains("tt_members_species_check"))throw new InvalidOperationException(L.Get("rc_species"));
    if((int)res.StatusCode is 400 or 401 or 403 && endpoint.StartsWith("/auth/v1/token"))throw new SessionExpiredException();
-   string msg=$"서버 응답 {(int)res.StatusCode}";try{var j=JsonDocument.Parse(text).RootElement;msg=j.TryGetProperty("message",out var m)?m.GetString()??msg:j.TryGetProperty("msg",out m)?m.GetString()??msg:msg;}catch(JsonException){}
+   string msg=L.F("rc_server",(int)res.StatusCode);try{var j=JsonDocument.Parse(text).RootElement;msg=j.TryGetProperty("message",out var m)?m.GetString()??msg:j.TryGetProperty("msg",out m)?m.GetString()??msg:msg;}catch(JsonException){}
    throw new InvalidOperationException(msg.Length>240?msg[..240]:msg);
   }
   return string.IsNullOrWhiteSpace(text)?JsonDocument.Parse("null").RootElement.Clone():JsonDocument.Parse(text).RootElement.Clone();
@@ -77,7 +80,7 @@ public sealed class RoomClient:IDisposable
  {
   if(SessionFile==null)return;
   try{Directory.CreateDirectory(Path.GetDirectoryName(SessionFile)!);File.WriteAllText(SessionFile,JsonSerializer.Serialize(new{refresh_token=refresh,user_id=UserId,machine=MachineKey,saved_at=DateTime.UtcNow}));}
-  catch(Exception e)when(e is IOException or UnauthorizedAccessException){Status?.Invoke("세션 저장 실패 · 다음 실행 시 새 사용자로 시작할 수 있어요.");}
+  catch(Exception e)when(e is IOException or UnauthorizedAccessException){Status?.Invoke(L.Get("rc_session_save"));}
  }
  async Task Authenticate()
  {
@@ -94,17 +97,27 @@ public sealed class RoomClient:IDisposable
   SaveSession();
   if(previous.Length>0&&previous!=UserId&&RoomId.Length>0){
    var pet=CurrentPet?.Invoke();await Request("/rest/v1/rpc/tt_join_room",new{p_code=InviteCode,p_pet_name=pet?.Name??"친구",p_species=pet?.Species??"cat"});
-   Status?.Invoke("새 세션으로 방에 다시 참여했어요.");
+   Status?.Invoke(L.Get("rc_rejoined"));
   }
  }
+ // Creates a room (create=true, value=name) or joins/switches by invite code. Membership in the previous room is kept.
  public async Task Open(string value,bool create,PetState state)
  {
-  if(RoomId.Length>0)await Leave();await Authenticate();
+  if(RoomId.Length>0)Disconnect();await Authenticate();
   object args=create?new{p_name=value,p_pet_name=state.Name,p_species=state.Species}:new{p_code=value,p_pet_name=state.Name,p_species=state.Species};
   var room=await Request("/rest/v1/rpc/"+(create?"tt_create_room":"tt_join_room"),args);
   RoomId=room.GetProperty("room_id").GetString()!;InviteCode=room.GetProperty("invite_code").GetString()!;RoomName=room.GetProperty("name").GetString()!;
   joined=new(TaskCreationOptions.RunContinuationsAsynchronously);lifetime=new();_ = Run(lifetime.Token);
   await joined.Task.WaitAsync(TimeSpan.FromSeconds(20));
+ }
+ // Rooms this user belongs to (RLS returns only those). Used for the room list and switching.
+ public async Task<List<RoomInfo>> ListRooms()
+ {
+  await Authenticate();
+  var data=await Request("/rest/v1/tt_rooms?select=id,name,invite_code&order=created_at.asc");
+  var list=new List<RoomInfo>();
+  foreach(var row in data.EnumerateArray())list.Add(new(row.GetProperty("id").GetString()!,row.GetProperty("name").GetString()!,row.GetProperty("invite_code").GetString()!));
+  return list;
  }
  async Task WsSend(object value,CancellationToken ct)
  {
@@ -127,19 +140,19 @@ public sealed class RoomClient:IDisposable
      var buffer=new byte[16384];
      while(socket.State==WebSocketState.Open&&!ct.IsCancellationRequested){
       using var message=new MemoryStream();WebSocketReceiveResult part;
-      do{part=await socket.ReceiveAsync(buffer,ct);if(part.MessageType==WebSocketMessageType.Close)throw new WebSocketException("서버 연결이 닫혔어요.");message.Write(buffer,0,part.Count);if(message.Length>65536)throw new InvalidOperationException("이벤트가 너무 큽니다.");}while(!part.EndOfMessage);
+      do{part=await socket.ReceiveAsync(buffer,ct);if(part.MessageType==WebSocketMessageType.Close)throw new WebSocketException(L.Get("rc_closed"));message.Write(buffer,0,part.Count);if(message.Length>65536)throw new InvalidOperationException(L.Get("rc_big"));}while(!part.EndOfMessage);
       using var doc=JsonDocument.Parse(message.ToArray());var root=doc.RootElement;
       var kind=root.GetProperty("event").GetString();var payload=root.GetProperty("payload");
       if(kind=="phx_reply"&&root.TryGetProperty("ref",out var reference)&&reference.GetString()=="join"){
-       if(payload.GetProperty("status").GetString()!="ok"){string reason=payload.TryGetProperty("response",out var resp)?resp.ToString():"";if(reason.Length>200)reason=reason[..200];throw new InvalidOperationException("방 구독 권한을 확인해 주세요. setup.sql의 Realtime 정책이 필요합니다. ("+reason+")");}
-       failures=0;joined?.TrySetResult(true);Status?.Invoke("연결됨 · "+RoomName);await RefreshRoster();
+       if(payload.GetProperty("status").GetString()!="ok"){string reason=payload.TryGetProperty("response",out var resp)?resp.ToString():"";if(reason.Length>200)reason=reason[..200];throw new InvalidOperationException(L.Get("rc_policy")+" ("+reason+")");}
+       failures=0;joined?.TrySetResult(true);Status?.Invoke(L.F("room_connected",RoomName));await RefreshRoster();
       }
       else if(kind=="broadcast"&&payload.TryGetProperty("event",out var eventName)&&eventName.GetString()=="pet"){
        var ev=payload.GetProperty("payload").Deserialize<PetEvent>(json);if(ev!=null&&ev.UserId!=UserId&&ev.UserId.Length>0)Received?.Invoke(ev);
       }
      }
     }finally{connection.Cancel();try{await heartbeat;}catch(OperationCanceledException){}}
-   }catch(OperationCanceledException){break;}catch(Exception e){failures++;Status?.Invoke("재연결 중 · "+e.Message);if(joined?.Task.IsCompleted==false&&(failures>=2||e is HttpRequestException))joined.TrySetException(e);}
+   }catch(OperationCanceledException){break;}catch(Exception e){failures++;Status?.Invoke(L.F("rc_reconnect",e.Message));if(joined?.Task.IsCompleted==false&&(failures>=2||e is HttpRequestException))joined.TrySetException(e);}
    finally{socket?.Dispose();socket=null;}
    // Exponential back-off between reconnect attempts (4s, 8s, 16s, ... up to 60s).
    if(!ct.IsCancellationRequested)try{await Task.Delay(TimeSpan.FromSeconds(Math.Min(60,4*Math.Pow(2,Math.Min(4,failures)))),ct);}catch(OperationCanceledException){break;}
@@ -147,7 +160,7 @@ public sealed class RoomClient:IDisposable
  }
  async Task Heartbeat(CancellationToken ct)
  {
-  while(!ct.IsCancellationRequested){await Task.Delay(15000,ct);await WsSend(new{topic="phoenix",@event="heartbeat",payload=new{},@ref=Interlocked.Increment(ref sequence).ToString()},ct);try{await RefreshRoster();}catch(Exception e)when(e is HttpRequestException or InvalidOperationException or TaskCanceledException){Status?.Invoke("참여자 갱신 대기 · "+e.Message);}}
+  while(!ct.IsCancellationRequested){await Task.Delay(15000,ct);await WsSend(new{topic="phoenix",@event="heartbeat",payload=new{},@ref=Interlocked.Increment(ref sequence).ToString()},ct);try{await RefreshRoster();}catch(Exception e)when(e is HttpRequestException or InvalidOperationException or TaskCanceledException){Status?.Invoke(L.F("rc_roster_wait",e.Message));}}
  }
  public async Task RefreshRoster()
  {
@@ -163,11 +176,24 @@ public sealed class RoomClient:IDisposable
  {
   if(!Connected)return;await publishLock.WaitAsync();try{await Authenticate();await Request("/rest/v1/rpc/tt_send_event",new{p_room=RoomId,p_event=value});}finally{publishLock.Release();}
  }
- public async Task Leave()
+ // Closes the live channel but keeps the membership (used when switching rooms).
+ public void Disconnect()
  {
   lifetime?.Cancel();socket?.Abort();
-  if(RoomId.Length>0)try{await Request("/rest/v1/rpc/tt_leave_room",new{p_room=RoomId});}catch(Exception e){Status?.Invoke(e.Message);}
-  RoomId="";InviteCode="";RoomName="";Members=Array.Empty<RoomMember>();RosterChanged?.Invoke(Members);Status?.Invoke("방에서 나왔어요.");
+  RoomId="";InviteCode="";RoomName="";Members=Array.Empty<RoomMember>();RosterChanged?.Invoke(Members);
+ }
+ // Leaves the current room for good.
+ public async Task Leave()
+ {
+  string room=RoomId;Disconnect();
+  if(room.Length>0)try{await Request("/rest/v1/rpc/tt_leave_room",new{p_room=room});}catch(Exception e)when(e is HttpRequestException or InvalidOperationException or TaskCanceledException){Status?.Invoke(e.Message);}
+  Status?.Invoke(L.Get("room_left"));
+ }
+ // Removes membership of a room that is not the live one.
+ public async Task LeaveRoom(string roomId)
+ {
+  if(roomId==RoomId){await Leave();return;}
+  await Authenticate();await Request("/rest/v1/rpc/tt_leave_room",new{p_room=roomId});
  }
  public void Dispose(){lifetime?.Cancel();socket?.Abort();socket?.Dispose();http.Dispose();}
 }

@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace TaskbarTails;
 
@@ -8,66 +9,119 @@ public partial class MainWindow : Window
 {
     readonly App app;
     bool ready;
+    int shownLevel = -1;
+    public bool AllowClose;
+    static readonly int[] IdleOptions = { 0, 3, 5, 10, 15 };
     public MainWindow(App owner)
     {
         app = owner; InitializeComponent();
-        NameBox.Text = app.State.Name; SpeciesBox.Items.Clear(); foreach(var k in PetCatalog.All) SpeciesBox.Items.Add(k.Label); SpeciesBox.SelectedIndex = Array.FindIndex(PetCatalog.All,k=>k.Id==app.State.Species);
-        VersionBadge.Text = "●  PIXEL PETS · " + app.VersionLabel + " · " + PetCatalog.All.Length + "종" + (StateStore.IsInstalled ? "" : " · 포터블");
-        FriendsCheck.IsChecked = app.State.DemoFriends; ScaleBox.SelectedIndex = app.State.Scale == 150 ? 1 : app.State.Scale == 200 ? 2 : 0; ready = true;
+        var s = app.State;
+        NameBox.Text = s.Name;
+        SpeciesBox.Items.Clear(); foreach (var k in PetCatalog.All) SpeciesBox.Items.Add(L.Group(k.Group) + " · " + PetCatalog.Label(k));
+        SpeciesBox.SelectedIndex = Math.Max(0, Array.FindIndex(PetCatalog.All, k => k.Id == s.Species));
+        VersionBadge.Text = "●  PIXEL PETS · " + app.VersionLabel + " · " + L.F("kinds", PetCatalog.All.Length) + (StateStore.IsInstalled ? "" : L.Get("badge_portable"));
+        FriendsCheck.IsChecked = s.DemoFriends;
+        ScaleBox.SelectedIndex = s.Scale == 150 ? 1 : s.Scale == 200 ? 2 : 0;
+        LanguageBox.SelectedIndex = s.Language == "ko" ? 1 : s.Language == "en" ? 2 : 0;
+        var monitors = Native.Monitors(); MonitorBox.Items.Clear();
+        for (int i = 0; i < monitors.Count; i++) { var m = monitors[i]; MonitorBox.Items.Add(L.F("monitor_item", i + 1, m.Monitor.Right - m.Monitor.Left, m.Monitor.Bottom - m.Monitor.Top, m.IsPrimary ? L.Get("monitor_primary") : "")); }
+        MonitorBox.SelectedIndex = Math.Clamp(s.MonitorIndex, 0, monitors.Count - 1);
+        IdleBox.Items.Clear(); foreach (var m in IdleOptions) IdleBox.Items.Add(m == 0 ? L.Get("idle_off") : L.F("idle_min", m));
+        IdleBox.SelectedIndex = Math.Max(0, Array.IndexOf(IdleOptions, s.IdleMinutes));
+        StartupCheck.IsChecked = s.StartWithWindows; HotkeyCheck.IsChecked = s.HotkeysEnabled; NightCheck.IsChecked = s.NightSleep;
+        StretchCheck.IsChecked = s.StretchReminder; SoundCheck.IsChecked = s.ClickSound; GreetCheck.IsChecked = s.GreetFriends; RejoinCheck.IsChecked = s.AutoRejoin;
+        FillBubbleStyles();
+        foreach (var r in QuickChatWindow.Reactions)
+        {
+            var b = new Button { Content = r, FontSize = 15, Padding = new Thickness(9, 4, 9, 4), Margin = new Thickness(0, 0, 6, 4) };
+            b.Click += (_, _) => { app.SendBubble(r); Notice.Text = app.Room?.Connected == true ? L.Get("bubble_sent_room") : L.Get("bubble_sent_local"); };
+            ReactionPanel.Children.Add(b);
+        }
+        ready = true;
         Refresh();
         Closing += OnClosing;
     }
-    void OnClosing(object? sender, CancelEventArgs e) { if (!app.Exiting) { e.Cancel = true; Hide(); } }
+    void OnClosing(object? sender, CancelEventArgs e) { if (!app.Exiting && !AllowClose) { e.Cancel = true; Hide(); } }
+    void FillBubbleStyles()
+    {
+        ready = false;
+        BubbleStyleBox.Items.Clear();
+        for (int i = 0; i < 4; i++) { int lv = PetState.UnlockLevel(i); string name = L.Get("style_" + i); BubbleStyleBox.Items.Add(app.State.Level >= lv ? name : L.F("style_locked", name, lv)); }
+        BubbleStyleBox.SelectedIndex = Math.Clamp(app.State.BubbleStyle, 0, 3);
+        shownLevel = app.State.Level; ready = true;
+    }
     public void Refresh()
     {
         var s = app.State;
-        PetTitle.Text = s.Name; LevelLabel.Text = "Lv. " + s.Level;
+        PetTitle.Text = s.Name; LevelLabel.Text = L.F("level", s.Level);
         FoodLabel.Text = $"{s.Fullness:0} / 100"; FoodBar.Value = s.Fullness;
         HappyLabel.Text = $"{s.Happiness:0} / 100"; HappyBar.Value = s.Happiness;
         XpLabel.Text = $"{s.Experience % 100} / 100"; XpBar.Value = s.Experience % 100;
-        MoodLabel.Text = s.Sleeping ? "쉿, 기분 좋은 꿈을 꾸고 있어요." : s.Fullness < 25 ? "배가 고파요. 간식 시간을 기다려요!" : "오늘도 함께 놀 준비 완료!";
-        SleepButton.Content = s.Sleeping ? "깨우기" : "재우기";
-        var kind=PetCatalog.Get(s.Species); ActionOne.Content=kind.FirstLabel; ActionTwo.Content=kind.SecondLabel;
+        MoodLabel.Text = s.Sleeping ? L.Get("mood_sleep") : s.Fullness < 25 ? L.Get("mood_hungry") : L.Get("mood_ok");
+        SleepButton.Content = s.Sleeping ? L.Get("wake") : L.Get("sleep");
+        var kind = PetCatalog.Get(s.Species); ActionOne.Content = PetCatalog.FirstLabel(kind); ActionTwo.Content = PetCatalog.SecondLabel(kind);
         Preview.Species = s.Species; Preview.Sleeping = s.Sleeping; Preview.ShowName = false; Preview.FrontView = true;
         Preview.InvalidateVisual();
-        VisibilityButton.Content = app.PetsVisible ? "캐릭터 숨기기" : "캐릭터 보이기";
+        VisibilityButton.Content = app.PetsVisible ? L.Get("hide_pets") : L.Get("show_pets");
         RoomInfo.Text = app.RoomSummary; RoomInfo.Visibility = RoomInfo.Text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+        if (shownLevel != s.Level) FillBubbleStyles();
         if (StateStore.LastError != null) Notice.Text = StateStore.LastError;
     }
     public void Animate(double time) { if (!IsVisible) return; Preview.Phase = time; Preview.InvalidateVisual(); }
+    void Save() => StateStore.Save(app.State);
     void Feed_Click(object sender, RoutedEventArgs e) => app.Feed();
     void Play_Click(object sender, RoutedEventArgs e) => app.Play();
     void Sleep_Click(object sender, RoutedEventArgs e) => app.ToggleSleep();
     void Apply_Click(object sender, RoutedEventArgs e)
     {
         var name = NameBox.Text.Trim();
-        if (name.Length == 0) { Notice.Text = "친구의 이름을 입력해 주세요."; return; }
+        if (name.Length == 0) { Notice.Text = L.Get("name_required"); return; }
         app.State.Name = name; app.State.Species = PetCatalog.All[Math.Max(0, SpeciesBox.SelectedIndex)].Id;
-        app.Changed("새 모습이 마음에 들어!"); Notice.Text = "친구의 이름과 모습을 저장했어요.";
+        app.Changed(L.Get("new_look")); Notice.Text = L.Get("saved_look");
     }
-    void Scale_Changed(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    void Scale_Changed(object sender, SelectionChangedEventArgs e)
     {
         if (!ready) return;
         app.State.Scale = ScaleBox.SelectedIndex switch { 1 => 150, 2 => 200, _ => 100 };
-        StateStore.Save(app.State); Notice.Text = "작업표시줄 캐릭터 크기를 " + app.State.Scale + "%로 바꿨어요.";
+        Save(); Notice.Text = L.F("size_changed", app.State.Scale);
     }
+    void Language_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (!ready) return;
+        string lang = LanguageBox.SelectedIndex switch { 1 => "ko", 2 => "en", _ => "auto" };
+        if (lang != app.State.Language) app.SetLanguage(lang);
+    }
+    void Monitor_Changed(object sender, SelectionChangedEventArgs e) { if (!ready) return; app.State.MonitorIndex = Math.Max(0, MonitorBox.SelectedIndex); Save(); app.RefreshScreen(); }
+    void Idle_Changed(object sender, SelectionChangedEventArgs e) { if (!ready) return; app.State.IdleMinutes = IdleOptions[Math.Clamp(IdleBox.SelectedIndex, 0, IdleOptions.Length - 1)]; Save(); }
+    void BubbleStyle_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (!ready) return;
+        int style = Math.Clamp(BubbleStyleBox.SelectedIndex, 0, 3);
+        if (app.State.Level < PetState.UnlockLevel(style)) { Notice.Text = L.F("style_locked", L.Get("style_" + style), PetState.UnlockLevel(style)); ready = false; BubbleStyleBox.SelectedIndex = app.State.EffectiveBubbleStyle; ready = true; return; }
+        app.State.BubbleStyle = style; Save();
+    }
+    void Startup_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.StartWithWindows = StartupCheck.IsChecked == true; Save(); app.ApplyStartup(app.State.StartWithWindows); }
+    void Hotkey_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.HotkeysEnabled = HotkeyCheck.IsChecked == true; Save(); app.RegisterHotkeys(); }
+    void Night_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.NightSleep = NightCheck.IsChecked == true; Save(); }
+    void Stretch_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.StretchReminder = StretchCheck.IsChecked == true; Save(); }
+    void Sound_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.ClickSound = SoundCheck.IsChecked == true; Save(); Sounds.Pop(app.State.ClickSound); }
+    void Greet_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.GreetFriends = GreetCheck.IsChecked == true; Save(); }
+    void Rejoin_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.AutoRejoin = RejoinCheck.IsChecked == true; Save(); }
     void Friends_Changed(object sender, RoutedEventArgs e) { if (ready) app.SetFriends(FriendsCheck.IsChecked == true); }
     void Visibility_Click(object sender, RoutedEventArgs e) => app.ToggleVisible();
-    void ActionOne_Click(object sender, RoutedEventArgs e)=>app.Specialty(0);
-    void ActionTwo_Click(object sender, RoutedEventArgs e)=>app.Specialty(1);
-    void Room_Click(object sender, RoutedEventArgs e)=>app.ShowRoom();
+    void ActionOne_Click(object sender, RoutedEventArgs e) => app.Specialty(0);
+    void ActionTwo_Click(object sender, RoutedEventArgs e) => app.Specialty(1);
+    void Room_Click(object sender, RoutedEventArgs e) => app.ShowRoom();
     void Bubble_Click(object sender, RoutedEventArgs e) => SendBubble();
     void Bubble_KeyDown(object sender, System.Windows.Input.KeyEventArgs e) { if (e.Key == System.Windows.Input.Key.Enter) { SendBubble(); e.Handled = true; } }
     void SendBubble()
     {
-        var text = BubbleBox.Text.Trim(); if (text.Length == 0) { Notice.Text = "말풍선에 넣을 내용을 입력해 주세요."; return; }
+        var text = BubbleBox.Text.Trim(); if (text.Length == 0) { Notice.Text = L.Get("bubble_empty"); return; }
         app.SendBubble(text); BubbleBox.Clear();
-        Notice.Text = app.Room?.Connected == true ? "말풍선을 방 친구들에게 보냈어요." : "말풍선을 표시했어요. 방에 연결하면 친구에게도 보여요.";
+        Notice.Text = app.Room?.Connected == true ? L.Get("bubble_sent_room") : L.Get("bubble_sent_local");
     }
     void Quit_Click(object sender, RoutedEventArgs e) => app.Quit();
-    void CheckUpdate_Click(object sender, RoutedEventArgs e) { Notice.Text = "업데이트를 확인하고 있어요…"; _ = app.CheckForUpdates(true); }
+    void CheckUpdate_Click(object sender, RoutedEventArgs e) { Notice.Text = L.Get("checking_update"); _ = app.CheckForUpdates(true); }
     void Update_Click(object sender, RoutedEventArgs e) => app.ApplyUpdate();
-    public void ShowUpdateReady(string version) { UpdateButton.Content = "v" + version + " 지금 업데이트하고 다시 시작"; UpdateButton.Visibility = Visibility.Visible; Notice.Text = "새 버전 v" + version + "이 준비됐어요. 지금 적용하거나 다음 실행 때 자동으로 적용됩니다."; }
+    public void ShowUpdateReady(string version) { UpdateButton.Content = L.F("update_ready_btn", version); UpdateButton.Visibility = Visibility.Visible; Notice.Text = L.F("update_ready", version); }
 }
-
-

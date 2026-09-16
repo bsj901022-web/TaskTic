@@ -5,7 +5,7 @@ namespace TaskbarTails;
 public sealed record PetKind(string Id,string Label,string Group,string FirstAction,string FirstLabel,string SecondAction,string SecondLabel);
 public static class PetCatalog
 {
- // 26 kinds. Sprites for every kind come from PixelLab (assets/<Id>/...).
+ // 26 kinds. Sprites for every kind come from PixelLab (assets/<Id>/...). English labels live in Strings.cs.
  public static readonly PetKind[] All = {
   new("cat","고양이","동물","loaf","식빵 굽기","groom","세수하기"), new("rabbit","토끼","동물","hop","깡총깡총","ears","귀 쫑긋"),
   new("dog","강아지","동물","fetch","공 물어오기","wag","꼬리 흔들기"), new("hamster","햄스터","동물","nibble","오물오물","curl","동글 휴식"),
@@ -25,11 +25,17 @@ public static class PetCatalog
  public static PetKind Get(string id) => All.FirstOrDefault(x=>x.Id==id) ?? All[0];
  public static bool Valid(string id) => All.Any(x=>x.Id==id);
  public static string RestPose(string id){var k=Get(id);return HoldPose.Contains(k.FirstAction)?k.FirstAction:HoldPose.Contains(k.SecondAction)?k.SecondAction:"";}
+ public static string Label(PetKind k) => L.Species(k);
+ public static string FirstLabel(PetKind k) => L.Action(k.Id, k.FirstAction, k.FirstLabel);
+ public static string SecondLabel(PetKind k) => L.Action(k.Id, k.SecondAction, k.SecondLabel);
 }
+// One realtime event. Kind: state | message | parachute | land | greet | poke | ball | <motion key>.
+// Target carries the recipient's user id for greet / poke / ball. UserId is stamped by the server.
 public sealed class PetEvent
 {
  public string Kind {get;set;}="state";
  public string UserId {get;set;}="";
+ public string Target {get;set;}="";
  public string Name {get;set;}="친구";
  public string Species {get;set;}="cat";
  public string Action {get;set;}="";

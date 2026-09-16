@@ -1,5 +1,5 @@
 # Builds the Windows installer with Velopack and publishes it as a GitHub Release.
-# Trigger: push a tag like v0.5.2, or run manually with a version number.
+# Trigger: push a tag like v0.6.0, or run manually with a version number.
 # Installed copies of Taskbar Tails check this repository's releases and update themselves.
 name: release
 
@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release (e.g. 0.5.2)'
+        description: 'Version to release (e.g. 0.6.0)'
         required: true
 
 permissions:
@@ -32,8 +32,16 @@ jobs:
           "VERSION=$v" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           Write-Host "Releasing version $v"
 
-      - name: Publish (self-contained win-x64)
-        run: dotnet publish work/TaskbarTails/TaskbarTails.csproj -c Release -r win-x64 --self-contained true -p:Version=${{ env.VERSION }} -o publish
+      # Installer channel: framework-dependent (~10 MB). Velopack's Setup.exe installs the .NET 8 desktop runtime on demand.
+      - name: Publish (framework-dependent win-x64)
+        run: dotnet publish work/TaskbarTails/TaskbarTails.csproj -c Release -r win-x64 --self-contained false -p:Version=${{ env.VERSION }} -o publish
+
+      # Extra asset for PCs where the runtime cannot be installed.
+      - name: Publish (self-contained portable)
+        shell: pwsh
+        run: |
+          dotnet publish work/TaskbarTails/TaskbarTails.csproj -c Release -r win-x64 --self-contained true -p:Version=${{ env.VERSION }} -o publish-sc
+          Compress-Archive -Path publish-sc\* -DestinationPath TaskbarTails-win-Portable-SelfContained.zip -Force
 
       # Diagnostic only: hosted runners have no real taskbar/desktop session, so this never blocks the release.
       # The release-gating smoke test is run locally before the tag is pushed. Results are written to the
@@ -69,10 +77,30 @@ jobs:
         run: vpk download github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }} --outputDir releases
 
       - name: Pack installer
-        run: vpk pack --packId TaskbarTails --packVersion ${{ env.VERSION }} --packDir publish --mainExe TaskbarTails.exe --packTitle "Taskbar Tails" --packAuthors "bsj901022-web" --icon work/TaskbarTails/app.ico --outputDir releases
+        run: vpk pack --packId TaskbarTails --packVersion ${{ env.VERSION }} --packDir publish --mainExe TaskbarTails.exe --packTitle "Taskbar Tails" --packAuthors "bsj901022-web" --icon work/TaskbarTails/app.ico --framework net8.0-x64-desktop --outputDir releases
+
+      - name: Release notes from CHANGELOG
+        shell: pwsh
+        run: |
+          $lines = Get-Content CHANGELOG.md
+          $start = ($lines | Select-String -Pattern "^## v$env:VERSION\b" | Select-Object -First 1).LineNumber
+          if (-not $start) { "Taskbar Tails v$env:VERSION" | Out-File notes.md -Encoding utf8 }
+          else {
+            $body = @(); for ($i = $start; $i -lt $lines.Count; $i++) { if ($lines[$i] -match '^## ') { break }; $body += $lines[$i] }
+            $body += ''; $body += 'Downloads: `TaskbarTails-win-Setup.exe` (installer, auto-updates) · `TaskbarTails-win-Portable.zip` (needs .NET 8 desktop runtime) · `TaskbarTails-win-Portable-SelfContained.zip` (runtime included)'
+            $body | Out-File notes.md -Encoding utf8
+          }
+          Get-Content notes.md
 
       - name: Upload to GitHub Release
         run: vpk upload github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }} --publish --releaseName "Taskbar Tails v${{ env.VERSION }}" --tag v${{ env.VERSION }} --outputDir releases
+
+      - name: Attach notes and self-contained portable zip
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release edit v${{ env.VERSION }} --notes-file notes.md --repo ${{ github.repository }}
+          gh release upload v${{ env.VERSION }} TaskbarTails-win-Portable-SelfContained.zip --clobber --repo ${{ github.repository }}
 
       - uses: actions/upload-artifact@v4
         with:
