@@ -59,7 +59,7 @@ public sealed class PetWindow : Window
   };
   MouseLeftButtonUp+=(_,_)=>{
    if(!dragging)return;dragging=false;ReleaseMouseCapture();
-   if(!moved){if(!demo)app.Pet();else Say(L.Get("demo_click"));Bounce();}
+   if(!moved){if(!demo)app.Pet();else Say(L.Get("demo_click"));Bounce();if(lift>0){falling=true;fallAge=Math.Max(fallAge,.2);}}
    else if(lift>8*dpi){falling=true;fallAge=0;Visual.Sleeping=false;if(!demo){app.State.Sleeping=false;app.Broadcast("parachute");}}
   };
   LostMouseCapture+=(_,_)=>{if(dragging){dragging=false;if(lift>0){falling=true;fallAge=0;}}};
@@ -122,6 +122,7 @@ public sealed class PetWindow : Window
   // Every 40-90 s the local character turns to the viewer and says something that fits the moment.
   if(!IsRemote&&!demo&&!Visual.Sleeping&&!falling&&!dragging&&fetchStage==0&&ballStage==0&&Visual.ActionKey.Length==0&&Visual.Bubble.Length==0&&phase>=nextChatter){nextChatter=phase+random.Next(40,90);LookAtViewer(random.Next(4,7),app.Chatter());}
   if(!IsRemote)Visual.FaceFront=!Visual.Sleeping&&!falling&&!dragging&&fetchStage==0&&ballStage==0&&(phase<frontUntil||(IsMouseOver&&!demo));
+  if(!IsRemote&&!dragging&&!falling&&lift>0){falling=true;fallAge=Math.Max(fallAge,.2);}
   bool walking=false;
   if(IsRemote){
    // Friends walk continuously at the shared pace; the 3-second snapshot only corrects drift, so no stop-and-jump.
@@ -196,4 +197,5 @@ public sealed class PetWindow : Window
  public bool InsideWorkArea(){if(!Native.GetWindowRect(handle,out var r))return false;var w=app.Screen.Work;return r.Left>=w.Left&&r.Right<=w.Right&&Math.Abs(r.Bottom-app.GroundY)<=2;}
  public void TestDrop(double fraction){lift=fraction*(app.GroundY-app.Screen.Work.Top-Height*dpi);falling=true;fallAge=0;}
  public void TestMoveTo(double screenX){x=screenX;targetX=screenX;Place();}
+ public void TestInterruptFall(){falling=false;dragging=false;}
 }

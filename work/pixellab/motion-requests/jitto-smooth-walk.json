@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "character: 5826fe15-873a-464e-905a-32b88840b44f\nanimation: v3 custom (A smooth relaxed walking loop in place with short alternating steps and gentle natural weight transfer, subtle head bob, consistent speed and side-facing direction, tiny arm or paw swing, seamless first to last transition)\ndirections: east, west (2 jobs)\ngroup: 1835fec6-318b-4dcb-b6ce-93427dd78c00\nframes: 16 (reference stripped, keep_first_frame=false)\ncost: 2 generations (1/dir x 2)\neta: ~30-60s/direction\n\nhint: get_character(character_id=\"5826fe15-873a-464e-905a-32b88840b44f\")\nadd more directions to this group: animate_character(character_id=\"5826fe15-873a-464e-905a-32b88840b44f\", action_description=\"A smooth relaxed walking loop in place with short alternating steps and gentle natural weight transfer, subtle head bob, consistent speed and side-facing direction, tiny arm or paw swing, seamless first to last transition\", animation_group_id=\"1835fec6-318b-4dcb-b6ce-93427dd78c00\", directions=[...])"
+    }
+  ],
+  "isError": false
+}

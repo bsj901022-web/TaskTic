@@ -445,6 +445,7 @@ public sealed class App : Application
             Check(!pets[0].IsFetching && pets[0].Visual.ActionKey == "wag", "dog throws, fetches and returns the ball");
             State.Species = "cat"; pets[0].Step(.033);
             pets[0].TestDrop(.5); pets[0].Step(.2); Check(pets[0].IsFalling && pets[0].Visual.Parachute, "parachute opens after drop");
+            pets[0].TestInterruptFall(); pets[0].Step(.033); Check(pets[0].IsFalling, "a click while airborne resumes the fall instead of hovering");
             for (int i = 0; i < 900 && pets[0].IsFalling; i++) pets[0].Step(.033);
             Check(!pets[0].IsFalling && !pets[0].Visual.Parachute && pets[0].InsideWorkArea(), "parachute lands on the work area");
             pets[0].Say(new string('가', 80)); pets[0].Step(.033); pets[0].UpdateLayout(); Check(pets[0].Visual.Bubble.Length == 80, "80-character bubble renders");
@@ -479,6 +480,7 @@ public sealed class App : Application
             Check(pets[0].IsFacingViewer && !pets[0].Visual.Walking && pets[0].Visual.Bubble.Length > 0, "character turns to the viewer and says a line");
             for (int i = 0; i < 200 && pets[0].IsFacingViewer; i++) pets[0].Step(.033); Check(!pets[0].IsFacingViewer, "character turns back after a few seconds");
             Check(PetVisual.DevicePixelsPerSprite(1) == 1 && PetVisual.DevicePixelsPerSprite(1.5) == 1.5 && PetVisual.DevicePixelsPerSprite(2) == 2 && PetVisual.DevicePixelsPerSprite(.5) == 1, "sprites are drawn at whole or half device pixels");
+            Check(Panel.ContactPanel.Children.Count >= 8 && Panel.AboutMade.Text.Contains(VersionLabel), "contact card lists email, social, repository and folder links");
             Check(!PetCatalog.Selectable.Any(k => PetCatalog.Hidden.Contains(k.Id)) && PetCatalog.Selectable.Any(k => k.Id == "robot") && PetCatalog.Valid("slime"), "hidden creature kinds stay valid but are not selectable");
             SendBubble("❤️"); Check(pets[0].Visual.Bubble == "❤️", "quick reaction shows as a bubble");
             OpenQuickChat(); Check(QuickChatVisible, "quick chat opens above the character"); HideQuickChat();

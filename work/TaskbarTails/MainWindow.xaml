@@ -25,7 +25,7 @@
  </Window.Resources>
  <ScrollViewer Background="#F7F7F2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
  <Grid Margin="32,25,32,22">
-  <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+  <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
   <Grid>
    <StackPanel><TextBlock Text="TASKBAR TAILS" FontSize="13" FontWeight="Bold" Foreground="#4E8269"/><TextBlock Text="{local:T brand_sub}" FontSize="29" FontWeight="Bold" Margin="0,9,0,6"/><TextBlock Text="{local:T brand_desc}" Foreground="#7B877E" FontSize="13"/></StackPanel>
    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Background="#E8EEE2" CornerRadius="13" Padding="12,6"><TextBlock x:Name="VersionBadge" Text="●  PIXEL PETS" FontSize="10" FontWeight="Bold" Foreground="#5F7E52"/></Border>
@@ -103,7 +103,15 @@
     <TextBlock Text="{local:T set_note}" Style="{StaticResource Caption}" FontSize="11" Margin="0,4,0,0"/>
    </StackPanel>
   </Border>
-  <StackPanel Grid.Row="4" Margin="0,17,0,0">
+  <Border Grid.Row="4" Background="White" CornerRadius="18" Padding="21,18" Margin="0,20,0,0">
+   <StackPanel>
+    <TextBlock Text="{local:T about_title}" FontSize="15" FontWeight="Bold"/>
+    <TextBlock Text="{local:T about_desc}" Style="{StaticResource Caption}" Margin="0,5,0,10"/>
+    <WrapPanel x:Name="ContactPanel"/>
+    <TextBlock x:Name="AboutMade" Style="{StaticResource Caption}" FontSize="11" Margin="0,6,0,0"/>
+   </StackPanel>
+  </Border>
+  <StackPanel Grid.Row="5" Margin="0,17,0,0">
    <Grid><TextBlock x:Name="Notice" Text="{local:T footer_hint}" FontSize="11" Foreground="#7B877E" VerticalAlignment="Center" Margin="0,0,300,0"/><StackPanel Orientation="Horizontal" HorizontalAlignment="Right"><Button x:Name="UpdateButton" Content="{local:T update_now}" Click="Update_Click" Padding="12,8" FontSize="11" Margin="0,0,7,0" Background="#E4B574" Foreground="#3F3223" Visibility="Collapsed"/><Button Content="{local:T update_check}" Click="CheckUpdate_Click" Padding="12,8" FontSize="11" Margin="0,0,7,0"/><Button x:Name="VisibilityButton" Content="{local:T hide_pets}" Click="Visibility_Click" Padding="12,8" FontSize="11" Margin="0,0,7,0"/><Button Content="{local:T quit}" Click="Quit_Click" Padding="12,8" FontSize="11" Background="#EEECE6" Foreground="#7F766C"/></StackPanel></Grid>
    <TextBlock Text="{local:T footer_note}" FontSize="10" Foreground="#969D94" Margin="0,9,0,0"/>
   </StackPanel>
