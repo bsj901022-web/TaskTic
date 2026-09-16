@@ -77,7 +77,7 @@ jobs:
         run: vpk download github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }} --outputDir releases
 
       - name: Pack installer
-        run: vpk pack --packId TaskbarTails --packVersion ${{ env.VERSION }} --packDir publish --mainExe TaskbarTails.exe --packTitle "Taskbar Tails" --packAuthors "bsj901022-web" --icon work/TaskbarTails/app.ico --framework net8.0-x64-desktop --outputDir releases
+        run: vpk pack --packId TaskbarTails --packVersion ${{ env.VERSION }} --packDir publish --mainExe TaskbarTails.exe --packTitle "Taskbar Tails" --packAuthors "Sangjun Park" --icon work/TaskbarTails/app.ico --framework net8.0-x64-desktop --outputDir releases
 
       - name: Release notes from CHANGELOG
         shell: pwsh

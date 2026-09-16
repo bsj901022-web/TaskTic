@@ -65,7 +65,7 @@ public sealed class InfoWindow : Window
     }
     void Link(string label, Action action, bool primary = false)
     {
-        var b = new Button { Content = label, HorizontalAlignment = HorizontalAlignment.Stretch, HorizontalContentAlignment = HorizontalAlignment.Left, Padding = new Thickness(12, 8, 12, 8), Margin = new Thickness(0, 0, 0, 6), FontSize = 12, BorderThickness = new Thickness(0), Cursor = System.Windows.Input.Cursors.Hand,
+        var b = new Button { Content = new TextBlock { Text = label, TextWrapping = TextWrapping.Wrap }, HorizontalAlignment = HorizontalAlignment.Stretch, HorizontalContentAlignment = HorizontalAlignment.Left, Padding = new Thickness(12, 8, 12, 8), Margin = new Thickness(0, 0, 0, 6), FontSize = 12, BorderThickness = new Thickness(0), Cursor = System.Windows.Input.Cursors.Hand,
             Background = new SolidColorBrush(primary ? Color.FromRgb(54, 118, 95) : Color.FromRgb(234, 240, 233)), Foreground = primary ? Brushes.White : new SolidColorBrush(Color.FromRgb(40, 89, 72)) };
         b.Click += (_, _) => { try { action(); } catch (Exception e) when (e is System.ComponentModel.Win32Exception or InvalidOperationException or IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException) { notice.Text = L.F("open_failed", e.Message); } };
         body.Children.Add(b); LinkCount++;

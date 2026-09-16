@@ -228,7 +228,7 @@ public static class L
         ["open_logs"] = ("로그 폴더 열기", "Open log folder"),
         ["copied"] = ("복사했어요: {0}", "Copied: {0}"),
         ["open_failed"] = ("열 수 없어요 · {0}", "Could not open · {0}"),
-        ["about_made"] = ("만든 사람 bsj901022-web · {0} · 캐릭터 그림은 PixelLab으로 만든 오리지널 디자인입니다.", "Made by bsj901022-web · {0} · Character art is original, generated with PixelLab."),
+        ["about_made"] = ("만든 사람 박상준 · {0} · 캐릭터 그림은 PixelLab으로 만든 오리지널 디자인입니다.", "Made by Sangjun Park · {0} · Character art is original, generated with PixelLab."),
         ["touch_0"] = ("오늘도 반가워!", "Good to see you today!"),
         ["touch_1"] = ("기분이 좋아졌어!", "That cheered me up!"),
         ["touch_2"] = ("고마워, 힘이 나!", "Thanks, that gives me energy!"),

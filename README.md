@@ -30,6 +30,10 @@ A pixel-art desktop companion that lives on the Windows taskbar. 26 characters w
 - 개발 인계 노트 (KO): [outputs/작업현황.md](outputs/작업현황.md)
 - 온라인 방 서버 설정 (Supabase): [outputs/TaskbarTails-Pixel/supabase](outputs/TaskbarTails-Pixel/supabase)
 
+## 만든 사람 · Author
+
+박상준 (Sangjun Park) · 문의 bsj_2200@naver.com · Instagram @Rinsomnia__
+
 ## 빌드 · Build
 
 ```
