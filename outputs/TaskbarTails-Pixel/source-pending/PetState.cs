@@ -13,6 +13,7 @@ public sealed class PetState
     public int Experience { get; set; }
     public bool Sleeping { get; set; }
     public bool DemoFriends { get; set; }
+    public int Scale { get; set; } = 100; // desktop character size: 100, 150 or 200 percent
     public int Level => 1 + Experience / 100;
     public void Feed() { Fullness = Math.Min(100, Fullness + 18); Happiness = Math.Min(100, Happiness + 3); Experience += 5; }
     public void Pet() { Happiness = Math.Min(100, Happiness + 8); Experience += 3; }
@@ -35,6 +36,7 @@ public static class StateStore
             state.Fullness = double.IsFinite(state.Fullness) ? Math.Clamp(state.Fullness, 0, 100) : 72;
             state.Happiness = double.IsFinite(state.Happiness) ? Math.Clamp(state.Happiness, 0, 100) : 80;
             state.Experience = Math.Clamp(state.Experience, 0, 1000000);
+            state.Scale = state.Scale is 150 or 200 ? state.Scale : 100;
             return state;
         }
         catch (Exception e) when (e is IOException or JsonException or UnauthorizedAccessException) { LastError = "저장 파일을 읽지 못해 새 친구로 시작했어요."; return new(); }

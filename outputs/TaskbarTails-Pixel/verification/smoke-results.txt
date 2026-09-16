@@ -103,6 +103,9 @@ PASS: parachute opens after drop
 PASS: parachute lands on the work area
 PASS: 80-character bubble renders
 PASS: sleeping cat rests in loaf pose
+PASS: 150% size applies and keeps the feet on the work area
+PASS: 200% size applies and keeps the feet on the work area
+PASS: size setting persists
 PASS: remote parachute stays visible between snapshots
 PASS: remote parachute closes on land
 PASS: state persistence round-trip

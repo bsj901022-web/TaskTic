@@ -51,13 +51,26 @@
      <ComboBox x:Name="SpeciesBox" Grid.Column="1" Margin="7,0" VerticalContentAlignment="Center" SelectedIndex="0" AutomationProperties.Name="반려동물 종류"><ComboBoxItem Content="고양이"/><ComboBoxItem Content="토끼"/><ComboBoxItem Content="강아지"/></ComboBox>
      <Button Grid.Column="2" Content="적용" Click="Apply_Click" Padding="8,9"/>
     </Grid>
+    <Grid Margin="0,10,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="125"/><ColumnDefinition Width="65"/></Grid.ColumnDefinitions>
+     <TextBlock Text="작업표시줄 캐릭터 크기" VerticalAlignment="Center" FontSize="12"/>
+     <ComboBox x:Name="ScaleBox" Grid.Column="1" Margin="7,0" VerticalContentAlignment="Center" SelectionChanged="Scale_Changed" AutomationProperties.Name="캐릭터 크기"><ComboBoxItem Content="100% (기본)"/><ComboBoxItem Content="150%"/><ComboBoxItem Content="200%"/></ComboBox>
+     <TextBlock Grid.Column="2" Text="즉시 적용" VerticalAlignment="Center" Style="{StaticResource Caption}" FontSize="11" Margin="8,0,0,0"/>
+    </Grid>
    </StackPanel>
   </Grid>
   <Border Grid.Row="2" Background="White" CornerRadius="18" Padding="21,18" Margin="0,20,0,0">
+   <StackPanel>
    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
     <StackPanel><TextBlock Text="작은 친구들의 모임" FontSize="15" FontWeight="Bold"/><TextBlock Text="보리와 구름이를 작업표시줄에 불러보세요." FontSize="12" Foreground="#7B877E" Margin="0,5,0,0"/><TextBlock Text="실제 친구와는 방에 참여해 움직임과 말풍선을 나눠보세요." FontSize="11" Foreground="#929A90" Margin="0,7,0,0"/><TextBlock x:Name="RoomInfo" FontSize="12" FontWeight="Bold" Foreground="#36765F" Margin="0,8,0,0" Visibility="Collapsed"/></StackPanel>
     <StackPanel Grid.Column="1" VerticalAlignment="Center"><Button Content="방 만들기 / 참여" Click="Room_Click" Margin="18,0,0,10" Padding="12,9"/><CheckBox x:Name="FriendsCheck" Content="데모 친구 2마리" VerticalAlignment="Center" Margin="18,0,0,0" Checked="Friends_Changed" Unchecked="Friends_Changed" Foreground="#36765F"/></StackPanel>
    </Grid>
+   <TextBlock Text="내 캐릭터가 할 말 · 최대 80자 · Enter로 보내기" FontSize="12" FontWeight="Bold" Margin="0,16,0,7"/>
+   <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+    <TextBox x:Name="BubbleBox" MaxLength="80" VerticalContentAlignment="Center" Padding="9,7" Background="#F7F7F2" BorderBrush="#DDE3D8" KeyDown="Bubble_KeyDown" AutomationProperties.Name="말풍선 내용"/>
+    <Button Grid.Column="1" Content="말풍선 보내기" Click="Bubble_Click" Margin="8,0,0,0" Padding="12,8" Background="#36765F" Foreground="White"/>
+   </Grid>
+   <TextBlock Text="방에 연결되어 있으면 같은 방 친구 화면에도 말풍선이 보여요. 대화 내역은 저장되지 않습니다." Style="{StaticResource Caption}" FontSize="11" Margin="0,6,0,0"/>
+   </StackPanel>
   </Border>
   <StackPanel Grid.Row="3" Margin="0,17,0,0">
    <Grid><TextBlock x:Name="Notice" Text="클릭: 쓰다듬기  ·  위로 끌어 놓기: 낙하산  ·  우클릭: 메뉴" FontSize="11" Foreground="#7B877E" VerticalAlignment="Center" Margin="0,0,230,0"/><StackPanel Orientation="Horizontal" HorizontalAlignment="Right"><Button x:Name="VisibilityButton" Content="캐릭터 숨기기" Click="Visibility_Click" Padding="12,8" FontSize="11" Margin="0,0,7,0"/><Button Content="종료" Click="Quit_Click" Padding="12,8" FontSize="11" Background="#EEECE6" Foreground="#7F766C"/></StackPanel></Grid>

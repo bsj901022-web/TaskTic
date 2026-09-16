@@ -221,6 +221,8 @@ public sealed class App : Application
             Check(!pets[0].IsFalling && !pets[0].Visual.Parachute && pets[0].InsideWorkArea(), "parachute lands on the work area");
             pets[0].Say(new string('가', 80)); pets[0].Step(.033); pets[0].UpdateLayout(); Check(pets[0].Visual.Bubble.Length == 80, "80-character bubble renders");
             State.Sleeping = true; pets[0].Step(.033); Check(pets[0].Visual.ActionKey == "loaf", "sleeping cat rests in loaf pose"); State.Sleeping = false; pets[0].Step(.033);
+            foreach (var size in new[] { 150, 200 }) { State.Scale = size; pets[0].Say("크기 " + size); pets[0].Step(.033); pets[0].UpdateLayout(); Check(Math.Abs(pets[0].Visual.SizeFactor - size / 100.0) < .001 && pets[0].InsideWorkArea(), size + "% size applies and keeps the feet on the work area"); }
+            State.Scale = 100; pets[0].Step(.033); StateStore.Save(State); Check(StateStore.Load().Scale == 100, "size setting persists");
             var remote = new PetWindow(this, "원격", "fox", "", 200, false, true) { RemoteId = "remote-test" }; remote.Show();
             remote.Apply(new PetEvent { Kind = "parachute", UserId = "remote-test", Name = "원격", Species = "fox", X = .5, Lift = .5 }); remote.Step(.033);
             Check(remote.Visual.Parachute, "remote parachute stays visible between snapshots");

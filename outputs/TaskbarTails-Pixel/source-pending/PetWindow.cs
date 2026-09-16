@@ -26,7 +26,7 @@ public sealed class PetWindow : Window
  public PetWindow(App owner,string name,string species,string coat,double initialX,bool isDemo=false,bool remote=false)
  {
   app=owner;demo=isDemo;IsRemote=remote;x=targetX=initialX;
-  Width=160;Height=180;WindowStyle=WindowStyle.None;AllowsTransparency=true;Background=Brushes.Transparent;
+  Width=160;Height=220;WindowStyle=WindowStyle.None;AllowsTransparency=true;Background=Brushes.Transparent;
   Topmost=true;ShowInTaskbar=false;ShowActivated=false;ResizeMode=ResizeMode.NoResize;Title="Taskbar Tails · "+name;
   Visual.PetName=name;Visual.Species=lastSpecies=species;Content=Visual;Cursor=Cursors.Hand; Closed+=(_,_)=>ball?.Close(); IsVisibleChanged+=(_,_)=>{if(!IsVisible)ball?.Hide();};
   SourceInitialized+=(_,_)=>{handle=new WindowInteropHelper(this).Handle;Native.SetWindowLong(handle,-20,Native.GetWindowLong(handle,-20)|0x08000000|0x80);HwndSource.FromHwnd(handle)?.AddHook(Hook);Place();};
@@ -66,7 +66,7 @@ public sealed class PetWindow : Window
  void ResetMotion(){Visual.ActionKey="";fetchStage=0;Visual.BallVisible=false;ball?.Hide();}
  public void Step(double dt)
  {
-  phase+=dt;
+  phase+=dt;Visual.SizeFactor=app.State.Scale/100.0;
   if(!demo&&!IsRemote){Visual.PetName=app.State.Name;Visual.Species=app.State.Species;Visual.Sleeping=app.State.Sleeping;}
   // A new kind has its own motion set; never keep playing the previous kind's action key.
   if(Visual.Species!=lastSpecies){lastSpecies=Visual.Species;ResetMotion();}
