@@ -22,6 +22,7 @@ public sealed class PetWindow : Window
  BallWindow? ball;
  // ball passed between friends: 1 = flying, 0 = idle
  int ballStage; double ballT, ballFromX, ballToX; bool ballOut;
+ double frontUntil, nextChatter=35;
  int placedX=int.MinValue, placedY, placedW, placedH, lastSignature;
  readonly ContextMenu menu=new();
  public bool IsDemo=>demo;
@@ -58,7 +59,7 @@ public sealed class PetWindow : Window
   };
   MouseLeftButtonUp+=(_,_)=>{
    if(!dragging)return;dragging=false;ReleaseMouseCapture();
-   if(!moved){if(!demo)app.Pet();else Say(L.Get("demo_click"));Bounce();}
+   if(!moved){if(!demo)app.Pet();else Say(L.Get("demo_click"));Bounce();if(lift>0){falling=true;fallAge=Math.Max(fallAge,.2);}}
    else if(lift>8*dpi){falling=true;fallAge=0;Visual.Sleeping=false;if(!demo){app.State.Sleeping=false;app.Broadcast("parachute");}}
   };
   LostMouseCapture+=(_,_)=>{if(dragging){dragging=false;if(lift>0){falling=true;fallAge=0;}}};
@@ -84,6 +85,13 @@ public sealed class PetWindow : Window
   nextAction=phase+random.Next(20,38);
   if(announce&&!demo&&!IsRemote)app.Broadcast(key);
  }
+ // Stops walking and faces the viewer for a few seconds; optionally says a short line.
+ public void LookAtViewer(double seconds,string? line=null)
+ {
+  frontUntil=phase+seconds;velocity=0;turnPause=Math.Max(turnPause,seconds);
+  if(line!=null)Say(line);
+ }
+ public bool IsFacingViewer=>Visual.FaceFront;
  // Turns toward the other character, stops for a moment and says hi.
  public void Greet(string otherName,double otherX)
  {
@@ -111,6 +119,10 @@ public sealed class PetWindow : Window
   if(Visual.Sleeping){string rest=PetCatalog.RestPose(Visual.Species);if(rest.Length>0&&Visual.ActionKey!=rest){Visual.ActionKey=rest;actionStart=phase;}}
   else if(phase>actionUntil&&fetchStage==0)Visual.ActionKey="";
   if(!IsRemote&&!Visual.Sleeping&&!falling&&!dragging&&fetchStage==0&&ballStage==0&&phase>=nextAction){var k=PetCatalog.Get(Visual.Species);Act(random.Next(2)==0?k.FirstAction:k.SecondAction);}
+  // Every 40-90 s the local character turns to the viewer and says something that fits the moment.
+  if(!IsRemote&&!demo&&!Visual.Sleeping&&!falling&&!dragging&&fetchStage==0&&ballStage==0&&Visual.ActionKey.Length==0&&Visual.Bubble.Length==0&&phase>=nextChatter){nextChatter=phase+random.Next(40,90);LookAtViewer(random.Next(4,7),app.Chatter());}
+  if(!IsRemote)Visual.FaceFront=!Visual.Sleeping&&!falling&&!dragging&&fetchStage==0&&ballStage==0&&(phase<frontUntil||(IsMouseOver&&!demo));
+  if(!IsRemote&&!dragging&&!falling&&lift>0){falling=true;fallAge=Math.Max(fallAge,.2);}
   bool walking=false;
   if(IsRemote){
    // Friends walk continuously at the shared pace; the 3-second snapshot only corrects drift, so no stop-and-jump.
@@ -119,7 +131,7 @@ public sealed class PetWindow : Window
    lift+=(targetLift-lift)*(1-Math.Exp(-dt*2.5));
    if(lift>8*dpi)x+=Math.Sin(phase*2.1)*dt*22*dpi;
    if(turnPause>0)turnPause-=dt;
-   walking=Visual.Walking&&!Visual.Sleeping&&turnPause<=0;
+   walking=Visual.Walking&&!Visual.Sleeping&&turnPause<=0&&!Visual.FaceFront;
   }
   else if(falling){fallAge+=dt;lift=Math.Max(0,lift-dt*Math.Min(100,40+fallAge*30)*dpi);x+=Math.Sin(fallAge*2.1)*dt*22*dpi;if(lift<=0){falling=false;Visual.Parachute=false;turnPause=.3;Say(L.Get("landed"));if(!demo)app.Broadcast("land");}}
   else if(fetchStage>0&&!dragging){
@@ -129,7 +141,7 @@ public sealed class PetWindow : Window
    if(fetchStage==1){double t=Math.Min(1,fetchTime/.9);ball?.Place(fetchOrigin+(fetchTarget-fetchOrigin)*t+73*dpi,app.GroundY-16*dpi-Math.Sin(t*Math.PI)*65*dpi,dpi);}
    if(Math.Abs(x-target)<8*dpi){x=target;if(fetchStage==1){fetchStage=2;Visual.BallVisible=false;ball?.Hide();Visual.ActionKey="fetch";actionStart=phase;}else{fetchStage=0;Visual.ActionKey="wag";actionStart=phase;actionUntil=phase+4.8;Say(L.Get("fetched"));}}
   }
-  else if(!dragging&&!Visual.Sleeping&&Visual.ActionKey.Length==0&&!IsMouseOver){
+  else if(!dragging&&!Visual.Sleeping&&Visual.ActionKey.Length==0&&!IsMouseOver&&!Visual.FaceFront){
    if(turnPause>0)turnPause-=dt;
    else{walking=true;velocity+=(direction*28*dpi-velocity)*Math.Min(1,dt*6);x+=velocity*dt;}
   }
@@ -147,7 +159,7 @@ public sealed class PetWindow : Window
   Visual.Phase=phase;Visual.ActionTime=phase-actionStart;Visual.Walking=walking;Visual.FaceLeft=direction<0;
   Place();
   // Redraw only when something visible changed (sprite frame, bubble, jump, parachute...), not 60 times a second.
-  int signature=HashCode.Combine((int)(phase*SpriteSet.WalkFps),(int)(Visual.ActionTime*SpriteSet.ActionFps),Visual.Bubble,Visual.ActionKey,HashCode.Combine(Visual.Walking,Visual.FaceLeft,Visual.Sleeping,Visual.Parachute,(int)(Visual.Jump*4),(int)(Visual.Sway*4),Visual.Species,Visual.SizeFactor),HashCode.Combine(Visual.BubbleStyle,Visual.GoldName,Visual.PetName));
+  int signature=HashCode.Combine((int)(phase*SpriteSet.WalkFps),(int)(Visual.ActionTime*SpriteSet.ActionFps),Visual.Bubble,Visual.ActionKey,HashCode.Combine(Visual.Walking,Visual.FaceLeft,Visual.Sleeping,Visual.Parachute,(int)(Visual.Jump*4),(int)(Visual.Sway*4),Visual.Species,Visual.SizeFactor),HashCode.Combine(Visual.BubbleStyle,Visual.GoldName,Visual.PetName,Visual.FaceFront));
   if(signature!=lastSignature){lastSignature=signature;Visual.InvalidateVisual();}
  }
  // Moves the overlay only when its pixel position changed. assertTop re-applies the top-most z-order (done every few seconds by App).
@@ -168,13 +180,13 @@ public sealed class PetWindow : Window
  public PetEvent Snapshot(string kind="state",string message="")
  {
   var w=app.Screen.Work;
-  return new PetEvent{Kind=kind,Name=Visual.PetName,Species=Visual.Species,Action=Visual.ActionKey,Message=message,X=Math.Clamp((x-w.Left)/Math.Max(1,w.Right-w.Left-Width*dpi),0,1),Lift=lift/Math.Max(1,app.GroundY-w.Top),Left=direction<0,Walking=Visual.Walking,Sleeping=Visual.Sleeping};
+  return new PetEvent{Kind=kind,Name=Visual.PetName,Species=Visual.Species,Action=Visual.ActionKey,Message=message,X=Math.Clamp((x-w.Left)/Math.Max(1,w.Right-w.Left-Width*dpi),0,1),Lift=lift/Math.Max(1,app.GroundY-w.Top),Left=direction<0,Walking=Visual.Walking,Sleeping=Visual.Sleeping,Front=Visual.FaceFront};
  }
  public void Apply(PetEvent e)
  {
   var w=app.Screen.Work;Visual.PetName=e.Name;Visual.Species=PetCatalog.Valid(e.Species)?e.Species:"cat";
   if(Visual.Species!=lastSpecies){lastSpecies=Visual.Species;ResetMotion();}
-  targetX=w.Left+Math.Clamp(e.X,0,1)*Math.Max(1,w.Right-w.Left-Width*dpi);direction=e.Left?-1:1;Visual.Walking=e.Walking;Visual.Sleeping=e.Sleeping;
+  targetX=w.Left+Math.Clamp(e.X,0,1)*Math.Max(1,w.Right-w.Left-Width*dpi);direction=e.Left?-1:1;Visual.Walking=e.Walking;Visual.Sleeping=e.Sleeping;Visual.FaceFront=e.Front;
   targetLift=Math.Clamp(e.Lift,0,1)*(app.GroundY-w.Top);
   if(e.Kind=="parachute"){lift=Math.Max(lift,targetLift);targetLift=0;}
   else if(e.Kind=="land"){targetLift=0;lift=Math.Min(lift,12*dpi);}
@@ -185,4 +197,5 @@ public sealed class PetWindow : Window
  public bool InsideWorkArea(){if(!Native.GetWindowRect(handle,out var r))return false;var w=app.Screen.Work;return r.Left>=w.Left&&r.Right<=w.Right&&Math.Abs(r.Bottom-app.GroundY)<=2;}
  public void TestDrop(double fraction){lift=fraction*(app.GroundY-app.Screen.Work.Top-Height*dpi);falling=true;fallAge=0;}
  public void TestMoveTo(double screenX){x=screenX;targetX=screenX;Place();}
+ public void TestInterruptFall(){falling=false;dragging=false;}
 }

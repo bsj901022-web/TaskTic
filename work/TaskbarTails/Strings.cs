@@ -221,7 +221,7 @@ public static class L
         ["duck"] = "Duckling", ["bear"] = "Bear cub", ["frog"] = "Frog", ["panda"] = "Panda", ["slime"] = "Slime", ["robot"] = "Robot",
         ["ghost"] = "Ghost", ["mushroom"] = "Mushroom", ["dragon"] = "Baby dragon", ["cactus"] = "Cactus", ["cloudpup"] = "Fluffy puppy",
         ["puffball"] = "White puff", ["bluecat"] = "Dodo cat", ["yellowbunny"] = "Nana bunny", ["boy"] = "Boy", ["girl"] = "Girl",
-        ["bobgirl"] = "Bob-cut girl", ["ponygirl"] = "Ponytail girl", ["hoodieboy"] = "Hoodie boy", ["suitboy"] = "Suit boy", ["yeodini"] = "Yeodini",
+        ["bobgirl"] = "Bob-cut girl", ["ponygirl"] = "Ponytail girl", ["hoodieboy"] = "Hoodie boy", ["suitboy"] = "Suit boy", ["yeodini"] = "Yeodini", ["jitto"] = "Jitto", ["jjeong"] = "Jjeong", ["seunghyeon"] = "Seunghyeon",
     };
     static readonly Dictionary<string, string> GroupEn = new() { ["동물"] = "Animals", ["비동물"] = "Creatures", ["마스코트"] = "Mascots", ["사람"] = "People" };
     static readonly Dictionary<string, string> ActionEn = new()
@@ -236,6 +236,7 @@ public static class L
         ["girl:wave"] = "Wave", ["girl:cheer"] = "Cheer", ["bobgirl:wave"] = "Wave", ["bobgirl:heart"] = "Finger heart", ["ponygirl:stretch"] = "Stretch", ["ponygirl:cheer"] = "Cheer",
         ["hoodieboy:wave"] = "Wave", ["hoodieboy:dance"] = "Dance", ["suitboy:bow"] = "Polite bow", ["suitboy:thumbs"] = "Thumbs up",
         ["yeodini:swing"] = "Tennis swing", ["yeodini:goggles"] = "Goggles on",
+        ["jitto:twirl"] = "Hair twirl", ["jitto:peace"] = "V sign", ["jjeong:spin"] = "Skirt twirl", ["jjeong:clap"] = "Happy clap", ["seunghyeon:glasses"] = "Adjust glasses", ["seunghyeon:stretch"] = "Shoulder stretch",
     };
 }
 

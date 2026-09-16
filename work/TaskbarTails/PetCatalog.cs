@@ -5,7 +5,7 @@ namespace TaskbarTails;
 public sealed record PetKind(string Id,string Label,string Group,string FirstAction,string FirstLabel,string SecondAction,string SecondLabel);
 public static class PetCatalog
 {
- // 27 kinds. Sprites for every kind come from PixelLab (assets/<Id>/...). English labels live in Strings.cs.
+ // 30 kinds. Sprites for every kind come from PixelLab (assets/<Id>/...). English labels live in Strings.cs.
  public static readonly PetKind[] All = {
   new("cat","고양이","동물","loaf","식빵 굽기","groom","세수하기"), new("rabbit","토끼","동물","hop","깡총깡총","ears","귀 쫑긋"),
   new("dog","강아지","동물","fetch","공 물어오기","wag","꼬리 흔들기"), new("hamster","햄스터","동물","nibble","오물오물","curl","동글 휴식"),
@@ -20,7 +20,9 @@ public static class PetCatalog
   new("boy","남자 캐릭터","사람","wave","손 흔들기","cheer","신나는 응원"), new("girl","여자 캐릭터","사람","wave","손 흔들기","cheer","신나는 응원"),
   new("bobgirl","검은 단발 여자","사람","wave","손 흔들기","heart","손가락 하트"), new("ponygirl","포니테일 여자","사람","stretch","스트레칭","cheer","신나는 응원"),
   new("hoodieboy","후드 남자","사람","wave","손 흔들기","dance","신나는 댄스"), new("suitboy","정장 남자","사람","bow","정중한 인사","thumbs","엄지 척"),
-  new("yeodini","여디니","사람","swing","테니스 스윙","goggles","물안경 쓰기") };
+  new("yeodini","여디니","사람","swing","테니스 스윙","goggles","물안경 쓰기"),
+  new("jitto","지또","사람","twirl","머리 빙글","peace","브이 포즈"), new("jjeong","쩡","사람","spin","치마 빙글","clap","신나는 박수"),
+  new("seunghyeon","승현","사람","glasses","안경 고쳐 쓰기","stretch","어깨 스트레칭") };
  // Not offered in the picker (assets stay so friends using them still render). Only the robot remains among the creatures.
  public static readonly HashSet<string> Hidden = new(){"slime","ghost","mushroom","dragon","cactus"};
  public static PetKind[] Selectable => All.Where(k=>!Hidden.Contains(k.Id)).ToArray();

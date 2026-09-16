@@ -113,9 +113,26 @@ PASS: sprites load for suitboy
 PASS: 16-frame walk east/west for suitboy
 PASS: special motions bow/thumbs for suitboy
 PASS: motion starts for suitboy
+PASS: sprites load for yeodini
+PASS: 16-frame walk east/west for yeodini
+PASS: special motions swing/goggles for yeodini
+PASS: motion starts for yeodini
+PASS: sprites load for jitto
+PASS: 16-frame walk east/west for jitto
+PASS: special motions twirl/peace for jitto
+PASS: motion starts for jitto
+PASS: sprites load for jjeong
+PASS: 16-frame walk east/west for jjeong
+PASS: special motions spin/clap for jjeong
+PASS: motion starts for jjeong
+PASS: sprites load for seunghyeon
+PASS: 16-frame walk east/west for seunghyeon
+PASS: special motions glasses/stretch for seunghyeon
+PASS: motion starts for seunghyeon
 PASS: species change resets the running motion
 PASS: dog throws, fetches and returns the ball
 PASS: parachute opens after drop
+PASS: a click while airborne resumes the fall instead of hovering
 PASS: parachute lands on the work area
 PASS: 80-character bubble renders
 PASS: sleeping cat rests in loaf pose
@@ -138,6 +155,11 @@ PASS: poke from a friend shows on my character
 PASS: incoming ball starts rolling
 PASS: incoming ball is caught
 PASS: outgoing ball leaves the screen
+PASS: character turns to the viewer and says a line
+PASS: character turns back after a few seconds
+PASS: sprites are drawn at whole or half device pixels
+PASS: contact card lists email, social, repository and folder links
+PASS: hidden creature kinds stay valid but are not selectable
 PASS: quick reaction shows as a bubble
 PASS: quick chat opens above the character
 PASS: bubble styles unlock by level

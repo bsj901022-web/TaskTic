@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "character: d779896a-f476-4b5f-b8d9-36d4837914c3\nanimation: v3 custom (Winds up and swings the tennis racket in a cheerful forehand stroke, bob haircut bounces, then returns to a ready stance with a big grin, keeps facing the same side, stays in place)\ndirections: east (1 jobs)\ngroup: 0a42d064-06db-487e-8d2a-55e710a25734\nframes: 16 (reference stripped, keep_first_frame=false)\ncost: 1 generation (1/dir x 1)\neta: ~30-60s/direction\n\nhint: get_character(character_id=\"d779896a-f476-4b5f-b8d9-36d4837914c3\")\nadd more directions to this group: animate_character(character_id=\"d779896a-f476-4b5f-b8d9-36d4837914c3\", action_description=\"Winds up and swings the tennis racket in a cheerful forehand stroke, bob haircut bounces, then returns to a ready stance with a big grin, keeps facing the same side, stays in place\", animation_group_id=\"0a42d064-06db-487e-8d2a-55e710a25734\", directions=[...])"
+    }
+  ],
+  "isError": false
+}

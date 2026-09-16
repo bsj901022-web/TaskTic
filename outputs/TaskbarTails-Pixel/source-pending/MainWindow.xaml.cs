@@ -3,6 +3,8 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Diagnostics;
+using System.IO;
 
 namespace TaskbarTails;
 
@@ -18,9 +20,10 @@ public partial class MainWindow : Window
         app = owner; InitializeComponent();
         var s = app.State;
         NameBox.Text = s.Name;
-        SpeciesBox.Items.Clear(); foreach (var k in PetCatalog.All) SpeciesBox.Items.Add(L.Group(k.Group) + " · " + PetCatalog.Label(k));
-        SpeciesBox.SelectedIndex = Math.Max(0, Array.FindIndex(PetCatalog.All, k => k.Id == s.Species));
-        VersionBadge.Text = "●  PIXEL PETS · " + app.VersionLabel + " · " + L.F("kinds", PetCatalog.All.Length) + (StateStore.IsInstalled ? "" : L.Get("badge_portable"));
+        var kinds = PetCatalog.Selectable;
+        SpeciesBox.Items.Clear(); foreach (var k in kinds) SpeciesBox.Items.Add(L.Group(k.Group) + " · " + PetCatalog.Label(k));
+        SpeciesBox.SelectedIndex = Math.Max(0, Array.FindIndex(kinds, k => k.Id == s.Species));
+        VersionBadge.Text = "●  PIXEL PETS · " + app.VersionLabel + " · " + L.F("kinds", kinds.Length) + (StateStore.IsInstalled ? "" : L.Get("badge_portable"));
         FriendsCheck.IsChecked = s.DemoFriends;
         ScaleBox.SelectedIndex = s.Scale == 150 ? 1 : s.Scale == 200 ? 2 : 0;
         LanguageBox.SelectedIndex = s.Language == "ko" ? 1 : s.Language == "en" ? 2 : 0;
@@ -39,10 +42,35 @@ public partial class MainWindow : Window
             b.Click += (_, _) => { app.SendBubble(r); Notice.Text = app.Room?.Connected == true ? L.Get("bubble_sent_room") : L.Get("bubble_sent_local"); };
             ReactionPanel.Children.Add(b);
         }
+        BuildContacts();
         ready = true;
         Refresh();
         Closing += OnClosing;
     }
+    // Contact and support links. Everything opens through the shell (mail app, browser, Explorer).
+    const string ContactEmail = "bsj_2200@naver.com", Instagram = "Rinsomnia__", Repo = "https://github.com/bsj901022-web/TaskTic";
+    void BuildContacts()
+    {
+        ContactPanel.Children.Clear();
+        AddContact(L.F("contact_email", ContactEmail), () => OpenExternal("mailto:" + ContactEmail + "?subject=" + Uri.EscapeDataString("Taskbar Tails " + app.VersionLabel)), true);
+        AddContact(L.Get("contact_copy_email"), () => { Clipboard.SetText(ContactEmail); Notice.Text = L.F("copied", ContactEmail); });
+        AddContact(L.F("contact_instagram", Instagram), () => OpenExternal("https://www.instagram.com/" + Instagram + "/"));
+        AddContact(L.Get("contact_github"), () => OpenExternal(Repo));
+        AddContact(L.Get("contact_issues"), () => OpenExternal(Repo + "/issues"));
+        AddContact(L.Get("contact_releases"), () => OpenExternal(Repo + "/releases"));
+        AddContact(L.Get("open_data"), () => OpenFolder(Path.GetDirectoryName(StateStore.PathName)!));
+        AddContact(L.Get("open_logs"), () => OpenFolder(AppContext.BaseDirectory));
+        AboutMade.Text = L.F("about_made", app.VersionLabel);
+    }
+    void AddContact(string label, Action action, bool primary = false)
+    {
+        var b = new Button { Content = label, Padding = new Thickness(11, 7, 11, 7), Margin = new Thickness(0, 0, 6, 6), FontSize = 12 };
+        if (primary) { b.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(54, 118, 95)); b.Foreground = System.Windows.Media.Brushes.White; }
+        b.Click += (_, _) => { try { action(); } catch (Exception e) when (e is System.ComponentModel.Win32Exception or InvalidOperationException or IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException) { Notice.Text = L.F("open_failed", e.Message); } };
+        ContactPanel.Children.Add(b);
+    }
+    void OpenExternal(string url) => Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+    void OpenFolder(string path) { Directory.CreateDirectory(path); Process.Start(new ProcessStartInfo("explorer.exe", "\"" + path + "\"") { UseShellExecute = true }); }
     void OnClosing(object? sender, CancelEventArgs e) { if (!app.Exiting && !AllowClose) { e.Cancel = true; Hide(); } }
     void FillBubbleStyles()
     {
@@ -78,7 +106,7 @@ public partial class MainWindow : Window
     {
         var name = NameBox.Text.Trim();
         if (name.Length == 0) { Notice.Text = L.Get("name_required"); return; }
-        app.State.Name = name; app.State.Species = PetCatalog.All[Math.Max(0, SpeciesBox.SelectedIndex)].Id;
+        var kinds = PetCatalog.Selectable; app.State.Name = name; app.State.Species = kinds[Math.Clamp(SpeciesBox.SelectedIndex, 0, kinds.Length - 1)].Id;
         app.Changed(L.Get("new_look")); Notice.Text = L.Get("saved_look");
     }
     void Scale_Changed(object sender, SelectionChangedEventArgs e)
