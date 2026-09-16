@@ -65,6 +65,20 @@ public static class Native
         catch (Exception e) when (e is EntryPointNotFoundException or DllNotFoundException) { }
         return bottom;
     }
+    // "ctrl+alt+t" -> (modifiers, virtual key) for RegisterHotKey. Letters and F1-F12 are supported.
+    public static (uint Modifiers, uint Key) ParseHotkey(string text)
+    {
+        uint mods = 0, key = 0;
+        foreach (var raw in text.ToLowerInvariant().Split('+', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (raw == "ctrl") mods |= 0x0002; else if (raw == "alt") mods |= 0x0001; else if (raw == "shift") mods |= 0x0004; else if (raw == "win") mods |= 0x0008;
+            else if (raw.Length == 1 && raw[0] >= 'a' && raw[0] <= 'z') key = (uint)char.ToUpperInvariant(raw[0]);
+            else if (raw.Length == 1 && raw[0] >= '0' && raw[0] <= '9') key = (uint)raw[0];
+            else if (raw == "space") key = 0x20;
+            else if (raw.Length >= 2 && raw[0] == 'f' && int.TryParse(raw[1..], out int f) && f is >= 1 and <= 12) key = 0x70u + (uint)(f - 1);
+        }
+        return (mods, key);
+    }
     public static double IdleSeconds()
     {
         var info = new LastInputInfo { Size = (uint)Marshal.SizeOf<LastInputInfo>() };

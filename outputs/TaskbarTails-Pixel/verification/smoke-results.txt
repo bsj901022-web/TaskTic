@@ -143,6 +143,9 @@ PASS: quick chat opens above the character
 PASS: bubble styles unlock by level
 PASS: english ui rebuilds the panel
 PASS: korean ui restored
+PASS: hotkey capture, validation and conflict flags
+PASS: custom hotkey saved with a conflict warning
+PASS: default hotkey clears the warning
 PASS: settings persist
 PASS: state persistence round-trip
 PASS: demo friends removed

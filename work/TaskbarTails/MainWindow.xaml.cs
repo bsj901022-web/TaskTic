@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace TaskbarTails;
 
@@ -31,6 +32,7 @@ public partial class MainWindow : Window
         StartupCheck.IsChecked = s.StartWithWindows; HotkeyCheck.IsChecked = s.HotkeysEnabled; NightCheck.IsChecked = s.NightSleep;
         StretchCheck.IsChecked = s.StretchReminder; SoundCheck.IsChecked = s.ClickSound; GreetCheck.IsChecked = s.GreetFriends; RejoinCheck.IsChecked = s.AutoRejoin;
         FillBubbleStyles();
+        UpdateHotkeyTexts(); PreviewKeyDown += Window_PreviewKeyDown;
         foreach (var r in QuickChatWindow.Reactions)
         {
             var b = new Button { Content = r, FontSize = 15, Padding = new Thickness(9, 4, 9, 4), Margin = new Thickness(0, 0, 6, 4) };
@@ -99,6 +101,35 @@ public partial class MainWindow : Window
         int style = Math.Clamp(BubbleStyleBox.SelectedIndex, 0, 3);
         if (app.State.Level < PetState.UnlockLevel(style)) { Notice.Text = L.F("style_locked", L.Get("style_" + style), PetState.UnlockLevel(style)); ready = false; BubbleStyleBox.SelectedIndex = app.State.EffectiveBubbleStyle; ready = true; return; }
         app.State.BubbleStyle = style; Save();
+    }
+    bool capturing;
+    void UpdateHotkeyTexts()
+    {
+        string label = Hotkeys.Label(app.State.ChatHotkey);
+        capturing = false;
+        HotkeyCapture.Content = app.State.ChatHotkey == Hotkeys.Default ? L.F("hotkey_default", label) : label;
+        QuickTip.Text = L.F("quick_tip", label);
+        bool conflict = Hotkeys.Conflicts(app.State.ChatHotkey);
+        HotkeyNote.Text = conflict ? L.Get("hotkey_conflict") : ""; HotkeyNote.Visibility = conflict ? Visibility.Visible : Visibility.Collapsed;
+    }
+    // Click the hotkey box, then press the combination you want. Esc cancels; modifiers alone are ignored.
+    void HotkeyCapture_Click(object sender, RoutedEventArgs e) { capturing = true; HotkeyCapture.Content = L.Get("hotkey_press"); HotkeyCapture.Focus(); }
+    void HotkeyReset_Click(object sender, RoutedEventArgs e) => ApplyHotkey(Hotkeys.Default);
+    void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (!capturing) return;
+        e.Handled = true;
+        var key = e.Key == Key.System ? e.SystemKey : e.Key;
+        if (key == Key.Escape) { UpdateHotkeyTexts(); return; }
+        if (key is Key.LeftCtrl or Key.RightCtrl or Key.LeftAlt or Key.RightAlt or Key.LeftShift or Key.RightShift or Key.LWin or Key.RWin) return;
+        string combo = Hotkeys.Compose(Keyboard.Modifiers, key);
+        if (!Hotkeys.IsValid(combo)) { Notice.Text = L.Get("hotkey_invalid"); return; }
+        ApplyHotkey(combo);
+    }
+    public void ApplyHotkey(string combo)
+    {
+        app.State.ChatHotkey = combo; Save(); UpdateHotkeyTexts(); app.RegisterHotkeys(); app.RefreshTrayMenu();
+        Notice.Text = L.F("hotkey_saved", Hotkeys.Label(combo));
     }
     void Startup_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.StartWithWindows = StartupCheck.IsChecked == true; Save(); app.ApplyStartup(app.State.StartWithWindows); }
     void Hotkey_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.HotkeysEnabled = HotkeyCheck.IsChecked == true; Save(); app.RegisterHotkeys(); }

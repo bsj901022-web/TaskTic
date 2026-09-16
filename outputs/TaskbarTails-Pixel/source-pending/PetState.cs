@@ -18,7 +18,8 @@ public sealed class PetState
     // --- settings (v0.6) ---
     public string Language { get; set; } = "auto";   // auto | ko | en
     public bool StartWithWindows { get; set; }
-    public bool HotkeysEnabled { get; set; } = true;  // Ctrl+Alt+P hide/show, Ctrl+Alt+T quick bubble
+    public bool HotkeysEnabled { get; set; } = true;  // Ctrl+Alt+P hide/show + the quick-bubble hotkey below
+    public string ChatHotkey { get; set; } = "ctrl+alt+t"; // one of Hotkeys.Options
     public bool NightSleep { get; set; } = true;      // 23:00-07:00
     public int IdleMinutes { get; set; } = 5;         // 0 = off
     public bool StretchReminder { get; set; } = true; // every 50 minutes
@@ -72,6 +73,7 @@ public static class StateStore
             state.IdleMinutes = state.IdleMinutes is 0 or 3 or 5 or 10 or 15 ? state.IdleMinutes : 5;
             state.MonitorIndex = Math.Clamp(state.MonitorIndex, 0, 8);
             state.BubbleStyle = Math.Clamp(state.BubbleStyle, 0, 3);
+            state.ChatHotkey = Hotkeys.IsValid(state.ChatHotkey) ? state.ChatHotkey : Hotkeys.Default;
             state.LastRoomCode = (state.LastRoomCode ?? "").Trim().ToUpperInvariant(); if (state.LastRoomCode.Length > 16) state.LastRoomCode = "";
             state.ApplyOfflineTime(DateTime.UtcNow);
             return state;

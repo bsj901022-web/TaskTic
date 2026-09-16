@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Windows.Markup;
 
 namespace TaskbarTails;
@@ -46,7 +47,7 @@ public static class L
         ["bubble_send"] = ("말풍선 보내기", "Send bubble"),
         ["bubble_note"] = ("방에 연결되어 있으면 같은 방 친구 화면에도 말풍선이 보여요. 대화 내역은 저장되지 않습니다.", "When connected to a room, friends see your bubble too. Nothing is stored."),
         ["quick_hint"] = ("빠른 반응", "Quick reactions"),
-        ["quick_tip"] = ("Ctrl+Alt+T 또는 캐릭터 휠 클릭으로 캐릭터 머리 위에서 바로 말할 수 있어요.", "Press Ctrl+Alt+T or middle-click the character to speak right above it."),
+        ["quick_tip"] = ("{0} 또는 캐릭터 휠 클릭으로 캐릭터 머리 위에서 바로 말할 수 있어요.", "Press {0} or middle-click the character to speak right above it."),
         ["settings_title"] = ("설정", "Settings"),
         ["set_language"] = ("언어", "Language"),
         ["lang_auto"] = ("시스템 언어", "System language"),
@@ -58,7 +59,14 @@ public static class L
         ["set_size"] = ("작업표시줄 캐릭터 크기", "Taskbar character size"),
         ["size_default"] = ("100% (기본)", "100% (default)"),
         ["set_startup"] = ("Windows 시작 시 자동 실행", "Start with Windows"),
-        ["set_hotkeys"] = ("전역 단축키 (Ctrl+Alt+P 숨기기/보이기 · Ctrl+Alt+T 빠른 말풍선)", "Global hotkeys (Ctrl+Alt+P hide/show · Ctrl+Alt+T quick bubble)"),
+        ["set_hotkeys"] = ("전역 단축키 사용 (Ctrl+Alt+P 숨기기/보이기 · 아래 키로 빠른 말풍선)", "Use global hotkeys (Ctrl+Alt+P hide/show · quick bubble with the key below)"),
+        ["set_chat_hotkey"] = ("빠른 말풍선 단축키", "Quick bubble hotkey"),
+        ["hotkey_default"] = ("{0} (기본)", "{0} (default)"),
+        ["hotkey_press"] = ("키 조합을 누르세요… (Esc 취소)", "Press a key combo… (Esc to cancel)"),
+        ["hotkey_reset"] = ("기본값", "Default"),
+        ["hotkey_invalid"] = ("Ctrl·Alt·Shift 중 하나와 글자·숫자를 함께 누르거나 F1~F12를 누르세요.", "Hold Ctrl, Alt or Shift with a letter or digit, or press an F key."),
+        ["hotkey_saved"] = ("빠른 말풍선 단축키를 {0}로 등록했어요.", "Quick bubble hotkey set to {0}."),
+        ["hotkey_conflict"] = ("Ctrl+T처럼 브라우저·편집기가 쓰는 조합을 고르면 이 앱이 켜져 있는 동안 그 프로그램에서는 그 키가 막혀요. Ctrl+Alt+T나 F9처럼 비어 있는 키를 권해요.", "A combo such as Ctrl+T is used by browsers and editors; while Taskbar Tails runs, that key stops working in them. Prefer a free key like Ctrl+Alt+T or F9."),
         ["set_night"] = ("밤 11시~아침 7시 자동 취침", "Auto sleep 11 PM to 7 AM"),
         ["set_idle"] = ("자리 비움 낮잠", "Nap when away"),
         ["idle_off"] = ("끄기", "Off"),
@@ -126,7 +134,7 @@ public static class L
         ["tray_title"] = ("Taskbar Tails · 작은 친구들", "Taskbar Tails · little friends"),
         ["tray_open"] = ("친구 관리 열기", "Open companion panel"),
         ["tray_toggle"] = ("캐릭터 숨기기 / 보이기", "Hide / show characters"),
-        ["tray_say"] = ("빠른 말풍선 (Ctrl+Alt+T)", "Quick bubble (Ctrl+Alt+T)"),
+        ["tray_say"] = ("빠른 말풍선 ({0})", "Quick bubble ({0})"),
         ["ctx_play"] = ("함께 놀기", "Play together"),
         ["ctx_sleep"] = ("잠자기 / 깨우기", "Sleep / wake"),
         ["ctx_say"] = ("말하기", "Speak"),
@@ -203,6 +211,47 @@ public static class L
         ["girl:wave"] = "Wave", ["girl:cheer"] = "Cheer", ["bobgirl:wave"] = "Wave", ["bobgirl:heart"] = "Finger heart", ["ponygirl:stretch"] = "Stretch", ["ponygirl:cheer"] = "Cheer",
         ["hoodieboy:wave"] = "Wave", ["hoodieboy:dance"] = "Dance", ["suitboy:bow"] = "Polite bow", ["suitboy:thumbs"] = "Thumbs up",
     };
+}
+
+// Selectable quick-bubble hotkeys. Ctrl+T is offered but flagged: it is what browsers and editors use.
+public static class Hotkeys
+{
+    public const string Default = "ctrl+alt+t";
+    // "ctrl+alt+t" style id from a key press; "" when the key is not supported (letters, digits, F1-F12, space).
+    public static string Compose(System.Windows.Input.ModifierKeys mods, System.Windows.Input.Key key)
+    {
+        var parts = new List<string>();
+        if (mods.HasFlag(System.Windows.Input.ModifierKeys.Control)) parts.Add("ctrl");
+        if (mods.HasFlag(System.Windows.Input.ModifierKeys.Alt)) parts.Add("alt");
+        if (mods.HasFlag(System.Windows.Input.ModifierKeys.Shift)) parts.Add("shift");
+        string main = key switch
+        {
+            >= System.Windows.Input.Key.A and <= System.Windows.Input.Key.Z => ((char)('a' + (key - System.Windows.Input.Key.A))).ToString(),
+            >= System.Windows.Input.Key.D0 and <= System.Windows.Input.Key.D9 => ((char)('0' + (key - System.Windows.Input.Key.D0))).ToString(),
+            >= System.Windows.Input.Key.F1 and <= System.Windows.Input.Key.F12 => "f" + (key - System.Windows.Input.Key.F1 + 1),
+            System.Windows.Input.Key.Space => "space",
+            _ => "",
+        };
+        if (main.Length == 0) return "";
+        parts.Add(main); return string.Join("+", parts);
+    }
+    // A modifier is required except for F keys, so a plain letter can never be swallowed system-wide.
+    public static bool IsValid(string id)
+    {
+        var (mods, key) = Native.ParseHotkey(id ?? "");
+        return key != 0 && (mods != 0 || (key >= 0x70 && key <= 0x7B));
+    }
+    public static string Label(string id) => string.Join("+", (id ?? "").Split('+', StringSplitOptions.RemoveEmptyEntries).Select(p => p.Length <= 3 && p != "alt" ? p.ToUpperInvariant() : char.ToUpperInvariant(p[0]) + p[1..]));
+    // Combos that browsers, editors and Windows itself commonly use; still allowed, but the settings card warns.
+    public static bool Conflicts(string id)
+    {
+        var (mods, key) = Native.ParseHotkey(id ?? "");
+        bool ctrl = (mods & 0x2) != 0, alt = (mods & 0x1) != 0, shift = (mods & 0x4) != 0;
+        if (ctrl && !alt) return true;                 // Ctrl+X / Ctrl+Shift+X: app shortcuts
+        if (alt && !ctrl && !shift) return true;        // Alt+X: menu accelerators
+        if (mods == 0) return key is 0x70 or 0x74 or 0x79 or 0x7A or 0x7B; // F1 F5 F10 F11 F12
+        return false;
+    }
 }
 
 // {local:T key} in XAML resolves to the string for the current language at load time.

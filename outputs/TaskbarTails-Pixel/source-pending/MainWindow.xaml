@@ -72,7 +72,7 @@
     <TextBlock Text="{local:T quick_hint}" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="0,0,10,0"/>
     <WrapPanel x:Name="ReactionPanel" Grid.Column="1"/>
    </Grid>
-   <TextBlock Text="{local:T quick_tip}" Style="{StaticResource Caption}" FontSize="11" Margin="0,6,0,0"/>
+   <TextBlock x:Name="QuickTip" Style="{StaticResource Caption}" FontSize="11" Margin="0,6,0,0"/>
    <TextBlock Text="{local:T bubble_note}" Style="{StaticResource Caption}" FontSize="11" Margin="0,3,0,0"/>
    </StackPanel>
   </Border>
@@ -86,6 +86,7 @@
       <Grid Margin="0,0,0,9"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="190"/></Grid.ColumnDefinitions><TextBlock Text="{local:T set_monitor}" Style="{StaticResource SettingLabel}"/><ComboBox x:Name="MonitorBox" Grid.Column="1" SelectionChanged="Monitor_Changed"/></Grid>
       <Grid Margin="0,0,0,9"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="190"/></Grid.ColumnDefinitions><TextBlock Text="{local:T set_size}" Style="{StaticResource SettingLabel}"/><ComboBox x:Name="ScaleBox" Grid.Column="1" SelectionChanged="Scale_Changed"><ComboBoxItem Content="{local:T size_default}"/><ComboBoxItem Content="150%"/><ComboBoxItem Content="200%"/></ComboBox></Grid>
       <Grid Margin="0,0,0,9"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="190"/></Grid.ColumnDefinitions><TextBlock Text="{local:T set_idle}" Style="{StaticResource SettingLabel}"/><ComboBox x:Name="IdleBox" Grid.Column="1" SelectionChanged="Idle_Changed"/></Grid>
+      <Grid Margin="0,0,0,9"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="190"/></Grid.ColumnDefinitions><TextBlock Text="{local:T set_chat_hotkey}" Style="{StaticResource SettingLabel}"/><Grid Grid.Column="1"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><Button x:Name="HotkeyCapture" Click="HotkeyCapture_Click" Padding="8,7" FontSize="12" Background="#F1F4EE"/><Button Grid.Column="1" Content="{local:T hotkey_reset}" Click="HotkeyReset_Click" Padding="8,7" FontSize="11" Margin="6,0,0,0"/></Grid></Grid>
       <Grid Margin="0,0,0,9"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="190"/></Grid.ColumnDefinitions><TextBlock Text="{local:T set_bubble_style}" Style="{StaticResource SettingLabel}"/><ComboBox x:Name="BubbleStyleBox" Grid.Column="1" SelectionChanged="BubbleStyle_Changed"/></Grid>
      </StackPanel>
      <StackPanel Grid.Column="2">
@@ -98,6 +99,7 @@
       <CheckBox x:Name="SoundCheck" Content="{local:T set_sound}" Checked="Sound_Changed" Unchecked="Sound_Changed"/>
      </StackPanel>
     </Grid>
+    <TextBlock x:Name="HotkeyNote" Style="{StaticResource Caption}" FontSize="11" Margin="0,4,0,0" Foreground="#B5713A" Visibility="Collapsed"/>
     <TextBlock Text="{local:T set_note}" Style="{StaticResource Caption}" FontSize="11" Margin="0,4,0,0"/>
    </StackPanel>
   </Border>

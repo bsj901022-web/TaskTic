@@ -116,7 +116,7 @@ public sealed class App : Application
         var menu = new Forms.ContextMenuStrip();
         menu.Items.Add(L.Get("tray_open"), null, (_, _) => Dispatcher.Invoke(ShowPanel));
         menu.Items.Add(L.Get("feed"), null, (_, _) => Dispatcher.Invoke(Feed));
-        menu.Items.Add(L.Get("tray_say"), null, (_, _) => Dispatcher.Invoke(OpenQuickChat));
+        menu.Items.Add(L.F("tray_say", Hotkeys.Label(State.ChatHotkey)), null, (_, _) => Dispatcher.Invoke(OpenQuickChat));
         menu.Items.Add(L.Get("tray_toggle"), null, (_, _) => Dispatcher.Invoke(ToggleVisible));
         menu.Items.Add(L.Get("update_check"), null, (_, _) => Dispatcher.Invoke(() => { ShowPanel(); _ = CheckForUpdates(true); }));
         menu.Items.Add(new Forms.ToolStripSeparator());
@@ -219,7 +219,8 @@ public sealed class App : Application
         var handle = new WindowInteropHelper(Panel).Handle; if (handle == IntPtr.Zero) return;
         hotkeySource = HwndSource.FromHwnd(handle); hotkeySource?.AddHook(HotkeyHook);
         bool ok = Native.RegisterHotKey(handle, 1, 0x0002 | 0x0001, 0x50); // Ctrl+Alt+P
-        ok &= Native.RegisterHotKey(handle, 2, 0x0002 | 0x0001, 0x54);    // Ctrl+Alt+T
+        var (mods, key) = Native.ParseHotkey(State.ChatHotkey);
+        ok &= key != 0 && Native.RegisterHotKey(handle, 2, mods, key);
         hotkeysRegistered = true;
         if (!ok) Panel.Notice.Text = L.Get("hotkey_failed");
     }
@@ -261,6 +262,7 @@ public sealed class App : Application
         if (tray != null) { tray.Text = L.Get("tray_title"); var previous = tray.ContextMenuStrip; tray.ContextMenuStrip = BuildTrayMenu(); previous?.Dispose(); }
         RegisterHotkeys(); Panel.Refresh();
     }
+    public void RefreshTrayMenu() { if (tray == null) return; var previous = tray.ContextMenuStrip; tray.ContextMenuStrip = BuildTrayMenu(); previous?.Dispose(); }
     public string VersionLabel => "v" + (typeof(App).Assembly.GetName().Version?.ToString(3) ?? "0.0.0");
     // Installed builds check GitHub Releases; the portable folder build only reports that it is portable.
     public async Task CheckForUpdates(bool manual)
@@ -463,6 +465,8 @@ public sealed class App : Application
             Check(PetState.UnlockLevel(3) == 8 && new PetState { BubbleStyle = 3 }.EffectiveBubbleStyle == 0 && new PetState { BubbleStyle = 3, Experience = 800 }.EffectiveBubbleStyle == 3, "bubble styles unlock by level");
             SetLanguage("en"); Check(L.Get("feed") == "Feed" && Panel.Title.Contains("A day") && Panel.IsVisible, "english ui rebuilds the panel");
             SetLanguage("ko"); Check(L.Get("feed") == "먹이 주기" && Panel.Title.Contains("작은 친구들"), "korean ui restored");
+            Check(Hotkeys.Compose(System.Windows.Input.ModifierKeys.Control | System.Windows.Input.ModifierKeys.Alt, System.Windows.Input.Key.T) == "ctrl+alt+t" && Hotkeys.IsValid("ctrl+alt+t") && Hotkeys.IsValid("f9") && !Hotkeys.IsValid("t") && Hotkeys.Conflicts("ctrl+t") && !Hotkeys.Conflicts("ctrl+alt+t") && Hotkeys.Label("ctrl+alt+t") == "Ctrl+Alt+T", "hotkey capture, validation and conflict flags");
+            Panel.ApplyHotkey("ctrl+t"); Check(State.ChatHotkey == "ctrl+t" && Panel.HotkeyNote.Visibility == Visibility.Visible, "custom hotkey saved with a conflict warning"); Panel.ApplyHotkey(Hotkeys.Default); Check(Panel.HotkeyNote.Visibility == Visibility.Collapsed, "default hotkey clears the warning");
             State.IdleMinutes = 10; State.NightSleep = false; StateStore.Save(State); var reloaded = StateStore.Load(); Check(reloaded.IdleMinutes == 10 && !reloaded.NightSleep, "settings persist"); State.IdleMinutes = 5; State.NightSleep = true;
             State.Species = "cat"; State.Name = "모찌"; State.Fullness = 86; State.Happiness = 94;
             StateStore.Save(State); var loaded = StateStore.Load(); Check(loaded.Name == State.Name && loaded.Experience == State.Experience, "state persistence round-trip");
