@@ -1,9 +1,9 @@
 {
   "Name": "\uACFC\uC790",
-  "Species": "jitto",
-  "Fullness": 96.94130567999947,
-  "Happiness": 98.73356269888929,
-  "Experience": 149,
+  "Species": "yeodini",
+  "Fullness": 89.71093416627626,
+  "Happiness": 99.00495118611163,
+  "Experience": 314,
   "Sleeping": false,
   "DemoFriends": false,
   "Scale": 100,
@@ -20,7 +20,8 @@
   "LastRoomCode": "",
   "MonitorIndex": 0,
   "BubbleStyle": 0,
-  "LastSeenUtc": "2026-09-16T14:23:14.6378248Z",
-  "Level": 2,
+  "NameStyle": 1,
+  "LastSeenUtc": "2026-09-16T14:34:21.2581373Z",
+  "Level": 4,
   "EffectiveBubbleStyle": 0
 }
