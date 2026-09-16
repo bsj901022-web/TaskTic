@@ -26,6 +26,7 @@ public sealed class App : Application
     public int GroundY;
     RoomWindow? roomWindow;
     QuickChatWindow? quickChat;
+    InfoWindow? info;
     double lastBroadcast;
     bool snapshotPending;
     readonly List<PetWindow> pets = new();
@@ -153,6 +154,8 @@ public sealed class App : Application
     }
     public void SimulateIdle(double? seconds) { idleOverride = seconds; if (seconds != null) IdleCheck(); }
     public static bool IsNight(int hour) => hour >= 23 || hour < 7;
+    // Smoke test helper: the real clock may be inside the night window, which would otherwise carry a manual-wake override into the check.
+    public void ResetNightState() { nightSlept = false; nightOverride = false; napping = false; }
     public void NightCheck(int hour)
     {
         if (!State.NightSleep) { nightSlept = false; nightOverride = false; return; }
@@ -225,6 +228,12 @@ public sealed class App : Application
         }
         return L.Get("chat_" + chatterRandom.Next(8));
     }
+    // About · Contact side panel docked to the main window.
+    public void ShowInfo() { info ??= new InfoWindow(this, Panel); info.ShowDocked(); }
+    public void HideInfo() => info?.Hide();
+    public bool InfoVisible => info?.IsVisible == true;
+    public bool InfoDocked => info?.IsDockedBeside == true;
+    public int InfoLinkCount => info?.LinkCount ?? 0;
     public bool QuickChatVisible => quickChat?.IsVisible == true;
     public void HideQuickChat() => quickChat?.Hide();
     public void RegisterHotkeys()
@@ -273,6 +282,7 @@ public sealed class App : Application
         old.AllowClose = true; old.Close();
         if (roomWindow != null) { var r = roomWindow; roomWindow = null; r.AllowClose = true; r.Close(); }
         if (quickChat != null) { var q = quickChat; quickChat = null; q.AllowClose = true; q.Close(); }
+        if (info != null) { var i = info; info = null; i.AllowClose = true; i.Close(); }
         foreach (var p in pets) p.BuildMenu();
         if (tray != null) { tray.Text = L.Get("tray_title"); var previous = tray.ContextMenuStrip; tray.ContextMenuStrip = BuildTrayMenu(); previous?.Dispose(); }
         RegisterHotkeys(); Panel.Refresh();
@@ -406,7 +416,7 @@ public sealed class App : Application
     public void Quit()
     {
         if (Exiting) return;
-        Exiting = true; timer.Stop(); UnregisterHotkeys(); Room?.Dispose(); roomWindow?.Close(); quickChat?.Close(); StateStore.Save(State);
+        Exiting = true; timer.Stop(); UnregisterHotkeys(); Room?.Dispose(); roomWindow?.Close(); quickChat?.Close(); info?.Close(); StateStore.Save(State);
         if (tray != null) { tray.Visible = false; tray.Icon?.Dispose(); tray.ContextMenuStrip?.Dispose(); tray.Dispose(); }
         foreach (var p in pets) p.Close(); Panel.Close(); Shutdown();
     }
@@ -466,7 +476,7 @@ public sealed class App : Application
             Check(longAway.Fullness == 20 && longAway.Happiness == 30, "offline decay stops at the friendly floor");
             State.Sleeping = false; State.IdleMinutes = 5; SimulateIdle(600); Check(State.Sleeping && IsNapping, "idle for 10 minutes starts a nap");
             SimulateIdle(0); Check(!State.Sleeping && !IsNapping, "input after a nap wakes the pet"); SimulateIdle(null);
-            State.NightSleep = true; NightCheck(23); Check(State.Sleeping, "night check puts the pet to sleep at 23:00"); NightCheck(8); Check(!State.Sleeping, "morning check wakes the pet");
+            ResetNightState(); State.NightSleep = true; NightCheck(23); Check(State.Sleeping, "night check puts the pet to sleep at 23:00"); NightCheck(8); Check(!State.Sleeping, "morning check wakes the pet");
             StretchNow(); Check(pets[0].Visual.Bubble == L.Get("stretch"), "stretch reminder fires a bubble");
             var friend = new PetWindow(this, "친구", "penguin", "", pets[0].CenterX, false, true) { RemoteId = "friend-1" }; friend.Show(); pets.Add(friend); friend.Step(.033);
             friend.TestMoveTo(pets[0].CenterX - 20 - friend.Width * friend.Dpi / 2); pets[0].Visual.Bubble = "";
@@ -480,7 +490,7 @@ public sealed class App : Application
             Check(pets[0].IsFacingViewer && !pets[0].Visual.Walking && pets[0].Visual.Bubble.Length > 0, "character turns to the viewer and says a line");
             for (int i = 0; i < 200 && pets[0].IsFacingViewer; i++) pets[0].Step(.033); Check(!pets[0].IsFacingViewer, "character turns back after a few seconds");
             Check(PetVisual.DevicePixelsPerSprite(1) == 1 && PetVisual.DevicePixelsPerSprite(1.5) == 1.5 && PetVisual.DevicePixelsPerSprite(2) == 2 && PetVisual.DevicePixelsPerSprite(.5) == 1, "sprites are drawn at whole or half device pixels");
-            Check(Panel.ContactPanel.Children.Count >= 8 && Panel.AboutMade.Text.Contains(VersionLabel), "contact card lists email, social, repository and folder links");
+            ShowInfo(); Panel.UpdateLayout(); Check(InfoVisible && InfoLinkCount >= 8 && InfoDocked, "info panel docks beside the main window with contact links"); HideInfo(); Check(!InfoVisible, "info panel hides on close");
             Check(!PetCatalog.Selectable.Any(k => PetCatalog.Hidden.Contains(k.Id)) && PetCatalog.Selectable.Any(k => k.Id == "robot") && PetCatalog.Valid("slime"), "hidden creature kinds stay valid but are not selectable");
             SendBubble("❤️"); Check(pets[0].Visual.Bubble == "❤️", "quick reaction shows as a bubble");
             OpenQuickChat(); Check(QuickChatVisible, "quick chat opens above the character"); HideQuickChat();

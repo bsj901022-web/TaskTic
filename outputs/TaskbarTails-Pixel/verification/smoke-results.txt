@@ -158,7 +158,8 @@ PASS: outgoing ball leaves the screen
 PASS: character turns to the viewer and says a line
 PASS: character turns back after a few seconds
 PASS: sprites are drawn at whole or half device pixels
-PASS: contact card lists email, social, repository and folder links
+PASS: info panel docks beside the main window with contact links
+PASS: info panel hides on close
 PASS: hidden creature kinds stay valid but are not selectable
 PASS: quick reaction shows as a bubble
 PASS: quick chat opens above the character

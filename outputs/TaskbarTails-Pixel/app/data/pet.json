@@ -1,10 +1,10 @@
 {
   "Name": "\uACFC\uC790",
-  "Species": "jjeong",
+  "Species": "seunghyeon",
   "Fullness": 0,
-  "Happiness": 49.0218248922213,
-  "Experience": 98,
-  "Sleeping": false,
+  "Happiness": 85.22712565110855,
+  "Experience": 110,
+  "Sleeping": true,
   "DemoFriends": false,
   "Scale": 100,
   "Language": "auto",
@@ -20,7 +20,7 @@
   "LastRoomCode": "",
   "MonitorIndex": 0,
   "BubbleStyle": 0,
-  "LastSeenUtc": "2026-09-16T13:55:28.1031175Z",
-  "Level": 1,
+  "LastSeenUtc": "2026-09-16T14:17:44.3395792Z",
+  "Level": 2,
   "EffectiveBubbleStyle": 0
 }

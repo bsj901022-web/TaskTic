@@ -21,7 +21,7 @@ public static class PetCatalog
   new("bobgirl","검은 단발 여자","사람","wave","손 흔들기","heart","손가락 하트"), new("ponygirl","포니테일 여자","사람","stretch","스트레칭","cheer","신나는 응원"),
   new("hoodieboy","후드 남자","사람","wave","손 흔들기","dance","신나는 댄스"), new("suitboy","정장 남자","사람","bow","정중한 인사","thumbs","엄지 척"),
   new("yeodini","여디니","사람","swing","테니스 스윙","goggles","물안경 쓰기"),
-  new("jitto","지또","사람","twirl","머리 빙글","peace","브이 포즈"), new("jjeong","쩡","사람","spin","치마 빙글","clap","신나는 박수"),
+  new("jitto","지또","사람","twirl","머리 빙글","peace","브이 포즈"), new("jjeong","쩡","사람","spin","빙글 돌기","clap","신나는 박수"),
   new("seunghyeon","승현","사람","glasses","안경 고쳐 쓰기","stretch","어깨 스트레칭") };
  // Not offered in the picker (assets stay so friends using them still render). Only the robot remains among the creatures.
  public static readonly HashSet<string> Hidden = new(){"slime","ghost","mushroom","dragon","cactus"};

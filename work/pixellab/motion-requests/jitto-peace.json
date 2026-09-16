@@ -2,7 +2,7 @@
   "content": [
     {
       "type": "text",
-      "text": "character: e44df306-d400-442c-b63e-31f9e82db5ef\nanimation: v3 custom (Raises one hand beside her face in a V sign and winks with a cute smile, holds the pose briefly, then lowers the hand, stays in place)\ndirections: east (1 jobs)\ngroup: 149cb734-8672-4ffa-9e32-ba39ec7fcde8\nframes: 16 (reference stripped, keep_first_frame=false)\ncost: 1 generation (1/dir x 1)\neta: ~30-60s/direction\n\nhint: get_character(character_id=\"e44df306-d400-442c-b63e-31f9e82db5ef\")\nadd more directions to this group: animate_character(character_id=\"e44df306-d400-442c-b63e-31f9e82db5ef\", action_description=\"Raises one hand beside her face in a V sign and winks with a cute smile, holds the pose briefly, then lowers the hand, stays in place\", animation_group_id=\"149cb734-8672-4ffa-9e32-ba39ec7fcde8\", directions=[...])"
+      "text": "character: 2b5b04fd-ec88-4ac9-9536-e7d8f8a386a5\nanimation: v3 custom (Raises one hand beside her face in a V sign and winks with a cute smile, holds the pose briefly, then lowers the hand, stays in place)\ndirections: east (1 jobs)\ngroup: 324493a9-22e6-47e2-8630-fde662ae8e7c\nframes: 16 (reference stripped, keep_first_frame=false)\ncost: 1 generation (1/dir x 1)\neta: ~30-60s/direction\n\nhint: get_character(character_id=\"2b5b04fd-ec88-4ac9-9536-e7d8f8a386a5\")\nadd more directions to this group: animate_character(character_id=\"2b5b04fd-ec88-4ac9-9536-e7d8f8a386a5\", action_description=\"Raises one hand beside her face in a V sign and winks with a cute smile, holds the pose briefly, then lowers the hand, stays in place\", animation_group_id=\"324493a9-22e6-47e2-8630-fde662ae8e7c\", directions=[...])"
     }
   ],
   "isError": false

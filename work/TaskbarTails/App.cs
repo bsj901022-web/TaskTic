@@ -154,6 +154,8 @@ public sealed class App : Application
     }
     public void SimulateIdle(double? seconds) { idleOverride = seconds; if (seconds != null) IdleCheck(); }
     public static bool IsNight(int hour) => hour >= 23 || hour < 7;
+    // Smoke test helper: the real clock may be inside the night window, which would otherwise carry a manual-wake override into the check.
+    public void ResetNightState() { nightSlept = false; nightOverride = false; napping = false; }
     public void NightCheck(int hour)
     {
         if (!State.NightSleep) { nightSlept = false; nightOverride = false; return; }
@@ -474,7 +476,7 @@ public sealed class App : Application
             Check(longAway.Fullness == 20 && longAway.Happiness == 30, "offline decay stops at the friendly floor");
             State.Sleeping = false; State.IdleMinutes = 5; SimulateIdle(600); Check(State.Sleeping && IsNapping, "idle for 10 minutes starts a nap");
             SimulateIdle(0); Check(!State.Sleeping && !IsNapping, "input after a nap wakes the pet"); SimulateIdle(null);
-            State.NightSleep = true; NightCheck(23); Check(State.Sleeping, "night check puts the pet to sleep at 23:00"); NightCheck(8); Check(!State.Sleeping, "morning check wakes the pet");
+            ResetNightState(); State.NightSleep = true; NightCheck(23); Check(State.Sleeping, "night check puts the pet to sleep at 23:00"); NightCheck(8); Check(!State.Sleeping, "morning check wakes the pet");
             StretchNow(); Check(pets[0].Visual.Bubble == L.Get("stretch"), "stretch reminder fires a bubble");
             var friend = new PetWindow(this, "친구", "penguin", "", pets[0].CenterX, false, true) { RemoteId = "friend-1" }; friend.Show(); pets.Add(friend); friend.Step(.033);
             friend.TestMoveTo(pets[0].CenterX - 20 - friend.Width * friend.Dpi / 2); pets[0].Visual.Bubble = "";
