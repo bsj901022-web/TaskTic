@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "status: creating (44% ~84s)\nid: e45c931b-83c9-4132-94cc-d85434bd2eb2\nname: Seunghyeon - Taskbar Tails\n\nhint: template-mode animate_character can be queued now (runs after creation completes); v3/pro animations must wait until status=completed"
+    }
+  ],
+  "isError": false
+}

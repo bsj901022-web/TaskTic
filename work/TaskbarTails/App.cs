@@ -479,6 +479,7 @@ public sealed class App : Application
             Check(pets[0].IsFacingViewer && !pets[0].Visual.Walking && pets[0].Visual.Bubble.Length > 0, "character turns to the viewer and says a line");
             for (int i = 0; i < 200 && pets[0].IsFacingViewer; i++) pets[0].Step(.033); Check(!pets[0].IsFacingViewer, "character turns back after a few seconds");
             Check(PetVisual.DevicePixelsPerSprite(1) == 1 && PetVisual.DevicePixelsPerSprite(1.5) == 1.5 && PetVisual.DevicePixelsPerSprite(2) == 2 && PetVisual.DevicePixelsPerSprite(.5) == 1, "sprites are drawn at whole or half device pixels");
+            Check(!PetCatalog.Selectable.Any(k => PetCatalog.Hidden.Contains(k.Id)) && PetCatalog.Selectable.Any(k => k.Id == "robot") && PetCatalog.Valid("slime"), "hidden creature kinds stay valid but are not selectable");
             SendBubble("❤️"); Check(pets[0].Visual.Bubble == "❤️", "quick reaction shows as a bubble");
             OpenQuickChat(); Check(QuickChatVisible, "quick chat opens above the character"); HideQuickChat();
             Check(PetState.UnlockLevel(3) == 8 && new PetState { BubbleStyle = 3 }.EffectiveBubbleStyle == 0 && new PetState { BubbleStyle = 3, Experience = 800 }.EffectiveBubbleStyle == 3, "bubble styles unlock by level");

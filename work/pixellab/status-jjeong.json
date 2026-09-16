@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "status: creating (42% ~92s)\nid: 323a281c-4ab7-4a0b-9175-69502957c750\nname: Jjeong - Taskbar Tails\n\nhint: template-mode animate_character can be queued now (runs after creation completes); v3/pro animations must wait until status=completed"
+    }
+  ],
+  "isError": false
+}

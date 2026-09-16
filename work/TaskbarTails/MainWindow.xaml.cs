@@ -18,9 +18,10 @@ public partial class MainWindow : Window
         app = owner; InitializeComponent();
         var s = app.State;
         NameBox.Text = s.Name;
-        SpeciesBox.Items.Clear(); foreach (var k in PetCatalog.All) SpeciesBox.Items.Add(L.Group(k.Group) + " · " + PetCatalog.Label(k));
-        SpeciesBox.SelectedIndex = Math.Max(0, Array.FindIndex(PetCatalog.All, k => k.Id == s.Species));
-        VersionBadge.Text = "●  PIXEL PETS · " + app.VersionLabel + " · " + L.F("kinds", PetCatalog.All.Length) + (StateStore.IsInstalled ? "" : L.Get("badge_portable"));
+        var kinds = PetCatalog.Selectable;
+        SpeciesBox.Items.Clear(); foreach (var k in kinds) SpeciesBox.Items.Add(L.Group(k.Group) + " · " + PetCatalog.Label(k));
+        SpeciesBox.SelectedIndex = Math.Max(0, Array.FindIndex(kinds, k => k.Id == s.Species));
+        VersionBadge.Text = "●  PIXEL PETS · " + app.VersionLabel + " · " + L.F("kinds", kinds.Length) + (StateStore.IsInstalled ? "" : L.Get("badge_portable"));
         FriendsCheck.IsChecked = s.DemoFriends;
         ScaleBox.SelectedIndex = s.Scale == 150 ? 1 : s.Scale == 200 ? 2 : 0;
         LanguageBox.SelectedIndex = s.Language == "ko" ? 1 : s.Language == "en" ? 2 : 0;
@@ -78,7 +79,7 @@ public partial class MainWindow : Window
     {
         var name = NameBox.Text.Trim();
         if (name.Length == 0) { Notice.Text = L.Get("name_required"); return; }
-        app.State.Name = name; app.State.Species = PetCatalog.All[Math.Max(0, SpeciesBox.SelectedIndex)].Id;
+        var kinds = PetCatalog.Selectable; app.State.Name = name; app.State.Species = kinds[Math.Clamp(SpeciesBox.SelectedIndex, 0, kinds.Length - 1)].Id;
         app.Changed(L.Get("new_look")); Notice.Text = L.Get("saved_look");
     }
     void Scale_Changed(object sender, SelectionChangedEventArgs e)

@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "status: creating (25% ~198s)\nid: 5826fe15-873a-464e-905a-32b88840b44f\nname: Jitto - Taskbar Tails\n\nhint: template-mode animate_character can be queued now (runs after creation completes); v3/pro animations must wait until status=completed"
+    }
+  ],
+  "isError": false
+}

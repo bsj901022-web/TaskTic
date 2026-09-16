@@ -322,5 +322,41 @@
       "label": "물안경 쓰기",
       "prompt": "Pulls the swim goggles down from her head over her eyes with both hands, strikes a playful pose with the racket, then pushes the goggles back up onto her head and laughs, stays in place"
     }
+  ],
+  "jitto": [
+    {
+      "key": "twirl",
+      "label": "머리 빙글",
+      "prompt": "Playfully twirls a lock of her wavy hair around one finger, tilts her head and giggles with sparkly eyes, then lets go and smiles, stays in place"
+    },
+    {
+      "key": "peace",
+      "label": "브이 포즈",
+      "prompt": "Raises one hand beside her face in a V sign and winks with a cute smile, holds the pose briefly, then lowers the hand, stays in place"
+    }
+  ],
+  "jjeong": [
+    {
+      "key": "spin",
+      "label": "치마 빙글",
+      "prompt": "Spins once in place so the long blue skirt flares out with arms slightly raised, then stops facing the same side with a happy smile, stays in place"
+    },
+    {
+      "key": "clap",
+      "label": "신나는 박수",
+      "prompt": "Claps her hands happily several times with a bright smile and a small bounce, then rests her hands, stays in place"
+    }
+  ],
+  "seunghyeon": [
+    {
+      "key": "glasses",
+      "label": "안경 고쳐 쓰기",
+      "prompt": "Pushes his glasses up with one finger, gives a small confident nod and a mild smile, then returns to standing, stays in place"
+    },
+    {
+      "key": "stretch",
+      "label": "어깨 스트레칭",
+      "prompt": "Rolls his shoulders and stretches one arm across his chest, then the other, relaxed face, returns to standing, stays in place"
+    }
   ]
 }
