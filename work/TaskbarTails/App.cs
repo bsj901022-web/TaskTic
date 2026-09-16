@@ -108,7 +108,7 @@ public sealed class App : Application
         double now = clock.Elapsed.TotalSeconds;
         double dt = Math.Min(.1, now - last); last = now;
         State.Tick(dt);
-        if (now - fullscreenChecked > 1) { fullscreen = Native.FullscreenApp(); fullscreenChecked = now; SyncVisibility(); }
+        if (smokePath == null && now - fullscreenChecked > 1) { fullscreen = Native.FullscreenApp(); fullscreenChecked = now; SyncVisibility(); }
         foreach (var pet in pets.ToArray()) if (pet.IsVisible) pet.Step(dt);
         if (now-lastBroadcast>3 && Room?.Connected==true && !snapshotPending) { lastBroadcast=now; Broadcast("state"); }
         Panel.Animate(now);

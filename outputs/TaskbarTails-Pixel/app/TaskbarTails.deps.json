@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v8.0": {
-      "TaskbarTails/0.5.3": {
+      "TaskbarTails/0.5.4": {
         "dependencies": {
           "Velopack": "1.2.0"
         },
@@ -25,7 +25,7 @@
     }
   },
   "libraries": {
-    "TaskbarTails/0.5.3": {
+    "TaskbarTails/0.5.4": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
