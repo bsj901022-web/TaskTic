@@ -23,7 +23,11 @@ public sealed class PetState
 
 public static class StateStore
 {
-    public static string PathName = Path.Combine(AppContext.BaseDirectory, "data", "pet.json");
+    public static string PathName = Path.Combine(DataRoot(), "pet.json");
+    // Velopack installs to %LocalAppData%\TaskbarTails\current\ and replaces that folder on every update,
+    // so an installed app stores its data in %LocalAppData%\TaskbarTails\data\. A portable copy keeps data beside the exe.
+    public static bool IsInstalled => File.Exists(Path.Combine(AppContext.BaseDirectory, "..", "Update.exe"));
+    static string DataRoot() => IsInstalled ? Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "data")) : Path.Combine(AppContext.BaseDirectory, "data");
     public static string? LastError { get; private set; }
     public static PetState Load()
     {

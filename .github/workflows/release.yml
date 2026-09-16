@@ -1,0 +1,61 @@
+# Builds the Windows installer with Velopack and publishes it as a GitHub Release.
+# Trigger: push a tag like v0.5.2, or run manually with a version number.
+# Installed copies of Taskbar Tails check this repository's releases and update themselves.
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g. 0.5.2)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Resolve version
+        shell: pwsh
+        run: |
+          $v = if ('${{ github.event_name }}' -eq 'workflow_dispatch') { '${{ inputs.version }}' } else { '${{ github.ref_name }}'.TrimStart('v') }
+          "VERSION=$v" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          Write-Host "Releasing version $v"
+
+      - name: Publish (self-contained win-x64)
+        run: dotnet publish work/TaskbarTails/TaskbarTails.csproj -c Release -r win-x64 --self-contained true -p:Version=${{ env.VERSION }} -o publish
+
+      - name: Smoke test the published build
+        shell: pwsh
+        run: |
+          & .\publish\TaskbarTails.exe --smoke-test smoke
+          if ($LASTEXITCODE -ne 0) { Get-Content smoke\smoke-results.txt; throw "smoke test failed" }
+          (Get-Content smoke\smoke-results.txt | Measure-Object -Line).Lines.ToString() + " checks passed"
+
+      - name: Install Velopack CLI
+        run: dotnet tool install -g vpk
+
+      - name: Download previous releases (for delta packages)
+        continue-on-error: true
+        run: vpk download github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }} --outputDir releases
+
+      - name: Pack installer
+        run: vpk pack --packId TaskbarTails --packVersion ${{ env.VERSION }} --packDir publish --mainExe TaskbarTails.exe --packTitle "Taskbar Tails" --packAuthors "bsj901022-web" --icon work/TaskbarTails/app.ico --outputDir releases
+
+      - name: Upload to GitHub Release
+        run: vpk upload github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }} --publish --releaseName "Taskbar Tails v${{ env.VERSION }}" --tag v${{ env.VERSION }} --outputDir releases
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TaskbarTails-${{ env.VERSION }}
+          path: releases

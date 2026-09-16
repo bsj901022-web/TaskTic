@@ -8,9 +8,14 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <AssemblyName>TaskbarTails</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Version>0.5.1</Version>
+    <Version>0.5.2</Version>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
-<ItemGroup><Content Include="supabase.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" /><Content Include="assets\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" /></ItemGroup></Project>
+<ItemGroup><Content Include="supabase.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" /><Content Include="assets\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" /></ItemGroup>
+<ItemGroup>
+  <PackageReference Include="Velopack" Version="1.2.0" />
+</ItemGroup></Project>
 
 
 

@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "status: creating (42% ~900s)\nid: aba50d24-118a-4d02-9bd0-7999f6212408\nname: Yuna - Taskbar Tails\n\nhint: template-mode animate_character can be queued now (runs after creation completes); v3/pro animations must wait until status=completed"
+    }
+  ],
+  "isError": false
+}

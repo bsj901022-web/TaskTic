@@ -12,6 +12,7 @@ public partial class MainWindow : Window
     {
         app = owner; InitializeComponent();
         NameBox.Text = app.State.Name; SpeciesBox.Items.Clear(); foreach(var k in PetCatalog.All) SpeciesBox.Items.Add(k.Label); SpeciesBox.SelectedIndex = Array.FindIndex(PetCatalog.All,k=>k.Id==app.State.Species);
+        VersionBadge.Text = "●  PIXEL PETS · " + app.VersionLabel + " · " + PetCatalog.All.Length + "종" + (StateStore.IsInstalled ? "" : " · 포터블");
         FriendsCheck.IsChecked = app.State.DemoFriends; ScaleBox.SelectedIndex = app.State.Scale == 150 ? 1 : app.State.Scale == 200 ? 2 : 0; ready = true;
         Refresh();
         Closing += OnClosing;
@@ -64,6 +65,9 @@ public partial class MainWindow : Window
         Notice.Text = app.Room?.Connected == true ? "말풍선을 방 친구들에게 보냈어요." : "말풍선을 표시했어요. 방에 연결하면 친구에게도 보여요.";
     }
     void Quit_Click(object sender, RoutedEventArgs e) => app.Quit();
+    void CheckUpdate_Click(object sender, RoutedEventArgs e) { Notice.Text = "업데이트를 확인하고 있어요…"; _ = app.CheckForUpdates(true); }
+    void Update_Click(object sender, RoutedEventArgs e) => app.ApplyUpdate();
+    public void ShowUpdateReady(string version) { UpdateButton.Content = "v" + version + " 지금 업데이트하고 다시 시작"; UpdateButton.Visibility = Visibility.Visible; Notice.Text = "새 버전 v" + version + "이 준비됐어요. 지금 적용하거나 다음 실행 때 자동으로 적용됩니다."; }
 }
 
 

@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "character: a893f657-5982-41d6-a332-51655b10b3fa\nanimation: v3 custom (Reaches both arms up high and stretches with a happy breath, ponytail sways, then bends slightly to each side and returns to standing, stays in place)\ndirections: east (1 jobs)\ngroup: 0bd48d0a-718e-4bc4-8288-4881a02ba855\nframes: 16 (reference stripped, keep_first_frame=false)\ncost: 1 generation (1/dir x 1)\neta: ~30-60s/direction\n\nhint: get_character(character_id=\"a893f657-5982-41d6-a332-51655b10b3fa\")\nadd more directions to this group: animate_character(character_id=\"a893f657-5982-41d6-a332-51655b10b3fa\", action_description=\"Reaches both arms up high and stretches with a happy breath, ponytail sways, then bends slightly to each side and returns to standing, stays in place\", animation_group_id=\"0bd48d0a-718e-4bc4-8288-4881a02ba855\", directions=[...])"
+    }
+  ],
+  "isError": false
+}

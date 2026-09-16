@@ -16,3 +16,10 @@ crash.log
 # OS
 Thumbs.db
 desktop.ini
+
+# velopack / release outputs
+work/publish-vpk/
+work/releases/
+publish/
+releases/
+smoke/

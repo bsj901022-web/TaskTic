@@ -8,6 +8,8 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Velopack;
+using Velopack.Sources;
 using Forms = System.Windows.Forms;
 
 namespace TaskbarTails;
@@ -30,10 +32,17 @@ public sealed class App : Application
     Mutex? mutex;
     static string? smokePath;
     static int smokeExitCode;
+    const string ReleaseRepo = "https://github.com/bsj901022-web/TaskTic";
+    UpdateManager? updater;
+    UpdateInfo? pendingUpdate;
+    double lastUpdateCheck = double.NegativeInfinity;
+    bool updating;
 
     [STAThread]
     public static int Main(string[] args)
     {
+        // Velopack must run first: it handles install/update/uninstall hooks and exits when invoked by Update.exe.
+        VelopackApp.Build().Run();
         if (args.Length > 1 && args[0] == "--smoke-test") smokePath = Path.GetFullPath(args[1]);
         var app = new App { ShutdownMode = ShutdownMode.OnExplicitShutdown };
         app.DispatcherUnhandledException += (_, e) => {
@@ -88,6 +97,7 @@ public sealed class App : Application
         menu.Items.Add("친구 관리 열기", null, (_, _) => Dispatcher.Invoke(ShowPanel));
         menu.Items.Add("먹이 주기", null, (_, _) => Dispatcher.Invoke(Feed));
         menu.Items.Add("캐릭터 숨기기 / 보이기", null, (_, _) => Dispatcher.Invoke(ToggleVisible));
+        menu.Items.Add("업데이트 확인", null, (_, _) => Dispatcher.Invoke(() => { ShowPanel(); _ = CheckForUpdates(true); }));
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add("종료", null, (_, _) => Dispatcher.Invoke(Quit));
         tray.ContextMenuStrip = menu; tray.DoubleClick += (_, _) => Dispatcher.Invoke(ShowPanel);
@@ -104,6 +114,34 @@ public sealed class App : Application
         Panel.Animate(now);
         if (now - refreshed > .5) { Panel.Refresh(); refreshed = now; }
         if (now - saved > 15) { StateStore.Save(State); saved = now; }
+        if (smokePath == null && now - lastUpdateCheck > (lastUpdateCheck < 0 ? 8 : 6 * 3600)) { lastUpdateCheck = now; _ = CheckForUpdates(false); }
+    }
+    public string VersionLabel => "v" + (typeof(App).Assembly.GetName().Version?.ToString(3) ?? "0.0.0");
+    // Installed builds check GitHub Releases; the portable folder build only reports that it is portable.
+    public async System.Threading.Tasks.Task CheckForUpdates(bool manual)
+    {
+        if (updating) return; updating = true;
+        try
+        {
+            updater ??= new UpdateManager(new GithubSource(ReleaseRepo, null, false));
+            if (!updater.IsInstalled) { if (manual) Panel.Notice.Text = "포터블 실행판은 자동 업데이트 대상이 아니에요. GitHub Releases에서 설치판을 받아 주세요."; return; }
+            if (pendingUpdate != null) { Panel.ShowUpdateReady(pendingUpdate.TargetFullRelease.Version.ToString()); return; }
+            var info = await updater.CheckForUpdatesAsync();
+            if (info == null) { if (manual) Panel.Notice.Text = "최신 버전이에요 (" + VersionLabel + ")."; return; }
+            string target = info.TargetFullRelease.Version.ToString();
+            Panel.Notice.Text = "새 버전 v" + target + " 내려받는 중…";
+            await updater.DownloadUpdatesAsync(info, p => Dispatcher.BeginInvoke(new Action(() => Panel.Notice.Text = "새 버전 v" + target + " 내려받는 중… " + p + "%")));
+            pendingUpdate = info; Panel.ShowUpdateReady(target); pets[0].Say("새 버전 v" + target + "이 준비됐어요!");
+        }
+        catch (Exception e) { if (manual) Panel.Notice.Text = "업데이트 확인 실패 · " + e.Message; }
+        finally { updating = false; }
+    }
+    public void ApplyUpdate()
+    {
+        if (pendingUpdate == null || updater == null) return;
+        StateStore.Save(State); Exiting = true; timer.Stop(); Room?.Dispose();
+        if (tray != null) { tray.Visible = false; tray.Dispose(); }
+        updater.ApplyUpdatesAndRestart(pendingUpdate);
     }
     public void ShowPanel() { Panel.Show(); Panel.WindowState = WindowState.Normal; Panel.Activate(); }
     public void Changed(string message) { StateStore.Save(State); pets[0].Say(message); Panel.Refresh(); Broadcast("message", message); }

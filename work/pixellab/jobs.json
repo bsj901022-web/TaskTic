@@ -86,5 +86,21 @@
   {
     "slug": "yellowbunny",
     "id": "b0dc5cc9-daf9-479d-95ed-c1426b2cca5d"
+  },
+  {
+    "slug": "bobgirl",
+    "id": "aba50d24-118a-4d02-9bd0-7999f6212408"
+  },
+  {
+    "slug": "ponygirl",
+    "id": "a893f657-5982-41d6-a332-51655b10b3fa"
+  },
+  {
+    "slug": "hoodieboy",
+    "id": "f548842a-1537-4386-b236-bbdcc6c03eff"
+  },
+  {
+    "slug": "suitboy",
+    "id": "1b34d7e4-83da-4087-b9ea-0f6b61671f04"
   }
 ]
