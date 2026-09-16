@@ -150,7 +150,7 @@ public sealed class App : Application
         Room.Received+=ev=>Dispatcher.BeginInvoke(new Action(()=>{
             if(Exiting)return;
             var pet=pets.FirstOrDefault(p=>p.IsRemote&&p.RemoteId==ev.UserId);
-            if(pet==null){var w=Native.Primary().Work;pet=new PetWindow(this,ev.Name,ev.Species,"",w.Left+(w.Right-w.Left)*ev.X,false,true){RemoteId=ev.UserId};pets.Add(pet);SyncVisibility();}
+            if(pet==null){var w=Native.Primary().Work;pet=new PetWindow(this,ev.Name,ev.Species,"",w.Left+(w.Right-w.Left)*ev.X,false,true){RemoteId=ev.UserId};pets.Add(pet);SyncVisibility();_=RefreshRosterSafe();}
             pet.Apply(ev);
         }));
         Room.RosterChanged+=members=>Dispatcher.BeginInvoke(new Action(()=>{
@@ -163,6 +163,9 @@ public sealed class App : Application
             Broadcast("state");
         }));
     }
+    // A newcomer is visible in the roster right away instead of waiting for the 15s heartbeat.
+    async System.Threading.Tasks.Task RefreshRosterSafe(){try{if(Room!=null)await Room.RefreshRoster();}catch(Exception e)when(e is System.Net.Http.HttpRequestException or InvalidOperationException or System.Threading.Tasks.TaskCanceledException){Panel.Notice.Text="참여자 갱신 대기 · "+e.Message;}}
+    public string RoomSummary=>Room?.Connected==true?$"방 '{Room.RoomName}' · 초대코드 {Room.InviteCode} · 함께 {Math.Max(1,Room.Members.Count)}명":"";
     public async void Broadcast(string kind,string message="")
     {
         if(Room?.Connected!=true||pets.Count==0)return;

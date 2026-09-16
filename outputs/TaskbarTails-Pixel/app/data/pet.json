@@ -1,10 +1,10 @@
 {
-  "Name": "\uBAA8\uCC0C",
-  "Species": "cat",
-  "Fullness": 91.87100468777766,
-  "Happiness": 97.95519406500041,
-  "Experience": 67,
+  "Name": "\uACFC\uC790",
+  "Species": "boy",
+  "Fullness": 93.78890978444477,
+  "Happiness": 99.59452678444448,
+  "Experience": 86,
   "Sleeping": false,
-  "DemoFriends": true,
+  "DemoFriends": false,
   "Level": 1
 }

@@ -27,9 +27,12 @@ public sealed class RoomClient:IDisposable
  public string RoomId{get;private set;}="";
  public string InviteCode{get;private set;}="";
  public string RoomName{get;private set;}="";
- // Anonymous session (refresh token + user id) kept next to pet.json so the same PC stays the same user across restarts.
+ // Anonymous session (refresh token + user id). Stored per Windows user under %LOCALAPPDATA%, never inside the app folder,
+ // so copying or zipping the app for a friend cannot hand them the same identity. Also bound to this PC + account.
  // Set to null to keep the session in memory only (used by the two-client network check).
- public string? SessionFile{get;set;}=Path.Combine(Path.GetDirectoryName(StateStore.PathName)!,"session.json");
+ public string? SessionFile{get;set;}=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"TaskbarTails","session.json");
+ static string MachineKey=>Environment.MachineName+"|"+(System.Security.Principal.WindowsIdentity.GetCurrent().User?.Value??"");
+ public IReadOnlyList<RoomMember> Members{get;private set;}=Array.Empty<RoomMember>();
  public bool Connected=>socket?.State==WebSocketState.Open&&joined?.Task.IsCompletedSuccessfully==true;
  public event Action<PetEvent>? Received;
  public event Action<IReadOnlyList<RoomMember>>? RosterChanged;
@@ -41,6 +44,8 @@ public sealed class RoomClient:IDisposable
   url=config.GetProperty("url").GetString()!.TrimEnd('/');key=config.GetProperty("anonKey").GetString()!;
   if(!Uri.TryCreate(url,UriKind.Absolute,out var u)||u.Scheme!="https")throw new InvalidOperationException("Supabase HTTPS 주소를 확인해 주세요.");
   http.DefaultRequestHeaders.Add("apikey",key);
+  // v0.5.0 kept the session next to pet.json; remove it so a shared app folder never carries an identity.
+  try{var legacy=Path.Combine(Path.GetDirectoryName(StateStore.PathName)!,"session.json");if(File.Exists(legacy))File.Delete(legacy);}catch(Exception e)when(e is IOException or UnauthorizedAccessException){}
  }
  async Task<JsonElement> Request(string endpoint,object? body=null,bool auth=true)
  {
@@ -63,19 +68,21 @@ public sealed class RoomClient:IDisposable
  {
   if(sessionLoaded)return;sessionLoaded=true;
   if(SessionFile==null||!File.Exists(SessionFile))return;
-  try{var s=JsonDocument.Parse(File.ReadAllText(SessionFile)).RootElement;refresh=s.GetProperty("refresh_token").GetString()??"";UserId=s.GetProperty("user_id").GetString()??"";}
+  try{var s=JsonDocument.Parse(File.ReadAllText(SessionFile)).RootElement;
+   if(!s.TryGetProperty("machine",out var m)||m.GetString()!=MachineKey){refresh="";UserId="";return;}
+   refresh=s.GetProperty("refresh_token").GetString()??"";UserId=s.GetProperty("user_id").GetString()??"";}
   catch(Exception e)when(e is IOException or JsonException or KeyNotFoundException or UnauthorizedAccessException){refresh="";UserId="";}
  }
  void SaveSession()
  {
   if(SessionFile==null)return;
-  try{Directory.CreateDirectory(Path.GetDirectoryName(SessionFile)!);File.WriteAllText(SessionFile,JsonSerializer.Serialize(new{refresh_token=refresh,user_id=UserId,saved_at=DateTime.UtcNow}));}
+  try{Directory.CreateDirectory(Path.GetDirectoryName(SessionFile)!);File.WriteAllText(SessionFile,JsonSerializer.Serialize(new{refresh_token=refresh,user_id=UserId,machine=MachineKey,saved_at=DateTime.UtcNow}));}
   catch(Exception e)when(e is IOException or UnauthorizedAccessException){Status?.Invoke("세션 저장 실패 · 다음 실행 시 새 사용자로 시작할 수 있어요.");}
  }
  async Task Authenticate()
  {
   if(token.Length>0&&DateTime.UtcNow<expires.AddMinutes(-2))return;
-  LoadSession();
+  LoadSession();string previous=UserId;
   JsonElement data;
   if(refresh.Length>0){
    try{data=await Request("/auth/v1/token?grant_type=refresh_token",new{refresh_token=refresh},false);}
@@ -85,6 +92,10 @@ public sealed class RoomClient:IDisposable
   token=data.GetProperty("access_token").GetString()!;refresh=data.GetProperty("refresh_token").GetString()!;
   expires=DateTime.UtcNow.AddSeconds(data.GetProperty("expires_in").GetInt32());UserId=data.GetProperty("user").GetProperty("id").GetString()!;
   SaveSession();
+  if(previous.Length>0&&previous!=UserId&&RoomId.Length>0){
+   var pet=CurrentPet?.Invoke();await Request("/rest/v1/rpc/tt_join_room",new{p_code=InviteCode,p_pet_name=pet?.Name??"친구",p_species=pet?.Species??"cat"});
+   Status?.Invoke("새 세션으로 방에 다시 참여했어요.");
+  }
  }
  public async Task Open(string value,bool create,PetState state)
  {
@@ -146,7 +157,7 @@ public sealed class RoomClient:IDisposable
   var members=new List<RoomMember>();foreach(var row in data.EnumerateArray()){
    if(row.GetProperty("last_seen").GetDateTime().ToUniversalTime()<DateTime.UtcNow.AddSeconds(-90))continue;
    members.Add(new(row.GetProperty("user_id").GetString()!,row.GetProperty("pet_name").GetString()!,row.GetProperty("species").GetString()!));
-  }RosterChanged?.Invoke(members);
+  }Members=members;RosterChanged?.Invoke(members);
  }
  public async Task Publish(PetEvent value)
  {
@@ -156,7 +167,7 @@ public sealed class RoomClient:IDisposable
  {
   lifetime?.Cancel();socket?.Abort();
   if(RoomId.Length>0)try{await Request("/rest/v1/rpc/tt_leave_room",new{p_room=RoomId});}catch(Exception e){Status?.Invoke(e.Message);}
-  RoomId="";InviteCode="";RosterChanged?.Invoke(Array.Empty<RoomMember>());Status?.Invoke("방에서 나왔어요.");
+  RoomId="";InviteCode="";RoomName="";Members=Array.Empty<RoomMember>();RosterChanged?.Invoke(Members);Status?.Invoke("방에서 나왔어요.");
  }
  public void Dispose(){lifetime?.Cancel();socket?.Abort();socket?.Dispose();http.Dispose();}
 }

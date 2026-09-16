@@ -32,7 +32,9 @@ public sealed class RoomWindow:Window
   stack.Children.Add(new TextBlock{Text="내 캐릭터가 할 말 · 최대 80자"});stack.Children.Add(bubble);
   bubble.KeyDown+=(_,e)=>{if(e.Key==System.Windows.Input.Key.Enter){app.SendBubble(bubble.Text);bubble.Clear();}};
   stack.Children.Add(Make("말풍선 보내기",()=>{app.SendBubble(bubble.Text);bubble.Clear();return System.Threading.Tasks.Task.CompletedTask;}));
-  stack.Children.Add(new TextBlock{Text="말풍선은 잠시 표시되고 대화 내역으로 저장되지 않아요.\n관리 화면의 데모 친구는 온라인 참가자가 아닙니다.",FontSize=11,Foreground=Brushes.Gray,Margin=new Thickness(0,16,0,0),TextWrapping=TextWrapping.Wrap});
+  stack.Children.Add(new TextBlock{Text="말풍선은 잠시 표시되고 대화 내역으로 저장되지 않아요.\n관리 화면의 데모 친구는 온라인 참가자가 아닙니다. 이 창을 닫아도 방 연결은 유지되며 초대코드는 관리 화면에도 표시됩니다.",FontSize=11,Foreground=Brushes.Gray,Margin=new Thickness(0,16,0,0),TextWrapping=TextWrapping.Wrap});
+  Closing+=(_,e)=>{if(!app.Exiting){e.Cancel=true;Hide();}};
+  if(app.Room!=null&&app.Room.RoomId.Length>0){UpdateStatus("연결됨 · "+app.Room.RoomName);UpdateRoster(app.Room.Members);}
  }
  Button Make(string label,Func<System.Threading.Tasks.Task> action){var b=new Button{Content=label,Padding=new Thickness(12,9,12,9),Margin=new Thickness(0,0,8,0)};b.Click+=async(_,_)=>{try{await action();}catch(Exception e){UpdateStatus(e.Message);}};return b;}
  async System.Threading.Tasks.Task Connect(bool make)

@@ -30,6 +30,7 @@ public partial class MainWindow : Window
         Preview.Species = s.Species; Preview.Sleeping = s.Sleeping; Preview.ShowName = false; Preview.FrontView = true;
         Preview.InvalidateVisual();
         VisibilityButton.Content = app.PetsVisible ? "캐릭터 숨기기" : "캐릭터 보이기";
+        RoomInfo.Text = app.RoomSummary; RoomInfo.Visibility = RoomInfo.Text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
         if (StateStore.LastError != null) Notice.Text = StateStore.LastError;
     }
     public void Animate(double time) { if (!IsVisible) return; Preview.Phase = time; Preview.InvalidateVisual(); }

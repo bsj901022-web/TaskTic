@@ -25,7 +25,7 @@
   <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
   <Grid>
    <StackPanel><TextBlock Text="TASKBAR TAILS" FontSize="13" FontWeight="Bold" Foreground="#4E8269"/><TextBlock Text="작업표시줄 위, 작은 친구들." FontSize="29" FontWeight="Bold" Margin="0,9,0,6"/><TextBlock Text="바쁜 하루에도 함께하는 나만의 작은 반려동물" Foreground="#7B877E" FontSize="13"/></StackPanel>
-   <Border HorizontalAlignment="Right" VerticalAlignment="Top" Background="#E8EEE2" CornerRadius="13" Padding="12,6"><TextBlock Text="●  PIXEL PETS · v0.5 · 22종" FontSize="10" FontWeight="Bold" Foreground="#5F7E52"/></Border>
+   <Border HorizontalAlignment="Right" VerticalAlignment="Top" Background="#E8EEE2" CornerRadius="13" Padding="12,6"><TextBlock Text="●  PIXEL PETS · v0.5.1 · 22종" FontSize="10" FontWeight="Bold" Foreground="#5F7E52"/></Border>
   </Grid>
   <Grid Grid.Row="1" Margin="0,25,0,0">
    <Grid.ColumnDefinitions><ColumnDefinition Width="1.08*"/><ColumnDefinition Width="24"/><ColumnDefinition Width="1*"/></Grid.ColumnDefinitions>
@@ -55,7 +55,7 @@
   </Grid>
   <Border Grid.Row="2" Background="White" CornerRadius="18" Padding="21,18" Margin="0,20,0,0">
    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-    <StackPanel><TextBlock Text="작은 친구들의 모임" FontSize="15" FontWeight="Bold"/><TextBlock Text="보리와 구름이를 작업표시줄에 불러보세요." FontSize="12" Foreground="#7B877E" Margin="0,5,0,0"/><TextBlock Text="실제 친구와는 방에 참여해 움직임과 말풍선을 나눠보세요." FontSize="11" Foreground="#929A90" Margin="0,7,0,0"/></StackPanel>
+    <StackPanel><TextBlock Text="작은 친구들의 모임" FontSize="15" FontWeight="Bold"/><TextBlock Text="보리와 구름이를 작업표시줄에 불러보세요." FontSize="12" Foreground="#7B877E" Margin="0,5,0,0"/><TextBlock Text="실제 친구와는 방에 참여해 움직임과 말풍선을 나눠보세요." FontSize="11" Foreground="#929A90" Margin="0,7,0,0"/><TextBlock x:Name="RoomInfo" FontSize="12" FontWeight="Bold" Foreground="#36765F" Margin="0,8,0,0" Visibility="Collapsed"/></StackPanel>
     <StackPanel Grid.Column="1" VerticalAlignment="Center"><Button Content="방 만들기 / 참여" Click="Room_Click" Margin="18,0,0,10" Padding="12,9"/><CheckBox x:Name="FriendsCheck" Content="데모 친구 2마리" VerticalAlignment="Center" Margin="18,0,0,0" Checked="Friends_Changed" Unchecked="Friends_Changed" Foreground="#36765F"/></StackPanel>
    </Grid>
   </Border>
