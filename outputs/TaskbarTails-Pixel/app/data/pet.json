@@ -1,8 +1,8 @@
 {
   "Name": "\uACFC\uC790",
   "Species": "yeodini",
-  "Fullness": 89.71093416627626,
-  "Happiness": 99.00495118611163,
+  "Fullness": 75.5369481562752,
+  "Happiness": 93.1344562877772,
   "Experience": 314,
   "Sleeping": false,
   "DemoFriends": false,
@@ -21,7 +21,7 @@
   "MonitorIndex": 0,
   "BubbleStyle": 0,
   "NameStyle": 1,
-  "LastSeenUtc": "2026-09-16T14:34:21.2581373Z",
+  "LastSeenUtc": "2026-09-16T14:55:37.4851484Z",
   "Level": 4,
   "EffectiveBubbleStyle": 0
 }
