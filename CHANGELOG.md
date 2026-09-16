@@ -2,13 +2,21 @@
 
 릴리스마다 이 파일의 해당 절이 GitHub Release 노트로 올라갑니다. Each release's section is published as its GitHub Release notes.
 
+## v0.6.1
+
+**한국어**
+- 빠른 말풍선 단축키를 설정에서 키를 직접 눌러 바꿀 수 있습니다(기본 Ctrl+Alt+T). Ctrl·Alt·Shift + 글자/숫자 또는 F1~F12. Ctrl+T처럼 브라우저·편집기가 쓰는 조합은 등록되지만 경고를 표시하고, 다른 앱이 선점한 키는 등록 실패를 안내합니다.
+
+**English**
+- The quick-bubble hotkey can be rebound by pressing keys in Settings (default Ctrl+Alt+T). Combos that clash with browsers and editors (e.g. Ctrl+T) are allowed but flagged.
+
 ## v0.6.0
 
 **한국어**
 - 자리 비움 감지: 입력이 없으면(기본 5분) 캐릭터가 낮잠을 자고, 돌아오면 일어나 인사합니다.
 - 꺼져 있던 시간 반영: 다시 켤 때 경과 시간만큼 포만감·행복도가 조금 줄고(하한 있음) "오랜만이야" 같은 인사를 합니다.
 - 친구 캐릭터와 마주치면 서로 인사하고, 친구 캐릭터를 클릭하면 콕 찌릅니다. 친구에게 공을 던지면 상대 화면에서 굴러갑니다.
-- 빠른 반응 이모지(❤️ 👋 😂 👍 😢 🎉)와 Ctrl+Alt+T(또는 캐릭터 휠 클릭)로 캐릭터 머리 위에 바로 뜨는 말풍선 입력칸. 단축키는 설정에서 키를 직접 눌러 바꿀 수 있고, Ctrl+T처럼 다른 프로그램과 겹치는 조합은 경고를 표시합니다.
+- 빠른 반응 이모지(❤️ 👋 😂 👍 😢 🎉)와 Ctrl+Alt+T(또는 캐릭터 휠 클릭)로 캐릭터 머리 위에 바로 뜨는 말풍선 입력칸.
 - 방 여러 개: 내 방 목록에서 전환·탈퇴, 마지막 방 자동 재참여. 방마다 대화와 캐릭터가 분리됩니다.
 - 설정: 한국어/English, 캐릭터가 사는 모니터 선택(작업표시줄 자동 숨김 대응), Windows 시작 시 실행, 전역 단축키(Ctrl+Alt+P 숨기기/보이기), 밤 11시~7시 자동 취침, 50분 스트레칭 알림, 클릭 효과음, 말풍선 스타일(레벨로 해금), Lv.10부터 금색 이름.
 - 움직임: 60Hz 렌더 타이머, 위치·프레임이 바뀔 때만 창을 옮기고 다시 그려 끊김 감소. 친구 캐릭터는 연속으로 걷고 3초 스냅샷은 보정에만 사용.
@@ -16,7 +24,7 @@
 
 **English**
 - Idle detection (nap after 5 minutes by default, greeting on return), offline time applied on launch, greetings when characters meet, poke a friend, throw a ball across screens.
-- Quick reactions and a quick bubble input above the character (Ctrl+Alt+T or middle-click). The hotkey is rebindable by pressing keys in Settings; combos that clash with common apps (e.g. Ctrl+T) show a warning.
+- Quick reactions and a quick bubble input above the character (Ctrl+Alt+T or middle-click).
 - Multiple rooms: list, switch, leave; auto-rejoin the last room. Each room is isolated.
 - Settings: Korean/English UI, monitor selection (auto-hide taskbar aware), start with Windows, global hotkeys, night sleep, stretch reminder, click sound, bubble styles unlocked by level.
 - Smoother motion (60 Hz render timer, redraw/move only on change); friends walk continuously.
