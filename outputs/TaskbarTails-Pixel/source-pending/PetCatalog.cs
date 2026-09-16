@@ -5,7 +5,7 @@ namespace TaskbarTails;
 public sealed record PetKind(string Id,string Label,string Group,string FirstAction,string FirstLabel,string SecondAction,string SecondLabel);
 public static class PetCatalog
 {
- // 22 kinds. Sprites for every kind come from PixelLab (assets/<Id>/...).
+ // 26 kinds. Sprites for every kind come from PixelLab (assets/<Id>/...).
  public static readonly PetKind[] All = {
   new("cat","고양이","동물","loaf","식빵 굽기","groom","세수하기"), new("rabbit","토끼","동물","hop","깡총깡총","ears","귀 쫑긋"),
   new("dog","강아지","동물","fetch","공 물어오기","wag","꼬리 흔들기"), new("hamster","햄스터","동물","nibble","오물오물","curl","동글 휴식"),
@@ -17,7 +17,9 @@ public static class PetCatalog
   new("dragon","아기 드래곤","비동물","puff","불 뿜기","wings","날개 파닥"), new("cactus","선인장","비동물","bloom","꽃 피우기","shimmy","살랑 댄스"),
   new("cloudpup","몽실 강아지","마스코트","smile","헤헤 웃기","flop","엎드려 쉬기"), new("puffball","하양 뭉치","마스코트","teary","글썽글썽","yay","만세"),
   new("bluecat","도도 고양이","마스코트","sing","노래하기","grin","히히 웃기"), new("yellowbunny","나나 토끼","마스코트","yaha","야하 점프","spin","빙글 돌기"),
-  new("boy","남자 캐릭터","사람","wave","손 흔들기","cheer","신나는 응원"), new("girl","여자 캐릭터","사람","wave","손 흔들기","cheer","신나는 응원") };
+  new("boy","남자 캐릭터","사람","wave","손 흔들기","cheer","신나는 응원"), new("girl","여자 캐릭터","사람","wave","손 흔들기","cheer","신나는 응원"),
+  new("bobgirl","검은 단발 여자","사람","wave","손 흔들기","heart","손가락 하트"), new("ponygirl","포니테일 여자","사람","stretch","스트레칭","cheer","신나는 응원"),
+  new("hoodieboy","후드 남자","사람","wave","손 흔들기","dance","신나는 댄스"), new("suitboy","정장 남자","사람","bow","정중한 인사","thumbs","엄지 척") };
  // Motions that end in a resting pose: the last frame is held instead of looping. Also used as the sleeping pose.
  public static readonly HashSet<string> HoldPose = new(){"loaf","curl","tail","flop"};
  public static PetKind Get(string id) => All.FirstOrDefault(x=>x.Id==id) ?? All[0];

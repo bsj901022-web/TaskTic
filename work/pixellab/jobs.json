@@ -88,10 +88,6 @@
     "id": "b0dc5cc9-daf9-479d-95ed-c1426b2cca5d"
   },
   {
-    "slug": "bobgirl",
-    "id": "aba50d24-118a-4d02-9bd0-7999f6212408"
-  },
-  {
     "slug": "ponygirl",
     "id": "a893f657-5982-41d6-a332-51655b10b3fa"
   },
@@ -102,5 +98,9 @@
   {
     "slug": "suitboy",
     "id": "1b34d7e4-83da-4087-b9ea-0f6b61671f04"
+  },
+  {
+    "slug": "bobgirl",
+    "id": "01e7926f-f0bb-43ff-81f3-4de86fbaff67"
   }
 ]

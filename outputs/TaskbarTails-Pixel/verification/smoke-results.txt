@@ -97,6 +97,22 @@ PASS: sprites load for girl
 PASS: 16-frame walk east/west for girl
 PASS: special motions wave/cheer for girl
 PASS: motion starts for girl
+PASS: sprites load for bobgirl
+PASS: 16-frame walk east/west for bobgirl
+PASS: special motions wave/heart for bobgirl
+PASS: motion starts for bobgirl
+PASS: sprites load for ponygirl
+PASS: 16-frame walk east/west for ponygirl
+PASS: special motions stretch/cheer for ponygirl
+PASS: motion starts for ponygirl
+PASS: sprites load for hoodieboy
+PASS: 16-frame walk east/west for hoodieboy
+PASS: special motions wave/dance for hoodieboy
+PASS: motion starts for hoodieboy
+PASS: sprites load for suitboy
+PASS: 16-frame walk east/west for suitboy
+PASS: special motions bow/thumbs for suitboy
+PASS: motion starts for suitboy
 PASS: species change resets the running motion
 PASS: dog throws, fetches and returns the ball
 PASS: parachute opens after drop

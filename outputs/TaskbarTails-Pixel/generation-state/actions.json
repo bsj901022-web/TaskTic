@@ -262,5 +262,53 @@
       "label": "빙글 돌기",
       "prompt": "Does one quick playful spin in place with arms out and ears swinging, then stops facing the original side with a big excited grin, stays in place"
     }
+  ],
+  "bobgirl": [
+    {
+      "key": "wave",
+      "label": "손 흔들기",
+      "prompt": "Friendly small wave with one hand, relaxed smile and gentle head tilt, lowers hand back to original pose, stays in place"
+    },
+    {
+      "key": "heart",
+      "label": "손가락 하트",
+      "prompt": "Raises one hand beside the cheek and makes a small finger heart, winks with a soft smile, holds briefly then lowers the hand, stays in place"
+    }
+  ],
+  "ponygirl": [
+    {
+      "key": "stretch",
+      "label": "스트레칭",
+      "prompt": "Reaches both arms up high and stretches with a happy breath, ponytail sways, then bends slightly to each side and returns to standing, stays in place"
+    },
+    {
+      "key": "cheer",
+      "label": "신나는 응원",
+      "prompt": "A cheerful little celebration, raises both hands and does two tiny joyful bounces then settles to original pose, stays in place"
+    }
+  ],
+  "hoodieboy": [
+    {
+      "key": "wave",
+      "label": "손 흔들기",
+      "prompt": "Friendly small wave with one hand, relaxed smile and gentle head tilt, lowers hand back to original pose, stays in place"
+    },
+    {
+      "key": "dance",
+      "label": "신나는 댄스",
+      "prompt": "Small rhythmic dance in place with alternating arm pumps and light foot taps, relaxed grin, gentle head bob, returns to original pose"
+    }
+  ],
+  "suitboy": [
+    {
+      "key": "bow",
+      "label": "정중한 인사",
+      "prompt": "Places one hand on the chest and gives a polite formal bow bending at the waist, then straightens up with a confident smile, stays in place"
+    },
+    {
+      "key": "thumbs",
+      "label": "엄지 척",
+      "prompt": "Raises one fist and gives a big thumbs up with a wink and a confident smile, small satisfied nod, lowers the hand, stays in place"
+    }
   ]
 }
