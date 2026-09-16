@@ -5,7 +5,7 @@
 ## v0.6.2
 
 **한국어**
-- 새 캐릭터 4종: **여디니**(밝은 갈색 단발, 머리 위 수영안경, 테니스 라켓 · 테니스 스윙/물안경 쓰기), **지또**(히피펌과 앞머리, 두부처럼 하얀 피부 · 머리 빙글/브이 포즈), **쩡**(약한 파마, 원색 상의와 긴 치마 · 치마 빙글/신나는 박수), **승현**(키 크고 안경, 투블럭, 밝은 청바지 · 안경 고쳐 쓰기/어깨 스트레칭).
+- 새 캐릭터 4종: **여디니**(밝은 갈색 단발, 머리 위 수영안경, 테니스 라켓 · 테니스 스윙/물안경 쓰기), **지또**(검은 히피펌과 앞머리, 두부처럼 하얀 피부 · 머리 빙글/브이 포즈), **쩡**(약한 파마, 원색 상의와 긴 치마 · 치마 빙글/신나는 박수), **승현**(키 크고 안경, 투블럭, 밝은 청바지 · 안경 고쳐 쓰기/어깨 스트레칭).
 - 비동물 캐릭터는 로봇만 남기고 슬라임·유령·버섯·아기 드래곤·선인장은 선택 목록에서 숨겼습니다. 이미 그 종류를 쓰는 친구의 캐릭터는 그대로 보입니다. 선택 가능 25종.
 - 픽셀이 깨져 보이던 문제 수정: 스프라이트를 화면 픽셀 정수(또는 0.5) 배율로만 그립니다. 100%는 1:1(지금보다 약 1.3배 크게), 150%는 1.5배, 200%는 2배이며 위치도 픽셀 격자에 맞춥니다.
 - 설정 아래 "정보 · 문의" 카드: 문의 메일(bsj_2200@naver.com, 클릭하면 메일 앱·주소 복사), Instagram @Rinsomnia__, GitHub 저장소, 버그 신고·제안(Issues), 릴리스 노트, 데이터·로그 폴더 열기.
@@ -13,7 +13,7 @@
 - 캐릭터가 40~90초마다 정면을 보며 상황에 맞는 말을 합니다(아침·점심·밤 인사, 배고픔, 잡담). 마우스를 올리면 정면을 보고, 빠른 말풍선을 열면 나를 쳐다봅니다. 정면 상태는 방 친구에게도 전달됩니다.
 
 **English**
-- Four new human characters: **Yeodini** (light-brown bob, swim goggles, tennis racket), **Jitto** (hippie perm with bangs, porcelain skin), **Jjeong** (light perm, primary-color top, long skirt), **Seunghyeon** (tall, glasses, two-block cut, light jeans), each with two motions.
+- Four new human characters: **Yeodini** (light-brown bob, swim goggles, tennis racket), **Jitto** (black hippie perm with bangs, porcelain skin), **Jjeong** (light perm, primary-color top, long skirt), **Seunghyeon** (tall, glasses, two-block cut, light jeans), each with two motions.
 - Creature kinds other than the robot (slime, ghost, mushroom, dragon, cactus) are hidden from the picker; friends already using them still render. 25 selectable kinds.
 - Crisp pixels: sprites are drawn at whole/half device-pixel multiples only (100% = 1:1, about 1.3x larger than before; 150% = 1.5x; 200% = 2x), snapped to the pixel grid.
 - About · Contact card under Settings: email (opens mail app, copy button), Instagram, GitHub repo, Issues, release notes, open data/log folders.
