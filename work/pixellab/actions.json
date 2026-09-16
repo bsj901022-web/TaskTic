@@ -310,5 +310,17 @@
       "label": "엄지 척",
       "prompt": "Raises one fist and gives a big thumbs up with a wink and a confident smile, small satisfied nod, lowers the hand, stays in place"
     }
+  ],
+  "yeodini": [
+    {
+      "key": "swing",
+      "label": "테니스 스윙",
+      "prompt": "Winds up and swings the tennis racket in a cheerful forehand stroke, bob haircut bounces, then returns to a ready stance with a big grin, keeps facing the same side, stays in place"
+    },
+    {
+      "key": "goggles",
+      "label": "물안경 쓰기",
+      "prompt": "Pulls the swim goggles down from her head over her eyes with both hands, strikes a playful pose with the racket, then pushes the goggles back up onto her head and laughs, stays in place"
+    }
   ]
 }

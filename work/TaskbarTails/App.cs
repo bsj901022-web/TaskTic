@@ -207,8 +207,23 @@ public sealed class App : Application
     {
         if (pets.Count == 0) return;
         quickChat ??= new QuickChatWindow(this);
+        pets[0].LookAtViewer(10);
         var (x, top) = pets[0].HeadPoint();
         quickChat.ShowAt(x, top, Screen);
+    }
+    // A short line that fits the moment: hunger first, then time of day, otherwise small talk.
+    readonly Random chatterRandom = new();
+    public string Chatter()
+    {
+        if (State.Fullness < 30) return L.Get("chat_hungry");
+        int hour = DateTime.Now.Hour;
+        if (chatterRandom.Next(3) == 0)
+        {
+            if (hour is >= 6 and < 11) return L.Get("chat_morning");
+            if (hour is >= 11 and < 14) return L.Get("chat_lunch");
+            if (hour is >= 21 or < 6) return L.Get("chat_night");
+        }
+        return L.Get("chat_" + chatterRandom.Next(8));
     }
     public bool QuickChatVisible => quickChat?.IsVisible == true;
     public void HideQuickChat() => quickChat?.Hide();
@@ -460,6 +475,10 @@ public sealed class App : Application
             for (int i = 0; i < 200 && pets[0].IsBallMoving; i++) pets[0].Step(.033); Check(!pets[0].IsBallMoving && pets[0].Visual.Bubble == L.Get("ball_caught"), "incoming ball is caught");
             pets[0].ThrowBall(true); for (int i = 0; i < 200 && pets[0].IsBallMoving; i++) pets[0].Step(.033); Check(!pets[0].IsBallMoving, "outgoing ball leaves the screen");
             pets.Remove(friend); friend.Close();
+            pets[0].Visual.Bubble = ""; pets[0].LookAtViewer(5, Chatter()); pets[0].Step(.033);
+            Check(pets[0].IsFacingViewer && !pets[0].Visual.Walking && pets[0].Visual.Bubble.Length > 0, "character turns to the viewer and says a line");
+            for (int i = 0; i < 200 && pets[0].IsFacingViewer; i++) pets[0].Step(.033); Check(!pets[0].IsFacingViewer, "character turns back after a few seconds");
+            Check(PetVisual.DevicePixelsPerSprite(1) == 1 && PetVisual.DevicePixelsPerSprite(1.5) == 1.5 && PetVisual.DevicePixelsPerSprite(2) == 2 && PetVisual.DevicePixelsPerSprite(.5) == 1, "sprites are drawn at whole or half device pixels");
             SendBubble("❤️"); Check(pets[0].Visual.Bubble == "❤️", "quick reaction shows as a bubble");
             OpenQuickChat(); Check(QuickChatVisible, "quick chat opens above the character"); HideQuickChat();
             Check(PetState.UnlockLevel(3) == 8 && new PetState { BubbleStyle = 3 }.EffectiveBubbleStyle == 0 && new PetState { BubbleStyle = 3, Experience = 800 }.EffectiveBubbleStyle == 3, "bubble styles unlock by level");

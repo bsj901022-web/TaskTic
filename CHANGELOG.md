@@ -2,6 +2,18 @@
 
 릴리스마다 이 파일의 해당 절이 GitHub Release 노트로 올라갑니다. Each release's section is published as its GitHub Release notes.
 
+## v0.6.2
+
+**한국어**
+- 새 캐릭터 **여디니**: 밝은 갈색 단발에 머리 위 수영안경, 한 손에 테니스 라켓을 든 발랄한 여자 캐릭터. 특수 모션은 테니스 스윙과 물안경 쓰기. 총 27종.
+- 픽셀이 깨져 보이던 문제 수정: 스프라이트를 화면 픽셀 정수(또는 0.5) 배율로만 그립니다. 100%는 1:1(지금보다 약 1.3배 크게), 150%는 1.5배, 200%는 2배이며 위치도 픽셀 격자에 맞춥니다.
+- 캐릭터가 40~90초마다 정면을 보며 상황에 맞는 말을 합니다(아침·점심·밤 인사, 배고픔, 잡담). 마우스를 올리면 정면을 보고, 빠른 말풍선을 열면 나를 쳐다봅니다. 정면 상태는 방 친구에게도 전달됩니다.
+
+**English**
+- New character **Yeodini**: a cheerful light-brown bob girl with swim goggles on her head and a tennis racket. Motions: tennis swing, goggles on. 27 kinds total.
+- Crisp pixels: sprites are drawn at whole/half device-pixel multiples only (100% = 1:1, about 1.3x larger than before; 150% = 1.5x; 200% = 2x), snapped to the pixel grid.
+- The character now turns to face you every 40-90 s and says something fitting (time of day, hunger, small talk), faces you on hover and when the quick bubble opens; friends see it too.
+
 ## v0.6.1
 
 **한국어**

@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "status: creating (89% ~24s)\nid: d779896a-f476-4b5f-b8d9-36d4837914c3\nname: Yeodini - Taskbar Tails\n\nhint: template-mode animate_character can be queued now (runs after creation completes); v3/pro animations must wait until status=completed"
+    }
+  ],
+  "isError": false
+}

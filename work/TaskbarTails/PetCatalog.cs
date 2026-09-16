@@ -45,4 +45,5 @@ public sealed class PetEvent
  public bool Left {get;set;}
  public bool Walking {get;set;}
  public bool Sleeping {get;set;}
+ public bool Front {get;set;}
 }
