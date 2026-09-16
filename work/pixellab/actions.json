@@ -338,8 +338,8 @@
   "jjeong": [
     {
       "key": "spin",
-      "label": "치마 빙글",
-      "prompt": "Spins once in place so the long blue skirt flares out with arms slightly raised, then stops facing the same side with a happy smile, stays in place"
+      "label": "빙글 돌기",
+      "prompt": "Turns once in place with arms slightly raised so her long black hair swings around, the slim long skirt staying straight, then stops facing the same side with a happy smile, stays in place"
     },
     {
       "key": "clap",

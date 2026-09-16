@@ -104,12 +104,10 @@
    </StackPanel>
   </Border>
   <Border Grid.Row="4" Background="White" CornerRadius="18" Padding="21,18" Margin="0,20,0,0">
-   <StackPanel>
-    <TextBlock Text="{local:T about_title}" FontSize="15" FontWeight="Bold"/>
-    <TextBlock Text="{local:T about_desc}" Style="{StaticResource Caption}" Margin="0,5,0,10"/>
-    <WrapPanel x:Name="ContactPanel"/>
-    <TextBlock x:Name="AboutMade" Style="{StaticResource Caption}" FontSize="11" Margin="0,6,0,0"/>
-   </StackPanel>
+   <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+    <StackPanel><TextBlock Text="{local:T about_title}" FontSize="15" FontWeight="Bold"/><TextBlock Text="{local:T about_open_desc}" Style="{StaticResource Caption}" Margin="0,5,0,0"/></StackPanel>
+    <Button Grid.Column="1" Content="{local:T about_open}" Click="Info_Click" Margin="18,0,0,0" Padding="12,9" VerticalAlignment="Center"/>
+   </Grid>
   </Border>
   <StackPanel Grid.Row="5" Margin="0,17,0,0">
    <Grid><TextBlock x:Name="Notice" Text="{local:T footer_hint}" FontSize="11" Foreground="#7B877E" VerticalAlignment="Center" Margin="0,0,300,0"/><StackPanel Orientation="Horizontal" HorizontalAlignment="Right"><Button x:Name="UpdateButton" Content="{local:T update_now}" Click="Update_Click" Padding="12,8" FontSize="11" Margin="0,0,7,0" Background="#E4B574" Foreground="#3F3223" Visibility="Collapsed"/><Button Content="{local:T update_check}" Click="CheckUpdate_Click" Padding="12,8" FontSize="11" Margin="0,0,7,0"/><Button x:Name="VisibilityButton" Content="{local:T hide_pets}" Click="Visibility_Click" Padding="12,8" FontSize="11" Margin="0,0,7,0"/><Button Content="{local:T quit}" Click="Quit_Click" Padding="12,8" FontSize="11" Background="#EEECE6" Foreground="#7F766C"/></StackPanel></Grid>

@@ -189,6 +189,14 @@ public static class L
         ["chat_6"] = ("친구도 불러볼까? 방 만들기!", "Shall we invite a friend? Make a room!"),
         ["chat_7"] = ("심심하면 나를 위로 던져 봐", "Bored? Toss me up in the air"),
         ["about_title"] = ("정보 · 문의", "About · Contact"),
+        ["about_open"] = ("정보 · 문의 열기", "Open About · Contact"),
+        ["about_open_desc"] = ("버전, 문의 메일, Instagram, GitHub, 폴더, 조작 도움말을 관리 화면 옆에 붙는 창으로 봅니다.", "Version, contact email, Instagram, GitHub, folders and a controls guide in a side panel next to this window."),
+        ["info_section_contact"] = ("문의", "Contact"),
+        ["info_section_project"] = ("프로젝트", "Project"),
+        ["info_section_folders"] = ("폴더", "Folders"),
+        ["info_section_help"] = ("조작 방법", "Controls"),
+        ["info_help_text"] = ("클릭: 쓰다듬기\n위로 끌어 놓기: 낙하산\n휠 클릭 또는 {0}: 빠른 말풍선\nCtrl+Alt+P: 캐릭터 숨기기/보이기\n더블클릭: 관리 화면 · 우클릭: 메뉴\n친구 캐릭터 클릭: 콕 찌르기 · 우클릭: 공 던지기", "Click: pet\nDrag up and release: parachute\nMiddle-click or {0}: quick bubble\nCtrl+Alt+P: hide/show characters\nDouble-click: panel · Right-click: menu\nClick a friend: poke · Right-click: throw a ball"),
+        ["info_dock_hint"] = ("관리 화면 옆에 붙어 함께 움직여요. 닫으면 숨겨지고 버튼으로 다시 열 수 있어요.", "Docks beside the panel and moves with it. Closing hides it; the button opens it again."),
         ["about_desc"] = ("버그, 제안, 새 캐릭터 요청은 아래로 보내 주세요. 답장은 메일이 가장 빠릅니다.", "Send bugs, ideas and character requests below. Email gets the quickest reply."),
         ["contact_email"] = ("문의 메일  {0}", "Email  {0}"),
         ["contact_copy_email"] = ("메일 주소 복사", "Copy email address"),
@@ -236,7 +244,7 @@ public static class L
         ["girl:wave"] = "Wave", ["girl:cheer"] = "Cheer", ["bobgirl:wave"] = "Wave", ["bobgirl:heart"] = "Finger heart", ["ponygirl:stretch"] = "Stretch", ["ponygirl:cheer"] = "Cheer",
         ["hoodieboy:wave"] = "Wave", ["hoodieboy:dance"] = "Dance", ["suitboy:bow"] = "Polite bow", ["suitboy:thumbs"] = "Thumbs up",
         ["yeodini:swing"] = "Tennis swing", ["yeodini:goggles"] = "Goggles on",
-        ["jitto:twirl"] = "Hair twirl", ["jitto:peace"] = "V sign", ["jjeong:spin"] = "Skirt twirl", ["jjeong:clap"] = "Happy clap", ["seunghyeon:glasses"] = "Adjust glasses", ["seunghyeon:stretch"] = "Shoulder stretch",
+        ["jitto:twirl"] = "Hair twirl", ["jitto:peace"] = "V sign", ["jjeong:spin"] = "Twirl", ["jjeong:clap"] = "Happy clap", ["seunghyeon:glasses"] = "Adjust glasses", ["seunghyeon:stretch"] = "Shoulder stretch",
     };
 }
 
