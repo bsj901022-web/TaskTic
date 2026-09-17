@@ -8,7 +8,7 @@
 --   Nothing is written to the database for that. Private channels check an INSERT policy on realtime.messages before
 --   accepting a broadcast or presence update, so this file adds that policy (room members only).
 -- * realtime.messages holds nothing the app ever reads back (bubbles and motions are shown once and forgotten), so the
---   existing rows are purged and an hourly pg_cron job keeps the table small while older clients are still around.
+--   existing rows are purged and a pg_cron job every 10 minutes keeps the table small while older clients are still around.
 -- tt_send_event stays so clients on v0.6.7 or older keep working.
 begin;
 
@@ -21,12 +21,12 @@ do $$ begin
  end if;
 end $$;
 
--- Hourly purge of transient realtime rows (needs the pg_cron extension: Database -> Extensions -> pg_cron, or the line below).
+-- Purge of transient realtime rows every 10 minutes (needs the pg_cron extension: Database -> Extensions -> pg_cron, or the line below).
 create extension if not exists pg_cron;
 do $$ begin
  if exists(select 1 from pg_extension where extname='pg_cron') then
   perform cron.unschedule(jobid) from cron.job where jobname='tt_purge_realtime_messages';
-  perform cron.schedule('tt_purge_realtime_messages','17 * * * *',
+  perform cron.schedule('tt_purge_realtime_messages','*/10 * * * *',
    $job$ delete from realtime.messages where inserted_at < now() - interval '1 hour' $job$);
  end if;
 end $$;
@@ -36,4 +36,4 @@ commit;
 -- One-time cleanup of what accumulated so far. Safe: the app never reads old messages.
 delete from realtime.messages where inserted_at < now() - interval '1 hour';
 
-select 'Taskbar Tails v0.6.8: websocket broadcasts + presence enabled, realtime.messages purged hourly' as result;
+select 'Taskbar Tails v0.6.8: websocket broadcasts + presence enabled, realtime.messages purged every 10 minutes' as result;

@@ -121,15 +121,15 @@ end $$;
 revoke all on function public.tt_create_room(text,text,text),public.tt_join_room(text,text,text),public.tt_touch_room(uuid,text,text),public.tt_leave_room(uuid),public.tt_send_event(uuid,jsonb) from public,anon;
 grant execute on function public.tt_create_room(text,text,text),public.tt_join_room(text,text,text),public.tt_touch_room(uuid,text,text),public.tt_leave_room(uuid),public.tt_send_event(uuid,jsonb) to authenticated;
 
--- realtime.messages holds nothing the app reads back; purge hourly so rows from older clients never pile up.
+-- realtime.messages holds nothing the app reads back; purge every 10 minutes so rows from older clients never pile up.
 create extension if not exists pg_cron;
 do $$ begin
  if exists(select 1 from pg_extension where extname='pg_cron') then
   perform cron.unschedule(jobid) from cron.job where jobname='tt_purge_realtime_messages';
-  perform cron.schedule('tt_purge_realtime_messages','17 * * * *',
+  perform cron.schedule('tt_purge_realtime_messages','*/10 * * * *',
    $job$ delete from realtime.messages where inserted_at < now() - interval '1 hour' $job$);
  end if;
 end $$;
 commit;
 
-select 'Taskbar Tails v0.6.8: tables, room functions, realtime policies and hourly purge are ready' as result;
+select 'Taskbar Tails v0.6.8: tables, room functions, realtime policies and 10-minute purge are ready' as result;

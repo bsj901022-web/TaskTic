@@ -14,7 +14,7 @@
 - v0.6.8부터 이벤트는 웹소켓 Broadcast, 참여자 명단은 Presence로 처리해 DB에 아무것도 쓰지 않습니다.
   DB에 남는 요청은 방 만들기·참여·나가기, 1분에 한 번의 last_seen 갱신, 입장 때의 참여자 조회뿐입니다.
 - realtime.messages의 내용은 앱이 다시 읽지 않으므로 보관할 필요가 없습니다. setup.sql/upgrade-v08.sql이
-  pg_cron으로 매시 17분에 1시간 지난 행을 지우고, 실행 시점에 쌓여 있던 행도 한 번 정리합니다.
+  pg_cron으로 10분마다 10분 지난 행을 지우고, 실행 시점에 쌓여 있던 행도 한 번 정리합니다.
 - 사용량 확인 SQL:
     select pg_size_pretty(pg_database_size(current_database()));
     select pg_size_pretty(pg_total_relation_size('realtime.messages')), (select count(*) from realtime.messages);

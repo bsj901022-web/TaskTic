@@ -7,12 +7,12 @@
 **한국어**
 - 서버 부하 대폭 감소: 캐릭터 이벤트를 RPC 대신 Realtime 웹소켓 Broadcast로 직접 보냅니다. 이전에는 이벤트마다 realtime.messages 테이블에 행이 하나씩 쌓여(접속자 1명당 초당 1~3행) 데이터베이스 용량과 CPU를 잡아먹었는데, 이제 이벤트는 DB에 전혀 기록되지 않습니다.
 - 참여자 명단은 15초마다 서버를 조회하던 방식에서 Realtime Presence로 바꿨습니다. 입장·퇴장이 즉시 반영되고 DB 요청은 1분에 한 번의 last_seen 갱신만 남습니다.
-- 서버 SQL 갱신 필요: 기존 프로젝트는 `supabase/upgrade-v08.sql`을 한 번 실행하세요(Broadcast·Presence 허용 정책 추가, 쌓인 realtime.messages 정리, pg_cron으로 매시 자동 정리). 새 프로젝트는 `setup.sql` 하나로 끝납니다. v0.6.7 이하 클라이언트도 계속 동작합니다.
+- 서버 SQL 갱신 필요: 기존 프로젝트는 `supabase/upgrade-v08.sql`을 한 번 실행하세요(Broadcast·Presence 허용 정책 추가, 쌓인 realtime.messages 정리, pg_cron으로 10분마다 자동 정리). 새 프로젝트는 `setup.sql` 하나로 끝납니다. v0.6.7 이하 클라이언트도 계속 동작합니다.
 
 **English**
 - Much lighter on the server: character events are now Realtime broadcasts over the websocket instead of an RPC. Previously every event inserted a row into realtime.messages (1-3 rows per second per client), eating database storage and CPU; events no longer touch the database at all.
 - The roster comes from Realtime presence instead of polling the member table every 15 s; joins and leaves show immediately and only a once-a-minute last_seen update remains.
-- Server SQL update required: existing projects run `supabase/upgrade-v08.sql` once (broadcast/presence policy, purge of accumulated realtime.messages rows, hourly pg_cron purge). New projects only need `setup.sql`. Clients on v0.6.7 and older keep working.
+- Server SQL update required: existing projects run `supabase/upgrade-v08.sql` once (broadcast/presence policy, purge of accumulated realtime.messages rows, 10-minute pg_cron purge). New projects only need `setup.sql`. Clients on v0.6.7 and older keep working.
 
 ## v0.6.7
 
