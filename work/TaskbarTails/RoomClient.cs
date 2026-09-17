@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.WebSockets;
@@ -13,6 +14,9 @@ public sealed record RoomMember(string UserId,string Name,string Species);
 public sealed record RoomInfo(string Id,string Name,string Code);
 // One anonymous Supabase user, one live room at a time. Membership in other rooms is kept on the server,
 // so switching rooms only moves the realtime channel; LeaveRoom removes a membership for good.
+// Traffic (v0.6.8): events go out as Realtime broadcasts over the websocket (no REST call, no database row) and the
+// roster comes from Realtime presence. The database only sees room create/join/leave, one "touch" a minute and a
+// member list read when joining or when an event arrives from an unknown user (older clients).
 public sealed class RoomClient:IDisposable
 {
  readonly HttpClient http=new(){Timeout=TimeSpan.FromSeconds(20)};
@@ -26,6 +30,12 @@ public sealed class RoomClient:IDisposable
  ClientWebSocket? socket;
  TaskCompletionSource<bool>? joined;
  long sequence;
+ string topic="";
+ // Roster: live presence (key = user id) merged with the member table read for older clients that do not track presence.
+ readonly Dictionary<string,RoomMember> presence=new();
+ List<RoomMember> tableMembers=new();
+ string tracked="";
+ DateTime lastTouch=DateTime.MinValue;
  public string UserId{get;private set;}="";
  public string RoomId{get;private set;}="";
  public string InviteCode{get;private set;}="";
@@ -107,6 +117,7 @@ public sealed class RoomClient:IDisposable
   object args=create?new{p_name=value,p_pet_name=state.Name,p_species=state.Species}:new{p_code=value,p_pet_name=state.Name,p_species=state.Species};
   var room=await Request("/rest/v1/rpc/"+(create?"tt_create_room":"tt_join_room"),args);
   RoomId=room.GetProperty("room_id").GetString()!;InviteCode=room.GetProperty("invite_code").GetString()!;RoomName=room.GetProperty("name").GetString()!;
+  topic="realtime:tt:"+RoomId;presence.Clear();tableMembers=new();tracked="";lastTouch=DateTime.UtcNow;
   joined=new(TaskCreationOptions.RunContinuationsAsynchronously);lifetime=new();_ = Run(lifetime.Token);
   await joined.Task.WaitAsync(TimeSpan.FromSeconds(20));
  }
@@ -124,6 +135,7 @@ public sealed class RoomClient:IDisposable
   var bytes=Encoding.UTF8.GetBytes(JsonSerializer.Serialize(value));await sendLock.WaitAsync(ct);
   try{if(socket?.State==WebSocketState.Open)await socket.SendAsync(bytes,WebSocketMessageType.Text,true,ct);}finally{sendLock.Release();}
  }
+ string NextRef()=>Interlocked.Increment(ref sequence).ToString();
  async Task Run(CancellationToken ct)
  {
   int failures=0;
@@ -132,8 +144,7 @@ public sealed class RoomClient:IDisposable
     await Authenticate();socket=new ClientWebSocket();
     string ws=url.Replace("https://","wss://")+"/realtime/v1/websocket?apikey="+Uri.EscapeDataString(key)+"&vsn=1.0.0";
     await socket.ConnectAsync(new Uri(ws),ct);
-    string topic="realtime:tt:"+RoomId;
-    await WsSend(new{topic,@event="phx_join",payload=new{config=new{broadcast=new{ack=true,self=false},presence=new{key=UserId},@private=true},access_token=token},@ref="join"},ct);
+    await WsSend(new{topic,@event="phx_join",payload=new{config=new{broadcast=new{ack=false,self=false},presence=new{key=UserId},@private=true},access_token=token},@ref="join"},ct);
     using var connection=CancellationTokenSource.CreateLinkedTokenSource(ct);
     var heartbeat=Heartbeat(connection.Token);
     try{
@@ -145,10 +156,18 @@ public sealed class RoomClient:IDisposable
       var kind=root.GetProperty("event").GetString();var payload=root.GetProperty("payload");
       if(kind=="phx_reply"&&root.TryGetProperty("ref",out var reference)&&reference.GetString()=="join"){
        if(payload.GetProperty("status").GetString()!="ok"){string reason=payload.TryGetProperty("response",out var resp)?resp.ToString():"";if(reason.Length>200)reason=reason[..200];throw new InvalidOperationException(L.Get("rc_policy")+" ("+reason+")");}
-       failures=0;joined?.TrySetResult(true);Status?.Invoke(L.F("room_connected",RoomName));await RefreshRoster();
+       failures=0;joined?.TrySetResult(true);Status?.Invoke(L.F("room_connected",RoomName));
+       tracked="";await TrackPresence(ct);
+       try{await RefreshRoster();}catch(Exception e)when(e is HttpRequestException or InvalidOperationException or TaskCanceledException){Status?.Invoke(L.F("rc_roster_wait",e.Message));}
       }
       else if(kind=="broadcast"&&payload.TryGetProperty("event",out var eventName)&&eventName.GetString()=="pet"){
        var ev=payload.GetProperty("payload").Deserialize<PetEvent>(json);if(ev!=null&&ev.UserId!=UserId&&ev.UserId.Length>0)Received?.Invoke(ev);
+      }
+      else if(kind=="presence_state"){presence.Clear();ApplyPresence(payload,true);UpdateMembers();}
+      else if(kind=="presence_diff"){
+       if(payload.TryGetProperty("leaves",out var leaves))foreach(var p in leaves.EnumerateObject())presence.Remove(p.Name);
+       if(payload.TryGetProperty("joins",out var joins))ApplyPresence(joins,true);
+       UpdateMembers();
       }
      }
     }finally{connection.Cancel();try{await heartbeat;}catch(OperationCanceledException){}}
@@ -158,29 +177,71 @@ public sealed class RoomClient:IDisposable
    if(!ct.IsCancellationRequested)try{await Task.Delay(TimeSpan.FromSeconds(Math.Min(60,4*Math.Pow(2,Math.Min(4,failures)))),ct);}catch(OperationCanceledException){break;}
   }
  }
+ // Phoenix presence payload: { "<key>": { "metas": [ { user_id, pet_name, species, phx_ref } ] } }
+ void ApplyPresence(JsonElement state,bool add)
+ {
+  foreach(var entry in state.EnumerateObject()){
+   if(!entry.Value.TryGetProperty("metas",out var metas)||metas.GetArrayLength()==0)continue;
+   var meta=metas[metas.GetArrayLength()-1];
+   string id=meta.TryGetProperty("user_id",out var u)?u.GetString()??entry.Name:entry.Name;
+   string name=meta.TryGetProperty("pet_name",out var n)?n.GetString()??"친구":"친구";
+   string species=meta.TryGetProperty("species",out var s)?s.GetString()??"cat":"cat";
+   if(add)presence[entry.Name]=new RoomMember(id,name,species);
+  }
+ }
+ void UpdateMembers()
+ {
+  var list=new List<RoomMember>(presence.Values);
+  foreach(var m in tableMembers)if(!list.Any(p=>p.UserId==m.UserId))list.Add(m);
+  Members=list;RosterChanged?.Invoke(list);
+ }
+ // Tells the room who we are (name, kind). Re-sent only when that changes.
+ async Task TrackPresence(CancellationToken ct)
+ {
+  var pet=CurrentPet?.Invoke();if(pet==null||!Connected)return;
+  string signature=pet.Name+"|"+pet.Species;if(signature==tracked)return;tracked=signature;
+  await WsSend(new{topic,@event="presence",payload=new{type="presence",@event="track",payload=new{user_id=UserId,pet_name=pet.Name,species=pet.Species}},@ref=NextRef()},ct);
+ }
  async Task Heartbeat(CancellationToken ct)
  {
-  while(!ct.IsCancellationRequested){await Task.Delay(15000,ct);await WsSend(new{topic="phoenix",@event="heartbeat",payload=new{},@ref=Interlocked.Increment(ref sequence).ToString()},ct);try{await RefreshRoster();}catch(Exception e)when(e is HttpRequestException or InvalidOperationException or TaskCanceledException){Status?.Invoke(L.F("rc_roster_wait",e.Message));}}
+  while(!ct.IsCancellationRequested){
+   await Task.Delay(15000,ct);
+   await WsSend(new{topic="phoenix",@event="heartbeat",payload=new{},@ref=NextRef()},ct);
+   // last_seen in the member table once a minute: keeps older clients' rosters showing us and costs one small request.
+   if(DateTime.UtcNow-lastTouch>TimeSpan.FromSeconds(45)){lastTouch=DateTime.UtcNow;try{await Touch();}catch(Exception e)when(e is HttpRequestException or InvalidOperationException or TaskCanceledException){Status?.Invoke(L.F("rc_roster_wait",e.Message));}}
+  }
  }
- public async Task RefreshRoster()
+ async Task Touch()
  {
   if(RoomId.Length==0)return;var pet=CurrentPet?.Invoke();
-  if(pet!=null)await Request("/rest/v1/rpc/tt_touch_room",new{p_room=RoomId,p_pet_name=pet.Name,p_species=pet.Species});
+  if(pet!=null){await Authenticate();await Request("/rest/v1/rpc/tt_touch_room",new{p_room=RoomId,p_pet_name=pet.Name,p_species=pet.Species});}
+ }
+ // Reads the member table (members seen in the last 90 s) and merges it with presence. Used on join and when an event arrives
+ // from a user presence does not know (an older client that does not track presence).
+ public async Task RefreshRoster()
+ {
+  if(RoomId.Length==0)return;await Authenticate();
   var data=await Request("/rest/v1/tt_members?room_id=eq."+RoomId+"&select=user_id,pet_name,species,last_seen");
   var members=new List<RoomMember>();foreach(var row in data.EnumerateArray()){
    if(row.GetProperty("last_seen").GetDateTime().ToUniversalTime()<DateTime.UtcNow.AddSeconds(-90))continue;
    members.Add(new(row.GetProperty("user_id").GetString()!,row.GetProperty("pet_name").GetString()!,row.GetProperty("species").GetString()!));
-  }Members=members;RosterChanged?.Invoke(members);
+  }tableMembers=members;UpdateMembers();
  }
+ // One event to the room over the live channel: no REST call and no database row. The sender id is set here (self=false, so we never receive it).
  public async Task Publish(PetEvent value)
  {
-  if(!Connected)return;await publishLock.WaitAsync();try{await Authenticate();await Request("/rest/v1/rpc/tt_send_event",new{p_room=RoomId,p_event=value});}finally{publishLock.Release();}
+  if(!Connected||lifetime==null)return;await publishLock.WaitAsync();
+  try{
+   value.UserId=UserId;
+   await WsSend(new{topic,@event="broadcast",payload=new{type="broadcast",@event="pet",payload=value},@ref=NextRef()},lifetime.Token);
+   await TrackPresence(lifetime.Token);
+  }finally{publishLock.Release();}
  }
  // Closes the live channel but keeps the membership (used when switching rooms).
  public void Disconnect()
  {
   lifetime?.Cancel();socket?.Abort();
-  RoomId="";InviteCode="";RoomName="";Members=Array.Empty<RoomMember>();RosterChanged?.Invoke(Members);
+  RoomId="";InviteCode="";RoomName="";topic="";presence.Clear();tableMembers=new();Members=Array.Empty<RoomMember>();RosterChanged?.Invoke(Members);
  }
  // Leaves the current room for good.
  public async Task Leave()

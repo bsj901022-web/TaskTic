@@ -1,16 +1,28 @@
-[처음 설치]
-1. Supabase SQL Editor에서 setup.sql 전체를 붙여 넣고 Run을 실행하세요.
-2. Authentication 설정에서 Anonymous Sign-Ins(익명 로그인)를 켜 주세요.
-3. 앱에서 방 만들기 또는 초대코드 참여를 사용합니다.
+[처음 설치 · 새 프로젝트]
+1. Supabase SQL Editor에서 setup.sql 전체를 붙여 넣고 Run을 실행하세요 (v0.6.8 기준, 전부 포함).
+2. Authentication → Sign In / Providers에서 Anonymous Sign-Ins(익명 로그인)를 켜 주세요.
+3. Database → Extensions에서 pg_cron이 켜져 있는지 확인하세요 (setup.sql이 켜지 못했다면 여기서 켜고 setup.sql의 마지막 블록만 다시 실행).
+4. app\supabase.json의 url·anonKey가 그 프로젝트 것인지 확인한 뒤 앱에서 방 만들기 또는 초대코드 참여를 사용합니다.
 
-[v0.4에서 올리는 경우]
-- setup.sql을 이미 실행한 프로젝트는 upgrade-v05.sql만 한 번 실행하세요.
-- 실행하지 않으면 새 캐릭터(오리, 아기곰, 개구리, 판다, 유령, 버섯, 아기 드래곤, 선인장)로 방에 들어갈 때
-  "서버가 이 캐릭터 종류를 아직 몰라요" 오류가 납니다.
+[기존 프로젝트를 올리는 경우]
+- v0.4 → upgrade-v05.sql, 그 다음 upgrade-v08.sql을 한 번씩 실행하세요.
+- v0.5~v0.6.7 → upgrade-v08.sql만 실행하세요.
+- upgrade-v08.sql을 실행하지 않으면 v0.6.8 이상 앱이 방에 들어갈 때 이벤트 전송이 거부됩니다(친구 캐릭터가 움직이지 않음).
+
+[데이터베이스 사용량]
+- v0.6.7까지는 캐릭터 이벤트마다 realtime.messages 테이블에 행이 하나씩 쌓였습니다(접속자 1명당 초당 1~3행).
+- v0.6.8부터 이벤트는 웹소켓 Broadcast, 참여자 명단은 Presence로 처리해 DB에 아무것도 쓰지 않습니다.
+  DB에 남는 요청은 방 만들기·참여·나가기, 1분에 한 번의 last_seen 갱신, 입장 때의 참여자 조회뿐입니다.
+- realtime.messages의 내용은 앱이 다시 읽지 않으므로 보관할 필요가 없습니다. setup.sql/upgrade-v08.sql이
+  pg_cron으로 매시 17분에 1시간 지난 행을 지우고, 실행 시점에 쌓여 있던 행도 한 번 정리합니다.
+- 사용량 확인 SQL:
+    select pg_size_pretty(pg_database_size(current_database()));
+    select pg_size_pretty(pg_total_relation_size('realtime.messages')), (select count(*) from realtime.messages);
 
 앱의 공개 anon/publishable 키만 사용하며 service_role 키는 필요 없습니다.
-방 멤버만 해당 방 정보와 Realtime 이벤트를 읽을 수 있습니다.
+방 멤버만 해당 방 정보와 Realtime 이벤트를 읽고 보낼 수 있습니다.
 메시지는 말풍선으로 잠시 표시되는 실시간 이벤트이며 대화 내역으로 저장하지 않습니다.
-익명 계정은 기기별 임시 계정입니다. v0.5.1부터 %LOCALAPPDATA%TaskbarTailssession.json에 로그인 세션을 보관해
+익명 계정은 기기별 임시 계정입니다. %LOCALAPPDATA%\TaskbarTails\session.json에 로그인 세션을 보관해
 같은 PC에서 다시 실행하면 같은 사용자로 이어집니다. 앱 폴더에는 세션이 남지 않으므로 폴더를 그대로 나눠 줘도
 받는 사람은 각자 새 사용자로 시작합니다. 다른 PC에서는 초대코드로 다시 참여하세요.
+프로젝트를 바꾸면(URL이 달라지면) 기존 세션은 무효가 되어 앱이 자동으로 새 익명 사용자를 만들고, 방은 다시 만들어야 합니다.

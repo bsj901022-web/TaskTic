@@ -46,5 +46,5 @@ C# / .NET 8 / WPF. Sprites are generated with [PixelLab](https://www.pixellab.ai
 ## 참고 · Notes
 
 - 캐릭터 그림은 모두 이 프로젝트를 위해 생성한 오리지널 디자인입니다. 마스코트 4종은 인기 캐릭터 굿즈의 분위기를 참고했지만 기존 캐릭터를 복제하지 않았습니다.
-- 온라인 방은 공개용 anon 키로 Supabase에 접속합니다. 말풍선과 동작은 실시간 이벤트로만 전달되고 저장되지 않습니다.
+- 온라인 방은 공개용 anon 키로 Supabase에 접속합니다. 말풍선과 동작은 Realtime Broadcast로만 전달되고 데이터베이스에 저장되지 않습니다(v0.6.8부터 DB 쓰기 없음).
 - All character art is original, generated for this project. Rooms use a public Supabase anon key; bubbles and motions are transient realtime events and are never stored.

@@ -334,7 +334,7 @@ public static class L
         ["rc_https"] = ("Supabase HTTPS 주소를 확인해 주세요.", "Check the Supabase HTTPS URL."),
         ["rc_closed"] = ("서버 연결이 닫혔어요.", "The server closed the connection."),
         ["rc_big"] = ("이벤트가 너무 큽니다.", "The event is too large."),
-        ["rc_policy"] = ("방 구독 권한을 확인해 주세요. setup.sql의 Realtime 정책이 필요합니다.", "Room subscription was refused. The Realtime policy from setup.sql is required."),
+        ["rc_policy"] = ("방 구독 권한을 확인해 주세요. setup.sql(또는 upgrade-v08.sql)의 Realtime 정책이 필요합니다.", "Room subscription was refused. The Realtime policy from setup.sql is required."),
         ["rc_reconnect"] = ("재연결 중 · {0}", "Reconnecting · {0}"),
         ["rc_rejoined"] = ("새 세션으로 방에 다시 참여했어요.", "Rejoined the room with a new session."),
         ["rc_session_save"] = ("세션 저장 실패 · 다음 실행 시 새 사용자로 시작할 수 있어요.", "Could not save the session; the next run may start as a new user."),
