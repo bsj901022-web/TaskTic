@@ -19,7 +19,7 @@ A pixel-art desktop companion that lives on the Windows taskbar. 26 characters w
 | --- | --- | --- |
 | 캐릭터 | 26종 (동물 10 · 비동물 6 · 마스코트 4 · 사람 6), 종류별 특수 모션 2가지, 100/150/200% 크기 | 26 kinds, two special motions each, 100/150/200% size |
 | 돌봄 | 먹이 주기(사람은 음식 먹기)·놀이·수면, 과식 방지(포만감 85+면 거부), 자리 비움 낮잠, 야간 자동 취침, 꺼져 있던 시간 반영, 50분 스트레칭 알림 | Feed (with an overfeeding guard), play, sleep, idle nap, night sleep, offline time, stretch reminder |
-| 놀이 | 낙하산 착지, 다른 창 위에 착지·가장자리 걷기·풍선 타고 올라가기, 활성 창에 한마디, 강아지 공 놀이, 친구에게 공 던지기, 콕 찌르기, 마주치면 인사 | Parachute drop, land on and walk along other windows, ride a balloon up to them, comment on the active window, fetch, throw a ball to a friend, poke, greetings |
+| 놀이 | 낙하산 착지, 다른 창 위에 착지·풍선 타고 올라가기, 화면 좌우 벽 오르기·천장 걷기, 활성 창에 한마디, 강아지 공 놀이, 친구에게 공 던지기, 콕 찌르기, 마주치면 인사 | Parachute drop, land on other windows, ride a balloon up to them, climb the screen edges and walk the ceiling, comment on the active window, fetch, throw a ball to a friend, poke, greetings |
 | 소통 | Ctrl+Alt+T 빠른 말풍선, 빠른 반응 이모지, 방 만들기·초대코드·방 전환 | Quick bubble (Ctrl+Alt+T), reactions, rooms with invite codes and switching |
 | 설정 | 한국어/English, 모니터 선택, 시작 시 실행, 전역 단축키 3종(빠른 말풍선·숨기기·자동 말풍선, 키 변경 가능), 자동 말풍선 끄기, 효과음, 말풍선 스타일(레벨 해금) | Korean/English, monitor, start with Windows, three rebindable hotkeys (quick bubble, hide, auto bubbles), mute automatic bubbles, sound, bubble styles |
 

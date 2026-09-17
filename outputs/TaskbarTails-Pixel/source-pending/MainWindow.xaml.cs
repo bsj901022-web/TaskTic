@@ -35,7 +35,7 @@ public partial class MainWindow : Window
         IdleBox.Items.Clear(); foreach (var m in IdleOptions) IdleBox.Items.Add(m == 0 ? L.Get("idle_off") : L.F("idle_min", m));
         IdleBox.SelectedIndex = Math.Max(0, Array.IndexOf(IdleOptions, s.IdleMinutes));
         StartupCheck.IsChecked = s.StartWithWindows; HotkeyCheck.IsChecked = s.HotkeysEnabled; NightCheck.IsChecked = s.NightSleep;
-        StretchCheck.IsChecked = s.StretchReminder; SoundCheck.IsChecked = s.ClickSound; GreetCheck.IsChecked = s.GreetFriends; RejoinCheck.IsChecked = s.AutoRejoin; WindowCheck.IsChecked = s.WindowPlay; BubblesCheck.IsChecked = s.AutoBubbles;
+        StretchCheck.IsChecked = s.StretchReminder; SoundCheck.IsChecked = s.ClickSound; GreetCheck.IsChecked = s.GreetFriends; RejoinCheck.IsChecked = s.AutoRejoin; WindowCheck.IsChecked = s.WindowPlay; BubblesCheck.IsChecked = s.AutoBubbles; EdgeCheck.IsChecked = s.EdgeRoam;
         FillBubbleStyles();
         NameStyleBox.SelectedIndex = Math.Clamp(s.NameStyle, 0, 2);
         UpdateHotkeyTexts(); PreviewKeyDown += Window_PreviewKeyDown;
@@ -162,6 +162,7 @@ public partial class MainWindow : Window
     void Greet_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.GreetFriends = GreetCheck.IsChecked == true; Save(); }
     void Rejoin_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.AutoRejoin = RejoinCheck.IsChecked == true; Save(); }
     void WindowPlay_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.WindowPlay = WindowCheck.IsChecked == true; Save(); }
+    void EdgeRoam_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.EdgeRoam = EdgeCheck.IsChecked == true; Save(); }
     void Bubbles_Changed(object sender, RoutedEventArgs e) { if (!ready) return; bool on = BubblesCheck.IsChecked == true; if (on != app.State.AutoBubbles) app.SetBubbles(on); }
     void Friends_Changed(object sender, RoutedEventArgs e) { if (ready) app.SetFriends(FriendsCheck.IsChecked == true); }
     void Visibility_Click(object sender, RoutedEventArgs e) => app.ToggleVisible();

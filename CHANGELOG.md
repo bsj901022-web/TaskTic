@@ -2,6 +2,16 @@
 
 릴리스마다 이 파일의 해당 절이 GitHub Release 노트로 올라갑니다. Each release's section is published as its GitHub Release notes.
 
+## v0.6.7
+
+**한국어**
+- 화면 가장자리 타고 돌기(설정에서 끌 수 있음): 작업표시줄 끝에 닿으면 절반쯤의 확률로 돌아서는 대신 화면 좌우 끝 벽을 타고 올라가고, 위쪽 끝에서는 뒤집혀 천장을 걷다가 반대편 벽으로 내려옵니다. 도중에 가끔 방향을 바꾸거나 손이 미끄러져 낙하산으로 내려옵니다. 벽에서는 캐릭터를 90° 돌려 발이 화면 끝에 닿게, 천장에서는 위아래를 뒤집어 그립니다. 벽·천장에서는 이름과 말풍선 위치도 그에 맞게 옮겨집니다.
+- 캐릭터 창 폭을 160→220으로 넓혀 회전한 몸이 잘리지 않게 했습니다.
+
+**English**
+- Roam the screen edges (can be switched off in Settings): at the end of the taskbar the character may climb the left or right screen edge instead of turning, walk upside down along the top edge and come down the other side, sometimes turning back or slipping into a parachute drop. On walls the sprite is turned 90° with its feet on the edge; on the ceiling it is mirrored. Names and bubbles follow.
+- The character window is wider (160→220) so the turned body is never clipped.
+
 ## v0.6.6
 
 **한국어**

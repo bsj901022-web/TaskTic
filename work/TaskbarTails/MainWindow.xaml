@@ -102,6 +102,7 @@
       <CheckBox x:Name="SoundCheck" Content="{local:T set_sound}" Checked="Sound_Changed" Unchecked="Sound_Changed"/>
       <CheckBox x:Name="WindowCheck" Content="{local:T set_window_play}" Checked="WindowPlay_Changed" Unchecked="WindowPlay_Changed"/>
       <CheckBox x:Name="BubblesCheck" Content="{local:T set_bubbles}" Checked="Bubbles_Changed" Unchecked="Bubbles_Changed"/>
+      <CheckBox x:Name="EdgeCheck" Content="{local:T set_edge_roam}" Checked="EdgeRoam_Changed" Unchecked="EdgeRoam_Changed"/>
      </StackPanel>
     </Grid>
     <TextBlock x:Name="HotkeyNote" Style="{StaticResource Caption}" FontSize="11" Margin="0,4,0,0" Foreground="#B5713A" Visibility="Collapsed"/>

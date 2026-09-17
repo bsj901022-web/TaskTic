@@ -33,7 +33,8 @@ public sealed class PetState
     public int MonitorIndex { get; set; }             // 0 = primary
     public int BubbleStyle { get; set; }              // cosmetic, unlocked by level
     public int NameStyle { get; set; } = 1;           // 0 hidden, 1 small, 2 large label with background
-    public bool WindowPlay { get; set; } = true;      // land on / walk along / climb other windows, react to the active window
+    public bool WindowPlay { get; set; } = true;      // land on / walk along / ride a balloon up to other windows, react to the active window
+    public bool EdgeRoam { get; set; } = true;        // climb the left/right screen edges and walk upside down along the top
     public DateTime LastSeenUtc { get; set; }
     [JsonIgnore] public double HoursAway { get; private set; }
 

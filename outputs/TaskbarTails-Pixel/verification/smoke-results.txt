@@ -177,6 +177,10 @@ PASS: falls back to the taskbar
 PASS: a window top edge nearby is chosen for a balloon ride
 PASS: character walks under the edge, floats up with a balloon and stands on top
 PASS: back on the ground after the test window closes
+PASS: character steps onto the left screen edge with its feet on the edge
+PASS: climbs the left edge to the top and turns onto the ceiling
+PASS: walks the ceiling to the right edge and starts down
+PASS: comes down the right edge back onto the taskbar
 PASS: quick reaction shows as a bubble
 PASS: quick chat opens above the character
 PASS: bubble styles unlock by level

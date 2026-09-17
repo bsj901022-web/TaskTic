@@ -547,6 +547,17 @@ public sealed class App : Application
             bool floated = false; for (int i = 0; i < 1500 && !pets[0].IsPerched; i++) { pets[0].Step(.033); floated |= pets[0].IsRising && pets[0].Visual.Balloon; }
             Check(pets[0].IsPerched && floated && Math.Abs(pets[0].FeetY - (GroundY - 420)) < 1 && !pets[0].Visual.Balloon, "character walks under the edge, floats up with a balloon and stands on top");
             Desktop.TestPlatform(null); Desktop.Refresh(Screen); for (int i = 0; i < 900 && (pets[0].IsPerched || pets[0].IsFalling); i++) pets[0].Step(.033); Check(pets[0].InsideWorkArea(), "back on the ground after the test window closes");
+            // --- v0.6.7: screen edges ---
+            State.EdgeRoam = true; pets[0].TestStartWall(1); pets[0].Step(.033); var edgeRect = pets[0].WindowRect();
+            Check(pets[0].Surface == 1 && Math.Abs(edgeRect.Left + 110 * pets[0].Dpi - Screen.Work.Left) <= 1 && pets[0].Visual.Surface == 1, "character steps onto the left screen edge with its feet on the edge");
+            for (int i = 0; i < 40; i++) pets[0].Step(.033); pets[0].Say("벽 타기!", false); pets[0].Visual.InvalidateVisual(); pets[0].UpdateLayout(); Export(pets[0], Path.Combine(smokePath!, "pet-wall.png"));
+            for (int i = 0; i < 4000 && pets[0].Surface == 1; i++) pets[0].Step(.033);
+            Check(pets[0].Surface == 3 && Math.Abs(pets[0].FeetY - Screen.Work.Top) < 1, "climbs the left edge to the top and turns onto the ceiling");
+            for (int i = 0; i < 40; i++) pets[0].Step(.033); pets[0].Say("천장 산책 중"); pets[0].Visual.InvalidateVisual(); pets[0].UpdateLayout(); Export(pets[0], Path.Combine(smokePath!, "pet-ceiling.png"));
+            for (int i = 0; i < 8000 && pets[0].Surface == 3; i++) pets[0].Step(.033);
+            Check(pets[0].Surface == 2, "walks the ceiling to the right edge and starts down");
+            for (int i = 0; i < 4000 && pets[0].Surface == 2; i++) pets[0].Step(.033);
+            Check(pets[0].Surface == 0 && !pets[0].IsFalling && pets[0].InsideWorkArea(), "comes down the right edge back onto the taskbar");
             SendBubble("❤️"); Check(pets[0].Visual.Bubble == "❤️", "quick reaction shows as a bubble");
             OpenQuickChat(); Check(QuickChatVisible, "quick chat opens above the character"); HideQuickChat();
             Check(PetState.UnlockLevel(3) == 8 && new PetState { BubbleStyle = 3 }.EffectiveBubbleStyle == 0 && new PetState { BubbleStyle = 3, Experience = 800 }.EffectiveBubbleStyle == 3, "bubble styles unlock by level");

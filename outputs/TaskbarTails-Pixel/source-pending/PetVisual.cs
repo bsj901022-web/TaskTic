@@ -16,6 +16,7 @@ public sealed class PetVisual : FrameworkElement
     public double Shake;          // horizontal head-shake offset (too full to eat)
     public bool Balloon;          // floating up to a window top edge under a small balloon (code-native prop, like the parachute)
     public bool BubbleTyped;      // true: a typed message (speech bubble); false: something the character says by itself (thought cloud)
+    public int Surface;           // 0 ground, 1 left screen edge (turned 90° clockwise), 2 right edge (90° anticlockwise), 3 ceiling (mirrored, feet up)
     public bool Parachute, BallVisible, GoldName, FaceFront;
     public string ActionKey = "";
     public string Bubble = "";
@@ -67,26 +68,29 @@ public sealed class PetVisual : FrameworkElement
     }
     // Grows upward from the pet and wraps long text (up to 80 characters) inside the 160px overlay.
     // Typed messages are speech bubbles (bold text, pointed tail); the character's own lines are thought clouds (lighter text, dashed edge, two little circles).
-    void DrawBubble(DrawingContext d, double bottom, double minTop)
+    // cx: horizontal centre of the tail; below: the bubble hangs under the anchor (ceiling) instead of rising above it.
+    void DrawBubble(DrawingContext d, double anchor, double minTop, double cx = 80, bool below = false)
     {
         bool typed = BubbleTyped;
         var f = Make(Bubble, typed ? 10 : 9.5, typed ? Ink : ThoughtInk, typed, 128);
         double width = Math.Min(150, Math.Ceiling(f.Width) + 16), height = Math.Ceiling(f.Height) + 10;
-        var box = new Rect(80 - width / 2, Math.Max(minTop, bottom - height - (typed ? 0 : 7)), width, height);
+        double left = Math.Clamp(cx - width / 2, -26, 186 - width);
+        var box = below ? new Rect(left, anchor + (typed ? 6 : 10), width, height) : new Rect(left, Math.Max(minTop, anchor - height - (typed ? 0 : 7)), width, height);
         int style = Math.Clamp(BubbleStyle, 0, BubbleFill.Length - 1);
+        double tailY = below ? box.Top : box.Bottom, dir = below ? -1 : 1;
         if (typed)
         {
             d.DrawRoundedRectangle(BubbleFill[style], BubbleEdge[style], box, 10, 10);
             var tail = new StreamGeometry();
-            using (var g = tail.Open()) { g.BeginFigure(new Point(76, box.Bottom - 1), true, true); g.LineTo(new Point(80, box.Bottom + 5), true, false); g.LineTo(new Point(84, box.Bottom - 1), true, false); }
+            using (var g = tail.Open()) { g.BeginFigure(new Point(cx - 4, tailY - dir), true, true); g.LineTo(new Point(cx, tailY + 5 * dir), true, false); g.LineTo(new Point(cx + 4, tailY - dir), true, false); }
             tail.Freeze(); d.DrawGeometry(BubbleFill[style], null, tail);
         }
         else
         {
             d.PushOpacity(.9);
             d.DrawRoundedRectangle(BubbleFill[style], ThoughtEdge, box, 14, 14);
-            d.DrawEllipse(BubbleFill[style], ThoughtEdge, new Point(78, box.Bottom + 4), 2.8, 2.8);
-            d.DrawEllipse(BubbleFill[style], ThoughtEdge, new Point(75.5, box.Bottom + 9.5), 1.7, 1.7);
+            d.DrawEllipse(BubbleFill[style], ThoughtEdge, new Point(cx - 2, tailY + 4 * dir), 2.8, 2.8);
+            d.DrawEllipse(BubbleFill[style], ThoughtEdge, new Point(cx - 4.5, tailY + 9.5 * dir), 1.7, 1.7);
             d.Pop();
         }
         d.DrawText(f, new Point(box.Left + 8, box.Top + 5));
@@ -109,16 +113,38 @@ public sealed class PetVisual : FrameworkElement
         double zoom = FrontView ? Math.Min(3, Math.Min(126 / sprites.Bounds.Width, 113 / sprites.Bounds.Height)) : DevicePixelsPerSprite(SizeFactor) / (dpiScale * scale);
         double snap = dpiScale * scale; // canvas units -> device pixels
         double petTop = 174 - sprites.Bounds.Height * zoom;
-        d.DrawEllipse(Shadow, null, new Point(80, 174), Math.Max(5, sprites.Bounds.Width * zoom * .42 - Jump / 12), FrontView ? 4 : Math.Max(2, zoom * 2.2));
-        if (ShowName && !Parachute && !Balloon) DrawName(d, FrontView ? 119 : petTop - (NameStyle >= 2 ? 21 : 15));
-        if (Bubble.Length > 0) DrawBubble(d, FrontView ? 40 : petTop - (ShowName && NameStyle >= 2 ? 26 : 18), FrontView ? 2 : 2 - headroom);
-        else if (Sleeping) Text(d, "z z Z", 12, Teal, FrontView ? 108 : 80 + sprites.Bounds.Width * zoom * .45, FrontView ? 38 : petTop - 30);
+        double bodyLength = sprites.Bounds.Height * zoom, bodyWidth = sprites.Bounds.Width * zoom;
+        if (Surface == 0) d.DrawEllipse(Shadow, null, new Point(80, 174), Math.Max(5, bodyWidth * .42 - Jump / 12), FrontView ? 4 : Math.Max(2, zoom * 2.2));
+        if (Surface == 0)
+        {
+            if (ShowName && !Parachute && !Balloon) DrawName(d, FrontView ? 119 : petTop - (NameStyle >= 2 ? 21 : 15));
+            if (Bubble.Length > 0) DrawBubble(d, FrontView ? 40 : petTop - (ShowName && NameStyle >= 2 ? 26 : 18), FrontView ? 2 : 2 - headroom);
+            else if (Sleeping) Text(d, "z z Z", 12, Teal, FrontView ? 108 : 80 + bodyWidth * .45, FrontView ? 38 : petTop - 30);
+        }
+        else if (Surface == 3)
+        {
+            // Upside down under the top edge: name and bubble hang below the body.
+            double bodyBottom = 6 + bodyLength;
+            if (ShowName) DrawName(d, bodyBottom + 6);
+            if (Bubble.Length > 0) DrawBubble(d, bodyBottom + (ShowName ? (NameStyle >= 2 ? 26 : 20) : 4), 0, 80, true);
+        }
+        else if (Bubble.Length > 0)
+        {
+            // Sideways on a wall: the body lies horizontally from the feet; the bubble sits above its middle.
+            double cx = 80 + (Surface == 1 ? 1 : -1) * bodyLength / 2;
+            DrawBubble(d, 74 - bodyWidth / 2 - 12, 2 - headroom, cx);
+        }
         var (frame, flip) = sprites.Frame(FaceLeft, Walking && !Sleeping && !FaceFront, Phase, FrontView || (FaceFront && ActionKey.Length == 0), ActionKey, ActionTime);
         double jumpOffset = FrontView ? Jump : Jump * zoom / 2.2;
         double px = 80 - (sprites.Bounds.Left + sprites.Bounds.Width / 2) * zoom;
         double py = 174 - sprites.Bounds.Bottom * zoom - jumpOffset;
         if (!FrontView) { px = Math.Round(px * snap) / snap; py = Math.Round(py * snap) / snap; }
         if (Shake != 0) d.PushTransform(new TranslateTransform(Shake, 0));
+        // Walls turn the sprite about the feet (feet stay on the edge); the ceiling mirrors it vertically and moves it up so the feet sit at canvas y=6.
+        // On walls the body lies horizontally at foot height, so it is also moved up 100 (feet at canvas y=74) to stay inside the window.
+        if (Surface == 1) { d.PushTransform(new TranslateTransform(0, -100)); d.PushTransform(new RotateTransform(90, 80, 174)); }
+        else if (Surface == 2) { d.PushTransform(new TranslateTransform(0, -100)); d.PushTransform(new RotateTransform(-90, 80, 174)); }
+        else if (Surface == 3) { d.PushTransform(new TranslateTransform(0, -168)); d.PushTransform(new ScaleTransform(1, -1, 0, 174)); }
         if (Parachute || Balloon) d.PushTransform(new RotateTransform(Sway, 80, petTop + 6));
         if (flip) d.PushTransform(new ScaleTransform(-1, 1, 80, 0));
         d.DrawImage(frame, new Rect(px, py, frame.PixelWidth * zoom, frame.PixelHeight * zoom));
@@ -150,6 +176,7 @@ public sealed class PetVisual : FrameworkElement
             d.Pop(); d.Pop();
         }
         if (Parachute || Balloon) d.Pop();
+        if (Surface != 0) { d.Pop(); d.Pop(); }
         if (Shake != 0) d.Pop();
         d.Pop(); d.Pop();
     }
