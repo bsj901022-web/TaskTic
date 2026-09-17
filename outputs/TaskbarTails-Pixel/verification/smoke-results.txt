@@ -181,6 +181,8 @@ PASS: character steps onto the left screen edge with its feet on the edge
 PASS: climbs the left edge to the top and turns onto the ceiling
 PASS: walks the ceiling to the right edge and starts down
 PASS: comes down the right edge back onto the taskbar
+PASS: menu command walks to the nearest edge and climbs it
+PASS: test drop returns the character to the ground
 PASS: quick reaction shows as a bubble
 PASS: quick chat opens above the character
 PASS: bubble styles unlock by level

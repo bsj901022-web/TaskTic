@@ -32,7 +32,7 @@ public sealed class PetWindow : Window
  int riseStage; DesktopWindow? riseWindow; double riseX, riseTarget, nextRise=45;
  int seenVersion=-1;
  // Screen edges: which surface the feet are on, when the next wall/ceiling decision may happen, and when the next wall climb may start.
- int surface; double nextEdgeDecision, nextWallTry;
+ int surface, wallGoal; double nextEdgeDecision, nextWallTry;
  // Remote copies: an invisible ledge at the height the owner reported (perched on one of their windows), or a balloon ride toward it.
  bool remotePerched; double remoteLedgeX, remoteLedgeLift;
  bool sentSleeping;
@@ -86,7 +86,7 @@ public sealed class PetWindow : Window
   MouseLeftButtonUp+=(_,_)=>{
    if(!dragging)return;dragging=false;ReleaseMouseCapture();
    if(!moved){if(!demo)app.Pet();else Say(L.Get("demo_click"));Bounce();if(lift>0&&perch==null&&riseStage!=2&&surface==0){falling=true;fallAge=Math.Max(fallAge,.2);}}
-   else if(lift>8*dpi){falling=true;fallAge=0;Visual.Sleeping=false;if(!demo){app.State.Sleeping=false;app.Broadcast("parachute");}}
+   else Released();
   };
   LostMouseCapture+=(_,_)=>{if(dragging){dragging=false;if(lift>0&&perch==null&&surface==0){falling=true;fallAge=0;}}};
   BuildMenu();ContextMenu=menu;
@@ -98,6 +98,7 @@ public sealed class PetWindow : Window
   void Item(string text,Action action){var i=new MenuItem{Header=text};i.Click+=(_,_)=>action();menu.Items.Add(i);}
   Item(L.Get("tray_open"),app.ShowPanel);
   if(!demo&&!IsRemote){Item(L.Feed(PetCatalog.Get(app.State.Species).Group),app.Feed);Item(L.Get("ctx_play"),app.Play);Item(L.Get("ctx_sleep"),app.ToggleSleep);Item(L.Get("ctx_say"),app.OpenQuickChat);}
+  if(!IsRemote)Item(L.Get("ctx_wall"),RequestWall);
   if(IsRemote){Item(L.Get("ctx_poke"),()=>app.Poke(this));Item(L.Get("ctx_ball"),()=>app.ThrowBallTo(this));}
   menu.Items.Add(new Separator());Item(L.Get("ctx_quit"),app.Quit);
  }
@@ -179,9 +180,22 @@ public sealed class PetWindow : Window
  // Steps from the ground onto the left (1) or right (2) screen edge and starts climbing.
  void StartWall(int side)
  {
-  var w=app.Screen.Work;surface=side;lift=0;direction=1;velocity=0;turnPause=.2;Visual.ActionKey="";
+  var w=app.Screen.Work;surface=side;wallGoal=0;lift=0;direction=1;velocity=0;turnPause=.2;Visual.ActionKey="";
   x=(side==1?w.Left:w.Right)-FeetLocalX*dpi;
   Say(L.Get("edge_climb"));
+ }
+ // Dropped after a drag: against the left or right screen edge the character grabs the wall at that height; anywhere else it parachutes down.
+ void Released()
+ {
+  var w=app.Screen.Work;Native.GetCursorPos(out var p);
+  if(app.State.EdgeRoam&&perch==null&&(p.X<=w.Left+30*dpi||p.X>=w.Right-30*dpi)){double h=lift;StartWall(p.X<=w.Left+30*dpi?1:2);lift=Math.Clamp(h,0,WallTop);Place();return;}
+  if(lift>8*dpi){falling=true;fallAge=0;Visual.Sleeping=false;if(!demo){app.State.Sleeping=false;app.Broadcast("parachute");}}
+ }
+ // Context menu: walk to the nearest screen edge and climb it (no coin toss).
+ public void RequestWall()
+ {
+  if(surface!=0||falling||dragging)return;
+  var w=app.Screen.Work;wallGoal=CenterX<(w.Left+w.Right)/2.0?1:2;direction=wallGoal==1?-1:1;velocity=0;turnPause=0;frontUntil=0;Visual.ActionKey="";perch=null;CancelRise();fetchStage=0;
  }
  // Lets go of the wall or ceiling: a parachute drop from where the feet were.
  void LetGo(string line){int from=surface;surface=0;falling=true;fallAge=0;velocity=0;if(from==1)x=app.Screen.Work.Left;else if(from==2)x=app.Screen.Work.Right-Width*dpi;Say(line);if(!demo&&!IsRemote)app.Broadcast("parachute");}
@@ -272,12 +286,14 @@ public sealed class PetWindow : Window
   else if(!dragging&&!Visual.Sleeping&&Visual.ActionKey.Length==0&&!IsMouseOver&&!Visual.FaceFront){
    if(turnPause>0)turnPause-=dt;
    else{
+    if(wallGoal!=0)direction=wallGoal==1?-1:1;
     walking=true;velocity+=(direction*28*dpi-velocity)*Math.Min(1,dt*6);x+=velocity*dt;
-    // At a screen edge the character may step onto the wall instead of turning around (roughly half the time, then not again for a while).
-    if(app.State.EdgeRoam&&perch==null&&!remotePerched&&phase>=nextWallTry){
+    // At a screen edge the character may step onto the wall instead of turning around (roughly half the time, then not again for a while;
+    // always when the menu asked for it).
+    if(perch==null&&!remotePerched&&(wallGoal!=0||(app.State.EdgeRoam&&phase>=nextWallTry))){
      var wa=app.Screen.Work;
-     if(x<=wa.Left&&direction<0){if(random.Next(2)==0)StartWall(1);else nextWallTry=phase+20;}
-     else if(x>=wa.Right-Width*dpi&&direction>0){if(random.Next(2)==0)StartWall(2);else nextWallTry=phase+20;}
+     if(x<=wa.Left&&direction<0){if(wallGoal==1||random.Next(2)==0)StartWall(1);else nextWallTry=phase+20;}
+     else if(x>=wa.Right-Width*dpi&&direction>0){if(wallGoal==2||random.Next(2)==0)StartWall(2);else nextWallTry=phase+20;}
     }
    }
    // Every couple of minutes a window nearby invites a balloon ride to its top edge (local character only).
@@ -367,4 +383,5 @@ public sealed class PetWindow : Window
  public void TestInterruptFall(){falling=false;dragging=false;}
  public bool TestRise()=>TryStartRise();
  public void TestStartWall(int side){LeaveSurfaces();StartWall(side);Place();}
+ public void TestRequestWall(){LeaveSurfaces();falling=false;RequestWall();}
 }

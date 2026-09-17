@@ -160,6 +160,7 @@ public static class L
         ["ctx_play"] = ("함께 놀기", "Play together"),
         ["ctx_sleep"] = ("잠자기 / 깨우기", "Sleep / wake"),
         ["ctx_say"] = ("말하기", "Speak"),
+        ["ctx_wall"] = ("벽 타고 올라가기", "Climb the screen edge"),
         ["ctx_poke"] = ("콕 찌르기", "Poke"),
         ["ctx_ball"] = ("공 던지기", "Throw a ball"),
         ["ctx_quit"] = ("프로그램 종료", "Quit"),

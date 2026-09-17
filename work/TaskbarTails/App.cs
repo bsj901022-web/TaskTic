@@ -558,6 +558,9 @@ public sealed class App : Application
             Check(pets[0].Surface == 2, "walks the ceiling to the right edge and starts down");
             for (int i = 0; i < 4000 && pets[0].Surface == 2; i++) pets[0].Step(.033);
             Check(pets[0].Surface == 0 && !pets[0].IsFalling && pets[0].InsideWorkArea(), "comes down the right edge back onto the taskbar");
+            pets[0].TestRequestWall(); for (int i = 0; i < 4000 && pets[0].Surface == 0; i++) pets[0].Step(.033);
+            Check(pets[0].Surface is 1 or 2 && pets[0].Visual.Walking, "menu command walks to the nearest edge and climbs it");
+            pets[0].TestDrop(0); pets[0].Step(.033); Check(pets[0].Surface == 0 && !pets[0].IsFalling, "test drop returns the character to the ground");
             SendBubble("❤️"); Check(pets[0].Visual.Bubble == "❤️", "quick reaction shows as a bubble");
             OpenQuickChat(); Check(QuickChatVisible, "quick chat opens above the character"); HideQuickChat();
             Check(PetState.UnlockLevel(3) == 8 && new PetState { BubbleStyle = 3 }.EffectiveBubbleStyle == 0 && new PetState { BubbleStyle = 3, Experience = 800 }.EffectiveBubbleStyle == 3, "bubble styles unlock by level");
