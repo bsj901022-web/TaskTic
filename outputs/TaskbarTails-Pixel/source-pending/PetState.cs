@@ -19,7 +19,10 @@ public sealed class PetState
     public string Language { get; set; } = "auto";   // auto | ko | en
     public bool StartWithWindows { get; set; }
     public bool HotkeysEnabled { get; set; } = true;  // Ctrl+Alt+P hide/show + the quick-bubble hotkey below
-    public string ChatHotkey { get; set; } = "ctrl+alt+t"; // one of Hotkeys.Options
+    public string ChatHotkey { get; set; } = "ctrl+alt+t"; // quick bubble
+    public string HideHotkey { get; set; } = "ctrl+alt+p"; // hide / show characters
+    public string BubbleHotkey { get; set; } = "ctrl+alt+b"; // automatic bubbles on / off
+    public bool AutoBubbles { get; set; } = true;          // small talk, reactions, window comments (typed messages always show)
     public bool NightSleep { get; set; } = true;      // 23:00-07:00
     public int IdleMinutes { get; set; } = 5;         // 0 = off
     public bool StretchReminder { get; set; } = true; // every 50 minutes
@@ -84,6 +87,10 @@ public static class StateStore
             state.BubbleStyle = Math.Clamp(state.BubbleStyle, 0, 3);
             state.NameStyle = Math.Clamp(state.NameStyle, 0, 2);
             state.ChatHotkey = Hotkeys.IsValid(state.ChatHotkey) ? state.ChatHotkey : Hotkeys.Default;
+            state.HideHotkey = Hotkeys.IsValid(state.HideHotkey) ? state.HideHotkey : Hotkeys.DefaultHide;
+            state.BubbleHotkey = Hotkeys.IsValid(state.BubbleHotkey) ? state.BubbleHotkey : Hotkeys.DefaultBubble;
+            if (state.HideHotkey == state.ChatHotkey) state.HideHotkey = Hotkeys.DefaultHide == state.ChatHotkey ? "ctrl+alt+h" : Hotkeys.DefaultHide;
+            if (state.BubbleHotkey == state.ChatHotkey || state.BubbleHotkey == state.HideHotkey) state.BubbleHotkey = Hotkeys.DefaultBubble == state.ChatHotkey || Hotkeys.DefaultBubble == state.HideHotkey ? "ctrl+alt+m" : Hotkeys.DefaultBubble;
             state.LastRoomCode = (state.LastRoomCode ?? "").Trim().ToUpperInvariant(); if (state.LastRoomCode.Length > 16) state.LastRoomCode = "";
             state.ApplyOfflineTime(DateTime.UtcNow);
             return state;

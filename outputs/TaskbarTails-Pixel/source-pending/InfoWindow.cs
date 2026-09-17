@@ -54,7 +54,7 @@ public sealed class InfoWindow : Window
         Section(L.Get("info_section_folders"), null);
         Link(L.Get("open_data"), () => OpenFolder(Path.GetDirectoryName(StateStore.PathName)!));
         Link(L.Get("open_logs"), () => OpenFolder(AppContext.BaseDirectory));
-        Section(L.Get("info_section_help"), L.F("info_help_text", Hotkeys.Label(app.State.ChatHotkey)));
+        Section(L.Get("info_section_help"), L.F("info_help_text", Hotkeys.Label(app.State.ChatHotkey), Hotkeys.Label(app.State.HideHotkey), Hotkeys.Label(app.State.BubbleHotkey)));
         body.Children.Add(notice);
         body.Children.Add(new TextBlock { Text = L.Get("info_dock_hint"), FontSize = 10, Foreground = new SolidColorBrush(Color.FromRgb(150, 157, 148)), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 14, 0, 0) });
     }

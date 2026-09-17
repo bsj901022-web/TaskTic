@@ -184,6 +184,15 @@ PASS: korean ui restored
 PASS: hotkey capture, validation and conflict flags
 PASS: custom hotkey saved with a conflict warning
 PASS: default hotkey clears the warning
+PASS: a key already used by another function is rejected
+PASS: hide and bubble hotkeys are rebindable
+PASS: automatic bubbles stay hidden while muted
+PASS: typed messages still show while muted
+PASS: bubbles toggle back on
+PASS: friend walks at the pace the friend reported
+PASS: friend parachute shows
+PASS: friend snaps to the ground when the friend reports standing on it
+PASS: turning or stopping requests an immediate snapshot for friends
 PASS: settings persist
 PASS: state persistence round-trip
 PASS: demo friends removed

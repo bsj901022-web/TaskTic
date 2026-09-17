@@ -27,6 +27,8 @@ public sealed class PetWindow : Window
  DesktopWindow? perch; double perchLeft, perchUntil, exposureChecked;
  int climbStage; DesktopWindow? climbWindow; bool climbLeftEdge; double climbWallX, nextClimb=45;
  bool remotePerched; int seenVersion=-1;
+ // Friends: their real walking pace on our screen (px/s); 0 = unknown. Local: what the last snapshot request described, plus a measured pace.
+ double remoteSpeed, measuredSpeed, prevX=double.NaN; int sentDirection; bool sentWalking, sentSleeping, sentFront, sentPerched;
  int placedX=int.MinValue, placedY, placedW, placedH, lastSignature;
  readonly ContextMenu menu=new();
  public bool IsDemo=>demo;
@@ -88,7 +90,8 @@ public sealed class PetWindow : Window
   menu.Items.Add(new Separator());Item(L.Get("ctx_quit"),app.Quit);
  }
  IntPtr Hook(IntPtr h,int msg,IntPtr w,IntPtr l,ref bool handled){if(msg==0x21){handled=true;return new IntPtr(3);}return IntPtr.Zero;}
- public void Say(string message){Visual.Bubble=message.Length>80?message[..80]:message;bubbleUntil=phase+Math.Clamp(3+message.Length*.12,6,12);}
+ // auto = a line the character says by itself (chatter, reactions, landing...). Those are hidden while automatic bubbles are off; typed messages always show.
+ public void Say(string message,bool auto=true){if(auto&&!app.State.AutoBubbles)return;Visual.Bubble=message.Length>80?message[..80]:message;bubbleUntil=phase+Math.Clamp(3+message.Length*.12,6,12);}
  public void Bounce(){leap=.01;}
  public void Act(string key,bool announce=true)
  {
@@ -178,9 +181,10 @@ public sealed class PetWindow : Window
   bool walking=false;
   if(IsRemote){
    // Friends walk continuously at the shared pace; the 3-second snapshot only corrects drift, so no stop-and-jump.
-   if(Visual.Walking&&!Visual.Sleeping&&turnPause<=0)x+=direction*28*dpi*dt;
-   x+=(targetX-x)*(1-Math.Exp(-dt*(Visual.Walking?1.2:7)));
-   lift+=(targetLift-lift)*(1-Math.Exp(-dt*2.5));
+   // Walks at the friend's own pace (scaled to this screen) so the snapshot correction stays tiny; a huge gap is a real jump, so snap.
+   if(Visual.Walking&&!Visual.Sleeping&&turnPause<=0){double step=direction*(remoteSpeed>0?remoteSpeed:28*dpi)*dt;x+=step;targetX+=step;}
+   if(Math.Abs(targetX-x)>400*dpi)x=targetX;else x+=(targetX-x)*(1-Math.Exp(-dt*(Visual.Walking?1.5:3)));
+   lift+=(targetLift-lift)*(1-Math.Exp(-dt*2.5));if(targetLift==0&&lift<3*dpi)lift=0;
    if(lift>8*dpi&&!remotePerched)x+=Math.Sin(phase*2.1)*dt*22*dpi;
    if(turnPause>0)turnPause-=dt;
    walking=Visual.Walking&&!Visual.Sleeping&&turnPause<=0&&!Visual.FaceFront;
@@ -239,6 +243,12 @@ public sealed class PetWindow : Window
   if(leap>0){leap+=dt;if(leap>.65)leap=0;}
   Visual.Jump=leap==0?0:Math.Sin(leap/.65*Math.PI)*39;
   Visual.Phase=phase;Visual.ActionTime=phase-actionStart;Visual.Walking=walking;Visual.FaceLeft=direction<0;
+  if(!IsRemote&&!demo){
+   // Friends should hear about turns, stops and starts right away instead of at the next 2-second snapshot.
+   if(!double.IsNaN(prevX)&&dt>0)measuredSpeed+=(Math.Abs(x-prevX)/dt-measuredSpeed)*Math.Min(1,dt*4);prevX=x;
+   bool perchedNow=perch!=null||climbStage==2;
+   if(walking!=sentWalking||direction!=sentDirection||Visual.Sleeping!=sentSleeping||Visual.FaceFront!=sentFront||perchedNow!=sentPerched){sentWalking=walking;sentDirection=direction;sentSleeping=Visual.Sleeping;sentFront=Visual.FaceFront;sentPerched=perchedNow;app.RequestSnapshot();}
+  }
   Place();
   // Redraw only when something visible changed (sprite frame, bubble, jump, parachute...), not 60 times a second.
   int signature=HashCode.Combine((int)(phase*SpriteSet.WalkFps),(int)(Visual.ActionTime*SpriteSet.ActionFps),Visual.Bubble,Visual.ActionKey,HashCode.Combine(Visual.Walking,Visual.FaceLeft,Visual.Sleeping,Visual.Parachute,(int)(Visual.Jump*4),(int)(Visual.Sway*4),Visual.Species,Visual.SizeFactor),HashCode.Combine(Visual.BubbleStyle,Visual.GoldName,Visual.PetName,Visual.FaceFront,Visual.NameStyle,Visual.ShowName,(int)(Visual.Shake*4),Visual.Climb));
@@ -264,18 +274,20 @@ public sealed class PetWindow : Window
  public PetEvent Snapshot(string kind="state",string message="")
  {
   var w=app.Screen.Work;
-  return new PetEvent{Kind=kind,Name=Visual.PetName,Species=Visual.Species,Action=Visual.ActionKey,Message=message,X=Math.Clamp((x-w.Left)/Math.Max(1,w.Right-w.Left-Width*dpi),0,1),Lift=lift/Math.Max(1,app.GroundY-w.Top),Left=direction<0,Walking=Visual.Walking,Sleeping=Visual.Sleeping,Front=Visual.FaceFront,Perched=perch!=null||climbStage==2};
+  return new PetEvent{Kind=kind,Name=Visual.PetName,Species=Visual.Species,Action=Visual.ActionKey,Message=message,X=Math.Clamp((x-w.Left)/Math.Max(1,w.Right-w.Left-Width*dpi),0,1),Lift=lift/Math.Max(1,app.GroundY-w.Top),Left=direction<0,Walking=Visual.Walking,Sleeping=Visual.Sleeping,Front=Visual.FaceFront,Perched=perch!=null||climbStage==2,Speed=Visual.Walking&&!dragging?measuredSpeed/Math.Max(1,w.Right-w.Left-Width*dpi):0};
  }
  public void Apply(PetEvent e)
  {
   var w=app.Screen.Work;Visual.PetName=e.Name;Visual.Species=PetCatalog.Valid(e.Species)?e.Species:"cat";
   if(Visual.Species!=lastSpecies){lastSpecies=Visual.Species;ResetMotion();}
   targetX=w.Left+Math.Clamp(e.X,0,1)*Math.Max(1,w.Right-w.Left-Width*dpi);direction=e.Left?-1:1;Visual.Walking=e.Walking;Visual.Sleeping=e.Sleeping;Visual.FaceFront=e.Front;remotePerched=e.Perched;
-  targetLift=Math.Clamp(e.Lift,0,1)*(app.GroundY-w.Top);
+  targetLift=Math.Clamp(e.Lift,0,1)*(app.GroundY-w.Top);remoteSpeed=e.Speed*Math.Max(1,w.Right-w.Left-Width*dpi);
   if(e.Kind=="parachute"){lift=Math.Max(lift,targetLift);targetLift=0;remotePerched=false;}
-  else if(e.Kind=="land"){if(!e.Perched){targetLift=0;lift=Math.Min(lift,12*dpi);}}
+  else if(e.Kind=="land"){if(!e.Perched){targetLift=0;lift=0;}}
+  // On the ground at the friend's end: never leave this copy hovering.
+  else if(e.Lift<=0&&!e.Perched&&lift<40*dpi){targetLift=0;lift=0;}
   if(e.Action!=Visual.ActionKey&&e.Kind=="state"){Visual.ActionKey=e.Action;actionStart=phase;actionUntil=phase+8;}
-  if(e.Kind=="message")Say(e.Message);
+  if(e.Kind=="message")Say(e.Message,e.Auto);
   else if(e.Kind is not ("state" or "land" or "parachute" or "greet" or "poke" or "ball")){Visual.ActionKey=e.Kind;actionStart=phase;actionUntil=phase+8;}
  }
  public bool InsideWorkArea(){if(!Native.GetWindowRect(handle,out var r))return false;var w=app.Screen.Work;return r.Left>=w.Left&&r.Right<=w.Right&&Math.Abs(r.Bottom-app.GroundY)<=2;}

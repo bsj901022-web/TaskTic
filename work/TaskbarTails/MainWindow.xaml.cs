@@ -35,7 +35,7 @@ public partial class MainWindow : Window
         IdleBox.Items.Clear(); foreach (var m in IdleOptions) IdleBox.Items.Add(m == 0 ? L.Get("idle_off") : L.F("idle_min", m));
         IdleBox.SelectedIndex = Math.Max(0, Array.IndexOf(IdleOptions, s.IdleMinutes));
         StartupCheck.IsChecked = s.StartWithWindows; HotkeyCheck.IsChecked = s.HotkeysEnabled; NightCheck.IsChecked = s.NightSleep;
-        StretchCheck.IsChecked = s.StretchReminder; SoundCheck.IsChecked = s.ClickSound; GreetCheck.IsChecked = s.GreetFriends; RejoinCheck.IsChecked = s.AutoRejoin; WindowCheck.IsChecked = s.WindowPlay;
+        StretchCheck.IsChecked = s.StretchReminder; SoundCheck.IsChecked = s.ClickSound; GreetCheck.IsChecked = s.GreetFriends; RejoinCheck.IsChecked = s.AutoRejoin; WindowCheck.IsChecked = s.WindowPlay; BubblesCheck.IsChecked = s.AutoBubbles;
         FillBubbleStyles();
         NameStyleBox.SelectedIndex = Math.Clamp(s.NameStyle, 0, 2);
         UpdateHotkeyTexts(); PreviewKeyDown += Window_PreviewKeyDown;
@@ -72,6 +72,7 @@ public partial class MainWindow : Window
         Preview.Species = s.Species; Preview.Sleeping = s.Sleeping; Preview.ShowName = false; Preview.FrontView = true;
         Preview.InvalidateVisual();
         VisibilityButton.Content = app.PetsVisible ? L.Get("hide_pets") : L.Get("show_pets");
+        if (ready && BubblesCheck.IsChecked != s.AutoBubbles) { ready = false; BubblesCheck.IsChecked = s.AutoBubbles; ready = true; }
         RoomInfo.Text = app.RoomSummary; RoomInfo.Visibility = RoomInfo.Text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
         if (shownLevel != s.Level) FillBubbleStyles();
         if (StateStore.LastError != null) Notice.Text = StateStore.LastError;
@@ -109,33 +110,47 @@ public partial class MainWindow : Window
         if (app.State.Level < PetState.UnlockLevel(style)) { Notice.Text = L.F("style_locked", L.Get("style_" + style), PetState.UnlockLevel(style)); ready = false; BubbleStyleBox.SelectedIndex = app.State.EffectiveBubbleStyle; ready = true; return; }
         app.State.BubbleStyle = style; Save();
     }
-    bool capturing;
+    // Which hotkey box is waiting for a key press: 0 none, 1 quick bubble, 2 hide/show, 3 automatic bubbles.
+    int capturing;
+    static string HotkeyText(string combo, string fallback) { string label = Hotkeys.Label(combo); return combo == fallback ? L.F("hotkey_default", label) : label; }
     void UpdateHotkeyTexts()
     {
-        string label = Hotkeys.Label(app.State.ChatHotkey);
-        capturing = false;
-        HotkeyCapture.Content = app.State.ChatHotkey == Hotkeys.Default ? L.F("hotkey_default", label) : label;
-        QuickTip.Text = L.F("quick_tip", label);
-        bool conflict = Hotkeys.Conflicts(app.State.ChatHotkey);
+        var s = app.State; capturing = 0;
+        HotkeyCapture.Content = HotkeyText(s.ChatHotkey, Hotkeys.Default);
+        HideHotkeyCapture.Content = HotkeyText(s.HideHotkey, Hotkeys.DefaultHide);
+        BubbleHotkeyCapture.Content = HotkeyText(s.BubbleHotkey, Hotkeys.DefaultBubble);
+        QuickTip.Text = L.F("quick_tip", Hotkeys.Label(s.ChatHotkey));
+        bool conflict = Hotkeys.Conflicts(s.ChatHotkey) || Hotkeys.Conflicts(s.HideHotkey) || Hotkeys.Conflicts(s.BubbleHotkey);
         HotkeyNote.Text = conflict ? L.Get("hotkey_conflict") : ""; HotkeyNote.Visibility = conflict ? Visibility.Visible : Visibility.Collapsed;
     }
-    // Click the hotkey box, then press the combination you want. Esc cancels; modifiers alone are ignored.
-    void HotkeyCapture_Click(object sender, RoutedEventArgs e) { capturing = true; HotkeyCapture.Content = L.Get("hotkey_press"); HotkeyCapture.Focus(); }
-    void HotkeyReset_Click(object sender, RoutedEventArgs e) => ApplyHotkey(Hotkeys.Default);
+    // Click a hotkey box, then press the combination you want. Esc cancels; modifiers alone are ignored.
+    void StartCapture(int which, Button box) { UpdateHotkeyTexts(); capturing = which; box.Content = L.Get("hotkey_press"); box.Focus(); }
+    void HotkeyCapture_Click(object sender, RoutedEventArgs e) => StartCapture(1, HotkeyCapture);
+    void HideHotkeyCapture_Click(object sender, RoutedEventArgs e) => StartCapture(2, HideHotkeyCapture);
+    void BubbleHotkeyCapture_Click(object sender, RoutedEventArgs e) => StartCapture(3, BubbleHotkeyCapture);
+    void HotkeyReset_Click(object sender, RoutedEventArgs e) => ApplyHotkey(1, Hotkeys.Default);
+    void HideHotkeyReset_Click(object sender, RoutedEventArgs e) => ApplyHotkey(2, Hotkeys.DefaultHide);
+    void BubbleHotkeyReset_Click(object sender, RoutedEventArgs e) => ApplyHotkey(3, Hotkeys.DefaultBubble);
     void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (!capturing) return;
+        if (capturing == 0) return;
         e.Handled = true;
         var key = e.Key == Key.System ? e.SystemKey : e.Key;
         if (key == Key.Escape) { UpdateHotkeyTexts(); return; }
         if (key is Key.LeftCtrl or Key.RightCtrl or Key.LeftAlt or Key.RightAlt or Key.LeftShift or Key.RightShift or Key.LWin or Key.RWin) return;
         string combo = Hotkeys.Compose(Keyboard.Modifiers, key);
         if (!Hotkeys.IsValid(combo)) { Notice.Text = L.Get("hotkey_invalid"); return; }
-        ApplyHotkey(combo);
+        ApplyHotkey(capturing, combo);
     }
-    public void ApplyHotkey(string combo)
+    public void ApplyHotkey(string combo) => ApplyHotkey(1, combo);
+    // which: 1 quick bubble, 2 hide/show, 3 automatic bubbles. The same key cannot serve two functions.
+    public void ApplyHotkey(int which, string combo)
     {
-        app.State.ChatHotkey = combo; Save(); UpdateHotkeyTexts(); app.RegisterHotkeys(); app.RefreshTrayMenu();
+        var s = app.State;
+        bool taken = which switch { 1 => combo == s.HideHotkey || combo == s.BubbleHotkey, 2 => combo == s.ChatHotkey || combo == s.BubbleHotkey, _ => combo == s.ChatHotkey || combo == s.HideHotkey };
+        if (taken) { UpdateHotkeyTexts(); Notice.Text = L.Get("hotkey_taken"); return; }
+        if (which == 1) s.ChatHotkey = combo; else if (which == 2) s.HideHotkey = combo; else s.BubbleHotkey = combo;
+        Save(); UpdateHotkeyTexts(); app.RegisterHotkeys(); app.RefreshTrayMenu();
         Notice.Text = L.F("hotkey_saved", Hotkeys.Label(combo));
     }
     void NameStyle_Changed(object sender, SelectionChangedEventArgs e) { if (!ready) return; app.State.NameStyle = Math.Clamp(NameStyleBox.SelectedIndex, 0, 2); Save(); }
@@ -147,6 +162,7 @@ public partial class MainWindow : Window
     void Greet_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.GreetFriends = GreetCheck.IsChecked == true; Save(); }
     void Rejoin_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.AutoRejoin = RejoinCheck.IsChecked == true; Save(); }
     void WindowPlay_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.WindowPlay = WindowCheck.IsChecked == true; Save(); }
+    void Bubbles_Changed(object sender, RoutedEventArgs e) { if (!ready) return; bool on = BubblesCheck.IsChecked == true; if (on != app.State.AutoBubbles) app.SetBubbles(on); }
     void Friends_Changed(object sender, RoutedEventArgs e) { if (ready) app.SetFriends(FriendsCheck.IsChecked == true); }
     void Visibility_Click(object sender, RoutedEventArgs e) => app.ToggleVisible();
     void ActionOne_Click(object sender, RoutedEventArgs e) => app.Specialty(0);

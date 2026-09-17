@@ -28,7 +28,7 @@ public sealed class App : Application
     QuickChatWindow? quickChat;
     InfoWindow? info;
     double lastBroadcast;
-    bool snapshotPending;
+    bool snapshotPending, snapshotDue;
     readonly List<PetWindow> pets = new();
     Forms.NotifyIcon? tray;
     // Render-priority timer at ~60 Hz: even pacing, and PetWindow only moves/redraws when something changed.
@@ -120,7 +120,8 @@ public sealed class App : Application
         menu.Items.Add(L.Get("tray_open"), null, (_, _) => Dispatcher.Invoke(ShowPanel));
         menu.Items.Add(L.Feed(PetCatalog.Get(State.Species).Group), null, (_, _) => Dispatcher.Invoke(Feed));
         menu.Items.Add(L.F("tray_say", Hotkeys.Label(State.ChatHotkey)), null, (_, _) => Dispatcher.Invoke(OpenQuickChat));
-        menu.Items.Add(L.Get("tray_toggle"), null, (_, _) => Dispatcher.Invoke(ToggleVisible));
+        menu.Items.Add(L.F("tray_toggle_key", Hotkeys.Label(State.HideHotkey)), null, (_, _) => Dispatcher.Invoke(ToggleVisible));
+        menu.Items.Add(L.F(State.AutoBubbles ? "tray_bubbles_off" : "tray_bubbles_on", Hotkeys.Label(State.BubbleHotkey)), null, (_, _) => Dispatcher.Invoke(ToggleBubbles));
         menu.Items.Add(L.Get("update_check"), null, (_, _) => Dispatcher.Invoke(() => { ShowPanel(); _ = CheckForUpdates(true); }));
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add(L.Get("quit"), null, (_, _) => Dispatcher.Invoke(Quit));
@@ -141,7 +142,8 @@ public sealed class App : Application
         foreach (var pet in pets.ToArray()) if (pet.IsVisible) pet.Step(dt);
         if (now - lastTopmost > 4) { lastTopmost = now; foreach (var p in pets) if (p.IsVisible) p.Place(true); }
         GreetCheck(now);
-        if (now - lastBroadcast > 3 && Room?.Connected == true && !snapshotPending) { lastBroadcast = now; Broadcast("state"); }
+        // Position snapshots: right away (rate-limited to 0.3 s) when a character turns, stops or starts, otherwise every 2 s.
+        if (Room?.Connected == true && !snapshotPending && ((snapshotDue && now - lastBroadcast > .3) || now - lastBroadcast > 2)) { lastBroadcast = now; snapshotDue = false; Broadcast("state"); }
         Panel.Animate(now);
         if (now - refreshed > .5) { Panel.Refresh(); refreshed = now; }
         if (now - saved > 15) { StateStore.Save(State); saved = now; }
@@ -157,7 +159,7 @@ public sealed class App : Application
         if (now - topicChecked < 2) return; topicChecked = now;
         var topic = Desktop.Topic(Desktop.ForegroundTitle());
         if (topic == lastTopic) return; lastTopic = topic;
-        if (topic != null && now - lastTopicSaid > 90 && !State.Sleeping && !pets[0].IsBusy) { lastTopicSaid = now; pets[0].LookAtViewer(5, L.Get(topic)); }
+        if (topic != null && now - lastTopicSaid > 90 && !State.Sleeping && State.AutoBubbles && !pets[0].IsBusy) { lastTopicSaid = now; pets[0].LookAtViewer(5, L.Get(topic)); }
     }
     // --- presence: idle nap, night sleep, stretch reminder ---
     void IdleCheck()
@@ -258,9 +260,8 @@ public sealed class App : Application
         if (!State.HotkeysEnabled || smokePath != null) return;
         var handle = new WindowInteropHelper(Panel).Handle; if (handle == IntPtr.Zero) return;
         hotkeySource = HwndSource.FromHwnd(handle); hotkeySource?.AddHook(HotkeyHook);
-        bool ok = Native.RegisterHotKey(handle, 1, 0x0002 | 0x0001, 0x50); // Ctrl+Alt+P
-        var (mods, key) = Native.ParseHotkey(State.ChatHotkey);
-        ok &= key != 0 && Native.RegisterHotKey(handle, 2, mods, key);
+        bool ok = true;
+        foreach (var (id, combo) in new[] { (1, State.HideHotkey), (2, State.ChatHotkey), (3, State.BubbleHotkey) }) { var (mods, key) = Native.ParseHotkey(combo); ok &= key != 0 && Native.RegisterHotKey(handle, id, mods, key); }
         hotkeysRegistered = true;
         if (!ok) Panel.Notice.Text = L.Get("hotkey_failed");
     }
@@ -268,13 +269,13 @@ public sealed class App : Application
     {
         if (!hotkeysRegistered) return;
         var handle = new WindowInteropHelper(Panel).Handle;
-        if (handle != IntPtr.Zero) { Native.UnregisterHotKey(handle, 1); Native.UnregisterHotKey(handle, 2); }
+        if (handle != IntPtr.Zero) { Native.UnregisterHotKey(handle, 1); Native.UnregisterHotKey(handle, 2); Native.UnregisterHotKey(handle, 3); }
         hotkeySource?.RemoveHook(HotkeyHook); hotkeySource = null; hotkeysRegistered = false;
     }
     IntPtr HotkeyHook(IntPtr hwnd, int msg, IntPtr w, IntPtr l, ref bool handled)
     {
         if (msg != 0x0312) return IntPtr.Zero;
-        if (w.ToInt32() == 1) ToggleVisible(); else if (w.ToInt32() == 2) OpenQuickChat();
+        if (w.ToInt32() == 1) ToggleVisible(); else if (w.ToInt32() == 2) OpenQuickChat(); else if (w.ToInt32() == 3) ToggleBubbles();
         handled = true; return IntPtr.Zero;
     }
     // Opt-in only (settings checkbox): HKCU Run key pointing at this exe.
@@ -332,7 +333,18 @@ public sealed class App : Application
         updater.ApplyUpdatesAndRestart(pendingUpdate);
     }
     public void ShowPanel() { Panel.Show(); Panel.WindowState = WindowState.Normal; Panel.Activate(); }
-    public void Changed(string message) { StateStore.Save(State); pets[0].Say(message); Panel.Refresh(); Broadcast("message", message); }
+    public void RequestSnapshot() => snapshotDue = true;
+    public void Changed(string message) { StateStore.Save(State); pets[0].Say(message); Panel.Refresh(); Broadcast("message", message, auto: true); }
+    // Hotkey / tray / settings: automatic bubbles on or off. Typed messages are never affected.
+    public void ToggleBubbles() => SetBubbles(!State.AutoBubbles);
+    public void SetBubbles(bool on)
+    {
+        State.AutoBubbles = on; StateStore.Save(State);
+        if (!on) foreach (var p in pets) p.Visual.Bubble = "";
+        else if (pets.Count > 0) pets[0].Say(L.Get("bubbles_on"));
+        Panel.Notice.Text = on ? L.Get("bubbles_on_notice") : L.F("bubbles_off_notice", Hotkeys.Label(State.BubbleHotkey));
+        Panel.Refresh(); RefreshTrayMenu();
+    }
     public void Feed()
     {
         var kind = PetCatalog.Get(State.Species);
@@ -374,7 +386,7 @@ public sealed class App : Application
     public void SendBubble(string text)
     {
         text = text.Trim(); if (text.Length == 0) return; if (text.Length > 80) text = text[..80];
-        pets[0].Say(text); Broadcast("message", text);
+        pets[0].Say(text, false); Broadcast("message", text);
     }
     // --- rooms ---
     public void ShowRoom()
@@ -429,12 +441,12 @@ public sealed class App : Application
     // A newcomer is visible in the roster right away instead of waiting for the 15s heartbeat.
     async Task RefreshRosterSafe() { try { if (Room != null) await Room.RefreshRoster(); } catch (Exception e) when (e is System.Net.Http.HttpRequestException or InvalidOperationException or TaskCanceledException) { Panel.Notice.Text = L.F("rc_roster_wait", e.Message); } }
     public string RoomSummary => Room?.Connected == true ? L.F("room_summary", Room.RoomName, Room.InviteCode, Math.Max(1, Room.Members.Count)) : "";
-    public async void Broadcast(string kind, string message = "", string target = "", bool? left = null)
+    public async void Broadcast(string kind, string message = "", string target = "", bool? left = null, bool auto = false)
     {
         if (Room?.Connected != true || pets.Count == 0) return;
         if (kind == "state" && snapshotPending) return;
         bool snapshot = kind == "state"; if (snapshot) snapshotPending = true;
-        try { var ev = pets[0].Snapshot(kind, message); ev.Target = target; if (left != null) ev.Left = left.Value; await Room.Publish(ev); }
+        try { var ev = pets[0].Snapshot(kind, message); ev.Target = target; ev.Auto = auto; if (left != null) ev.Left = left.Value; await Room.Publish(ev); }
         catch (Exception e) { Panel.Notice.Text = L.F("send_wait", e.Message); }
         finally { if (snapshot) snapshotPending = false; }
     }
@@ -549,6 +561,21 @@ public sealed class App : Application
             SetLanguage("ko"); Check(L.Get("feed") == "먹이 주기" && Panel.Title.Contains("작은 친구들"), "korean ui restored");
             Check(Hotkeys.Compose(System.Windows.Input.ModifierKeys.Control | System.Windows.Input.ModifierKeys.Alt, System.Windows.Input.Key.T) == "ctrl+alt+t" && Hotkeys.IsValid("ctrl+alt+t") && Hotkeys.IsValid("f9") && !Hotkeys.IsValid("t") && Hotkeys.Conflicts("ctrl+t") && !Hotkeys.Conflicts("ctrl+alt+t") && Hotkeys.Label("ctrl+alt+t") == "Ctrl+Alt+T", "hotkey capture, validation and conflict flags");
             Panel.ApplyHotkey("ctrl+t"); Check(State.ChatHotkey == "ctrl+t" && Panel.HotkeyNote.Visibility == Visibility.Visible, "custom hotkey saved with a conflict warning"); Panel.ApplyHotkey(Hotkeys.Default); Check(Panel.HotkeyNote.Visibility == Visibility.Collapsed, "default hotkey clears the warning");
+            Panel.ApplyHotkey(2, "ctrl+alt+t"); Check(State.HideHotkey == Hotkeys.DefaultHide && Panel.Notice.Text == L.Get("hotkey_taken"), "a key already used by another function is rejected");
+            Panel.ApplyHotkey(2, "ctrl+alt+h"); Panel.ApplyHotkey(3, "f8"); Check(State.HideHotkey == "ctrl+alt+h" && State.BubbleHotkey == "f8", "hide and bubble hotkeys are rebindable");
+            Panel.ApplyHotkey(2, Hotkeys.DefaultHide); Panel.ApplyHotkey(3, Hotkeys.DefaultBubble);
+            SetBubbles(false); pets[0].Say("auto"); Check(pets[0].Visual.Bubble == "" && !State.AutoBubbles, "automatic bubbles stay hidden while muted");
+            pets[0].Say("typed", false); Check(pets[0].Visual.Bubble == "typed", "typed messages still show while muted");
+            SetBubbles(true); Check(State.AutoBubbles && pets[0].Visual.Bubble == L.Get("bubbles_on"), "bubbles toggle back on");
+            var sync = new PetWindow(this, "동기", "cat", "", 300, false, true) { RemoteId = "sync-1" }; sync.Show();
+            sync.Apply(new PetEvent { Kind = "state", UserId = "sync-1", Name = "동기", Species = "cat", X = .5, Lift = 0, Walking = true, Speed = .05 }); sync.Step(.033); double x0 = sync.CenterX; for (int i = 0; i < 30; i++) sync.Step(.033);
+            double span = Screen.Work.Right - Screen.Work.Left - sync.Width * sync.Dpi, moved = sync.CenterX - x0;
+            Check(moved > .05 * span * .6 && moved < .05 * span * 1.6, "friend walks at the pace the friend reported");
+            sync.Apply(new PetEvent { Kind = "parachute", UserId = "sync-1", Name = "동기", Species = "cat", X = .5, Lift = .4 }); sync.Step(.033); Check(sync.Visual.Parachute, "friend parachute shows");
+            sync.Apply(new PetEvent { Kind = "land", UserId = "sync-1", Name = "동기", Species = "cat", X = .5, Lift = 0 }); sync.Step(.033); Check(!sync.Visual.Parachute && Math.Abs(sync.FeetY - GroundY) < 1, "friend snaps to the ground when the friend reports standing on it");
+            sync.Close();
+            pets[0].TestMoveTo(Screen.Work.Left - 50); pets[0].Step(.033); snapshotDue = false; pets[0].TestMoveTo(Screen.Work.Right + 50); pets[0].Step(.033);
+            Check(snapshotDue, "turning or stopping requests an immediate snapshot for friends");
             State.IdleMinutes = 10; State.NightSleep = false; StateStore.Save(State); var reloaded = StateStore.Load(); Check(reloaded.IdleMinutes == 10 && !reloaded.NightSleep, "settings persist"); State.IdleMinutes = 5; State.NightSleep = true;
             State.Species = "cat"; State.Name = "모찌"; State.Fullness = 86; State.Happiness = 94;
             StateStore.Save(State); var loaded = StateStore.Load(); Check(loaded.Name == State.Name && loaded.Experience == State.Experience, "state persistence round-trip");

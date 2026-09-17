@@ -2,6 +2,20 @@
 
 릴리스마다 이 파일의 해당 절이 GitHub Release 노트로 올라갑니다. Each release's section is published as its GitHub Release notes.
 
+## v0.6.5
+
+**한국어**
+- 방 친구 캐릭터가 더 매끄럽게 움직입니다. 방향을 바꾸거나 멈추거나 다시 걷기 시작하면 다음 정기 스냅샷(이제 2초)을 기다리지 않고 0.3초 안에 바로 알려 주고, 걷는 속도도 함께 보내 상대 화면 너비에 맞춰 같은 빠르기로 걷습니다. 그래서 3초 뒤에 미끄러지듯 되돌아가던 "순간이동"이 거의 사라집니다.
+- 친구 캐릭터가 작업표시줄 위에 떠 있던 문제 수정: 상대가 바닥에 있다고 알려 오면 높이를 서서히 줄이는 대신 즉시 바닥에 붙입니다. 착지 이벤트가 늦거나 빠져도 다음 스냅샷에서 바로 내려옵니다.
+- 자동 말풍선 켜기/끄기: 잡담·반응·창 한마디 같은 자동 말풍선을 숨기는 설정과 단축키(기본 Ctrl+Alt+B). 직접 입력한 말과 친구가 보낸 말은 항상 보입니다. 트레이 메뉴에서도 켜고 끌 수 있습니다.
+- 캐릭터 숨기기/보이기 단축키도 설정에서 원하는 키로 바꿀 수 있습니다(기본 Ctrl+Alt+P). 세 단축키는 서로 같은 키를 쓸 수 없습니다.
+
+**English**
+- Friends' characters move more smoothly: turns, stops and starts are sent within 0.3 s instead of waiting for the periodic snapshot (now every 2 s), and the walking pace is shared so the copy walks at the same speed scaled to the other screen. The slide-back "teleport" after 3 s is mostly gone.
+- Fix: friends' characters hovering above the taskbar. When a friend reports standing on the ground the copy snaps down immediately instead of easing.
+- Automatic bubbles on/off: a setting and hotkey (default Ctrl+Alt+B) hide small talk, reactions and window comments. Typed messages, yours and your friends', always show. Also in the tray menu.
+- The hide/show characters hotkey is now rebindable too (default Ctrl+Alt+P). The three hotkeys cannot share a key.
+
 ## v0.6.4
 
 **한국어**

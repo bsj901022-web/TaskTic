@@ -77,13 +77,13 @@ public static class L
         ["set_size"] = ("작업표시줄 캐릭터 크기", "Taskbar character size"),
         ["size_default"] = ("100% (기본)", "100% (default)"),
         ["set_startup"] = ("Windows 시작 시 자동 실행", "Start with Windows"),
-        ["set_hotkeys"] = ("전역 단축키 사용 (Ctrl+Alt+P 숨기기/보이기 · 아래 키로 빠른 말풍선)", "Use global hotkeys (Ctrl+Alt+P hide/show · quick bubble with the key below)"),
+        ["set_hotkeys"] = ("전역 단축키 사용 (왼쪽의 세 가지 키)", "Use global hotkeys (the three keys on the left)"),
         ["set_chat_hotkey"] = ("빠른 말풍선 단축키", "Quick bubble hotkey"),
         ["hotkey_default"] = ("{0} (기본)", "{0} (default)"),
         ["hotkey_press"] = ("키 조합을 누르세요… (Esc 취소)", "Press a key combo… (Esc to cancel)"),
         ["hotkey_reset"] = ("기본값", "Default"),
         ["hotkey_invalid"] = ("Ctrl·Alt·Shift 중 하나와 글자·숫자를 함께 누르거나 F1~F12를 누르세요.", "Hold Ctrl, Alt or Shift with a letter or digit, or press an F key."),
-        ["hotkey_saved"] = ("빠른 말풍선 단축키를 {0}로 등록했어요.", "Quick bubble hotkey set to {0}."),
+        ["hotkey_saved"] = ("단축키를 {0}로 등록했어요.", "Hotkey set to {0}."),
         ["hotkey_conflict"] = ("Ctrl+T처럼 브라우저·편집기가 쓰는 조합을 고르면 이 앱이 켜져 있는 동안 그 프로그램에서는 그 키가 막혀요. Ctrl+Alt+T나 F9처럼 비어 있는 키를 권해요.", "A combo such as Ctrl+T is used by browsers and editors; while Taskbar Tails runs, that key stops working in them. Prefer a free key like Ctrl+Alt+T or F9."),
         ["set_night"] = ("밤 11시~아침 7시 자동 취침", "Auto sleep 11 PM to 7 AM"),
         ["set_idle"] = ("자리 비움 낮잠", "Nap when away"),
@@ -217,7 +217,7 @@ public static class L
         ["info_section_project"] = ("프로젝트", "Project"),
         ["info_section_folders"] = ("폴더", "Folders"),
         ["info_section_help"] = ("조작 방법", "Controls"),
-        ["info_help_text"] = ("클릭: 인사하기\n위로 끌어 놓기: 낙하산\n휠 클릭 또는 {0}: 빠른 말풍선\nCtrl+Alt+P: 캐릭터 숨기기/보이기\n더블클릭: 관리 화면 · 우클릭: 메뉴\n친구 캐릭터 클릭: 콕 찌르기 · 우클릭: 공 던지기", "Click: say hi\nDrag up and release: parachute\nMiddle-click or {0}: quick bubble\nCtrl+Alt+P: hide/show characters\nDouble-click: panel · Right-click: menu\nClick a friend: poke · Right-click: throw a ball"),
+        ["info_help_text"] = ("클릭: 인사하기\n위로 끌어 놓기: 낙하산\n휠 클릭 또는 {0}: 빠른 말풍선\n{1}: 캐릭터 숨기기/보이기 · {2}: 자동 말풍선 켜기/끄기\n더블클릭: 관리 화면 · 우클릭: 메뉴\n친구 캐릭터 클릭: 콕 찌르기 · 우클릭: 공 던지기", "Click: say hi\nDrag up and release: parachute\nMiddle-click or {0}: quick bubble\n{1}: hide/show characters · {2}: automatic bubbles on/off\nDouble-click: panel · Right-click: menu\nClick a friend: poke · Right-click: throw a ball"),
         ["info_dock_hint"] = ("관리 화면 옆에 붙어 함께 움직여요. 닫으면 숨겨지고 버튼으로 다시 열 수 있어요.", "Docks beside the panel and moves with it. Closing hides it; the button opens it again."),
         ["about_desc"] = ("버그, 제안, 새 캐릭터 요청은 아래로 보내 주세요. 답장은 메일이 가장 빠릅니다.", "Send bugs, ideas and character requests below. Email gets the quickest reply."),
         ["contact_email"] = ("문의 메일  {0}", "Email  {0}"),
@@ -312,6 +312,16 @@ public static class L
         ["win_chat"] = ("누구랑 얘기해? 내 안부도 전해 줘", "Chatting with someone? Say hi from me"),
         ["win_shop"] = ("쇼핑 중? 내 간식도 하나…", "Shopping? Maybe a snack for me…"),
         ["win_browse"] = ("뭐 찾아봐? 재밌는 거면 알려 줘", "What are you looking up? Tell me if it's fun"),
+        ["set_hide_hotkey"] = ("캐릭터 숨기기/보이기 단축키", "Hide / show characters hotkey"),
+        ["set_bubble_hotkey"] = ("자동 말풍선 켜기/끄기 단축키", "Automatic bubbles on / off hotkey"),
+        ["set_bubbles"] = ("자동 말풍선 (잡담·반응·창 한마디). 직접 보낸 말과 친구가 보낸 말은 항상 보여요.", "Automatic bubbles (small talk, reactions, window comments). Typed messages always show."),
+        ["hotkey_taken"] = ("이미 다른 기능에 쓰는 단축키예요. 다른 키를 골라 주세요.", "That key is already used by another function. Pick a different one."),
+        ["bubbles_on"] = ("말풍선 다시 켰어!", "Bubbles back on!"),
+        ["bubbles_off_notice"] = ("자동 말풍선을 숨겼어요 ({0}로 다시 켜기). 직접 보낸 말과 친구가 보낸 말은 그대로 보여요.", "Automatic bubbles hidden ({0} to turn them back on). Your own and friends' typed messages still show."),
+        ["bubbles_on_notice"] = ("자동 말풍선을 다시 켰어요.", "Automatic bubbles are on again."),
+        ["tray_bubbles_on"] = ("자동 말풍선 켜기 ({0})", "Turn automatic bubbles on ({0})"),
+        ["tray_bubbles_off"] = ("자동 말풍선 끄기 ({0})", "Turn automatic bubbles off ({0})"),
+        ["tray_toggle_key"] = ("캐릭터 숨기기 / 보이기 ({0})", "Hide / show characters ({0})"),
         ["rc_anon"] = ("Supabase에서 Anonymous Sign-Ins를 켜 주세요.", "Enable Anonymous Sign-Ins in Supabase."),
         ["rc_setup"] = ("먼저 Supabase setup.sql을 실행해 주세요.", "Run Supabase setup.sql first."),
         ["rc_species"] = ("서버가 이 캐릭터 종류를 아직 몰라요. supabase/upgrade-v05.sql을 실행해 주세요.", "The server does not know this character kind yet. Run supabase/upgrade-v05.sql."),
@@ -354,7 +364,7 @@ public static class L
 // Selectable quick-bubble hotkeys. Ctrl+T is offered but flagged: it is what browsers and editors use.
 public static class Hotkeys
 {
-    public const string Default = "ctrl+alt+t";
+    public const string Default = "ctrl+alt+t", DefaultHide = "ctrl+alt+p", DefaultBubble = "ctrl+alt+b";
     // "ctrl+alt+t" style id from a key press; "" when the key is not supported (letters, digits, F1-F12, space).
     public static string Compose(System.Windows.Input.ModifierKeys mods, System.Windows.Input.Key key)
     {
