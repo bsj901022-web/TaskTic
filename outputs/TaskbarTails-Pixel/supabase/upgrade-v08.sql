@@ -27,13 +27,13 @@ do $$ begin
  if exists(select 1 from pg_extension where extname='pg_cron') then
   perform cron.unschedule(jobid) from cron.job where jobname='tt_purge_realtime_messages';
   perform cron.schedule('tt_purge_realtime_messages','*/10 * * * *',
-   $job$ delete from realtime.messages where inserted_at < now() - interval '1 hour' $job$);
+   $job$ delete from realtime.messages where inserted_at < now() - interval '10 minutes' $job$);
  end if;
 end $$;
 
 commit;
 
 -- One-time cleanup of what accumulated so far. Safe: the app never reads old messages.
-delete from realtime.messages where inserted_at < now() - interval '1 hour';
+delete from realtime.messages where inserted_at < now() - interval '10 minutes';
 
 select 'Taskbar Tails v0.6.8: websocket broadcasts + presence enabled, realtime.messages purged every 10 minutes' as result;

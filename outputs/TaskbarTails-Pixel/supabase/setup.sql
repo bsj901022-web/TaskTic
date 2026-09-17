@@ -127,7 +127,7 @@ do $$ begin
  if exists(select 1 from pg_extension where extname='pg_cron') then
   perform cron.unschedule(jobid) from cron.job where jobname='tt_purge_realtime_messages';
   perform cron.schedule('tt_purge_realtime_messages','*/10 * * * *',
-   $job$ delete from realtime.messages where inserted_at < now() - interval '1 hour' $job$);
+   $job$ delete from realtime.messages where inserted_at < now() - interval '10 minutes' $job$);
  end if;
 end $$;
 commit;
