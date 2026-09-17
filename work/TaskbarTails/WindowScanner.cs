@@ -95,30 +95,22 @@ public static class Desktop
         }
         return null;
     }
-    // The nearest window that reaches down to the ground and is tall enough to be worth climbing: (window, use its left edge?).
-    public static (DesktopWindow? Window, bool LeftEdge) ClimbTarget(double centerX, int ground, Native.Rect work, int minTop, double dpi)
+    // The nearest point on a window's top edge a balloon ride can reach: (window, physical x), or (null, 0).
+    // The ride goes straight up from the ground, so the window only needs a visible top edge, not contact with the taskbar.
+    public static (DesktopWindow? Window, double X) RiseTarget(double centerX, int ground, Native.Rect work, int minTop, double dpi)
     {
-        DesktopWindow? best = null; bool left = true; double bestDistance = 600 * dpi;
+        DesktopWindow? best = null; double bestX = 0, bestDistance = 600 * dpi;
         foreach (var w in windows)
         {
             var b = w.Bounds;
-            if (b.Bottom < ground - 30 * dpi || b.Top > ground - 200 * dpi || b.Top < minTop || b.Right - b.Left < 200) continue;
-            foreach (bool edgeLeft in new[] { true, false })
-            {
-                if (!EdgeUsable(w, edgeLeft, ground, work, dpi)) continue;
-                double wall = edgeLeft ? b.Left : b.Right, distance = Math.Abs(wall - centerX);
-                if (distance < bestDistance) { bestDistance = distance; best = w; left = edgeLeft; }
-            }
+            if (b.Top < minTop || b.Top > ground - 120 * dpi || b.Right - b.Left < 200) continue;
+            double lo = Math.Max(b.Left + 12 * dpi, work.Left + 80 * dpi), hi = Math.Min(b.Right - 12 * dpi, work.Right - 80 * dpi);
+            if (hi < lo) continue;
+            double x = Math.Clamp(centerX, lo, hi), distance = Math.Abs(x - centerX);
+            if (distance >= bestDistance || !Exposed(w, x, b.Top + 6)) continue;
+            bestDistance = distance; best = w; bestX = x;
         }
-        return (best, left);
-    }
-    // The edge lies inside the work area with room for the character beside it, and the window is visible along it.
-    public static bool EdgeUsable(DesktopWindow w, bool leftEdge, int ground, Native.Rect work, double dpi)
-    {
-        var b = w.Bounds; double wall = leftEdge ? b.Left : b.Right;
-        if (leftEdge ? wall - 80 * dpi < work.Left : wall + 80 * dpi > work.Right) return false;
-        double inside = leftEdge ? wall + 4 : wall - 4;
-        return Exposed(w, inside, ground - 40 * dpi) && Exposed(w, inside, (b.Top + ground) / 2.0);
+        return (best, bestX);
     }
     public static void TestPlatform(Native.Rect? rect) { testPlatform = rect; }
 

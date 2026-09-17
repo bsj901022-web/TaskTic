@@ -2,6 +2,20 @@
 
 릴리스마다 이 파일의 해당 절이 GitHub Release 노트로 올라갑니다. Each release's section is published as its GitHub Release notes.
 
+## v0.6.6
+
+**한국어**
+- 방 친구 캐릭터가 각 PC에서 스스로 걸어 다닙니다. 상대 위치를 실시간으로 따라가지 않으므로 인터넷 지연 때문에 멈추거나 제자리걸음을 하거나 빠르게 따라붙는 증상이 사라집니다. 위치 정보는 낙하산으로 내려올 때와 풍선을 타고 올라갈 때, 창 위에 착지했을 때만 받아 그 자리에서 재현합니다. 특수 모션·잠·기상·말풍선·콕 찌르기·공은 그대로 전달됩니다.
+- 인사는 친구가 방에 들어올 때 한 번만 합니다(마주칠 때마다 인사하던 동작 제거). 설정 문구도 "친구가 방에 들어오면 인사"로 바뀌었습니다.
+- 말풍선 구분: 캐릭터가 스스로 하는 말(잡담·반응·착지 대사)은 점선 테두리에 작은 동그라미 꼬리가 달린 **생각 구름**으로, 사람이 직접 입력한 말은 진한 글씨의 **말풍선**으로 그립니다. 친구 캐릭터도 같은 규칙입니다.
+- 창 옆면을 타고 오르던 동작을 **풍선 타고 올라가기**로 바꿨습니다. 캐릭터가 창 아래로 걸어가 작은 풍선을 잡고 살짝 흔들리며 창 윗변까지 떠올라 착지합니다. 창이 작업표시줄에 닿아 있을 필요가 없어 더 자주 볼 수 있습니다.
+
+**English**
+- Friends' characters now walk on their own on each PC instead of tracking the owner's position, so network latency can no longer make them stop, walk in place or rush to catch up. Position is only received where it matters: a parachute drop, a balloon ride and a landing on a window. Motions, sleep, bubbles, pokes and balls are still relayed.
+- Greetings happen once, when a friend joins the room (no more greeting on every encounter).
+- Bubble types: the character's own lines are thought clouds (dashed edge, little circle tail); typed messages are speech bubbles with bold text. Friends' characters follow the same rule.
+- Climbing a window's side is replaced by a balloon ride: the character walks under the window, grabs a small balloon and floats up to the top edge. Windows no longer need to touch the taskbar.
+
 ## v0.6.5
 
 **한국어**

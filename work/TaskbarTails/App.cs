@@ -141,9 +141,8 @@ public sealed class App : Application
         if (smokePath == null && State.StretchReminder && now - lastStretch > 3000) { lastStretch = now; StretchNow(); }
         foreach (var pet in pets.ToArray()) if (pet.IsVisible) pet.Step(dt);
         if (now - lastTopmost > 4) { lastTopmost = now; foreach (var p in pets) if (p.IsVisible) p.Place(true); }
-        GreetCheck(now);
-        // Position snapshots: right away (rate-limited to 0.3 s) when a character turns, stops or starts, otherwise every 2 s.
-        if (Room?.Connected == true && !snapshotPending && ((snapshotDue && now - lastBroadcast > .3) || now - lastBroadcast > 2)) { lastBroadcast = now; snapshotDue = false; Broadcast("state"); }
+        // Friends simulate my character themselves; only sleep changes (within 0.3 s) and a 15 s presence heartbeat go out as "state".
+        if (Room?.Connected == true && !snapshotPending && ((snapshotDue && now - lastBroadcast > .3) || now - lastBroadcast > 15)) { lastBroadcast = now; snapshotDue = false; Broadcast("state"); }
         Panel.Animate(now);
         if (now - refreshed > .5) { Panel.Refresh(); refreshed = now; }
         if (now - saved > 15) { StateStore.Save(State); saved = now; }
@@ -154,7 +153,7 @@ public sealed class App : Application
     // The foreground title is polled (title only, no enumeration) every 2 s for a one-time reaction when the user switches to something new.
     void WindowCheck(double now)
     {
-        bool active = pets.Any(p => !p.IsRemote && (p.IsFalling || p.IsPerched || p.IsClimbing));
+        bool active = pets.Any(p => !p.IsRemote && (p.IsFalling || p.IsPerched || p.IsRising));
         Desktop.Scan(Screen, now, active ? .25 : 2);
         if (now - topicChecked < 2) return; topicChecked = now;
         var topic = Desktop.Topic(Desktop.ForegroundTitle());
@@ -185,19 +184,13 @@ public sealed class App : Application
         var kind = PetCatalog.Get(State.Species); pets[0].Act(kind.SecondAction); pets[0].Say(L.Get("stretch"));
     }
     // --- friends: greeting, poke, ball ---
-    public void GreetCheck(double now)
+    // Once per session, when a friend's character appears in the room, both say hi. Characters live at different spots on
+    // each PC now, so "meeting" on screen means nothing and no longer triggers greetings.
+    public void GreetJoin(PetWindow newcomer)
     {
-        if (!State.GreetFriends || pets.Count == 0) return;
-        var me = pets[0]; if (me.IsFalling) return;
-        double reach = 40 * me.Dpi * Math.Max(1, State.Scale / 100.0);
-        foreach (var r in pets.ToArray())
-        {
-            if (!r.IsRemote || Math.Abs(r.CenterX - me.CenterX) > reach) continue;
-            if (greeted.TryGetValue(r.RemoteId, out var t) && now - t < 90) continue;
-            greeted[r.RemoteId] = now;
-            me.Greet(r.PetName, r.CenterX); r.Greet(State.Name, me.CenterX);
-            Broadcast("greet", "", r.RemoteId);
-        }
+        if (!State.GreetFriends || pets.Count == 0 || !newcomer.IsRemote || greeted.ContainsKey(newcomer.RemoteId)) return;
+        greeted[newcomer.RemoteId] = clock.Elapsed.TotalSeconds;
+        pets[0].Greet(newcomer.PetName, newcomer.CenterX); newcomer.Greet(State.Name, pets[0].CenterX);
     }
     public void Poke(PetWindow remote)
     {
@@ -407,7 +400,7 @@ public sealed class App : Application
             foreach (var m in members.Where(m => m.UserId != Room.UserId))
             {
                 if (pets.Any(p => p.IsRemote && p.RemoteId == m.UserId)) continue;
-                var w = Screen.Work; var p = new PetWindow(this, m.Name, m.Species, "", w.Left + (w.Right - w.Left) * .4, false, true) { RemoteId = m.UserId }; pets.Add(p); SyncVisibility();
+                var w = Screen.Work; var p = new PetWindow(this, m.Name, m.Species, "", w.Left + (w.Right - w.Left) * .4, false, true) { RemoteId = m.UserId }; pets.Add(p); SyncVisibility(); GreetJoin(p);
             }
             Panel.Refresh(); Broadcast("state");
         }));
@@ -431,7 +424,7 @@ public sealed class App : Application
     {
         if (Exiting || pets.Count == 0) return;
         var pet = pets.FirstOrDefault(p => p.IsRemote && p.RemoteId == ev.UserId);
-        if (pet == null) { var w = Screen.Work; pet = new PetWindow(this, ev.Name, ev.Species, "", w.Left + (w.Right - w.Left) * ev.X, false, true) { RemoteId = ev.UserId }; pets.Add(pet); SyncVisibility(); _ = RefreshRosterSafe(); }
+        if (pet == null) { var w = Screen.Work; pet = new PetWindow(this, ev.Name, ev.Species, "", w.Left + (w.Right - w.Left) * ev.X, false, true) { RemoteId = ev.UserId }; pets.Add(pet); SyncVisibility(); GreetJoin(pet); _ = RefreshRosterSafe(); }
         double now = clock.Elapsed.TotalSeconds;
         if (ev.Kind == "poke" && ev.Target == myId) { pets[0].Bounce(); pets[0].Say(L.F("poked_by", ev.Name)); State.Happiness = Math.Min(100, State.Happiness + 2); Sounds.Pop(State.ClickSound); }
         else if (ev.Kind == "greet" && ev.Target == myId) { greeted[ev.UserId] = now; pets[0].Greet(ev.Name, pet.CenterX); pet.Greet(State.Name, pets[0].CenterX); }
@@ -500,7 +493,7 @@ public sealed class App : Application
             foreach (var size in new[] { 150, 200 }) { State.Scale = size; pets[0].Say("크기 " + size); pets[0].Step(.033); pets[0].UpdateLayout(); Check(Math.Abs(pets[0].Visual.SizeFactor - size / 100.0) < .001 && pets[0].InsideWorkArea(), size + "% size applies and keeps the feet on the work area"); }
             State.Scale = 100; pets[0].Step(.033); StateStore.Save(State); Check(StateStore.Load().Scale == 100, "size setting persists");
             var remote = new PetWindow(this, "원격", "fox", "", 200, false, true) { RemoteId = "remote-test" }; remote.Show();
-            remote.Apply(new PetEvent { Kind = "parachute", UserId = "remote-test", Name = "원격", Species = "fox", X = .5, Lift = .5 }); remote.Step(.033);
+            remote.Apply(new PetEvent { Kind = "parachute", UserId = "remote-test", Name = "원격", Species = "fox", X = .5, Lift = .5 }); for (int i = 0; i < 6; i++) remote.Step(.033);
             Check(remote.Visual.Parachute, "remote parachute stays visible between snapshots");
             remote.Apply(new PetEvent { Kind = "land", UserId = "remote-test", Name = "원격", Species = "fox", X = .5, Lift = 0 }); for (int i = 0; i < 300; i++) remote.Step(.033);
             Check(!remote.Visual.Parachute, "remote parachute closes on land"); remote.Close();
@@ -516,8 +509,8 @@ public sealed class App : Application
             ResetNightState(); State.NightSleep = true; NightCheck(23); Check(State.Sleeping, "night check puts the pet to sleep at 23:00"); NightCheck(8); Check(!State.Sleeping, "morning check wakes the pet");
             StretchNow(); Check(pets[0].Visual.Bubble == L.Get("stretch"), "stretch reminder fires a bubble");
             var friend = new PetWindow(this, "친구", "penguin", "", pets[0].CenterX, false, true) { RemoteId = "friend-1" }; friend.Show(); pets.Add(friend); friend.Step(.033);
-            friend.TestMoveTo(pets[0].CenterX - 20 - friend.Width * friend.Dpi / 2); pets[0].Visual.Bubble = "";
-            GreetCheck(clock.Elapsed.TotalSeconds); Check(pets[0].Visual.Bubble == L.F("greet", "친구") && friend.Visual.Bubble == L.F("greet", State.Name), "characters greet when they meet");
+            pets[0].Visual.Bubble = ""; GreetJoin(friend); Check(pets[0].Visual.Bubble == L.F("greet", "친구") && friend.Visual.Bubble == L.F("greet", State.Name), "characters greet once when a friend joins");
+            pets[0].Visual.Bubble = ""; GreetJoin(friend); Check(pets[0].Visual.Bubble == "", "no repeated greeting for the same friend");
             HandleEvent(new PetEvent { Kind = "poke", UserId = "friend-1", Target = "me", Name = "친구", Species = "penguin", X = .3 }, "me"); Check(pets[0].Visual.Bubble == L.F("poked_by", "친구"), "poke from a friend shows on my character");
             HandleEvent(new PetEvent { Kind = "ball", UserId = "friend-1", Target = "me", Name = "친구", Species = "penguin", X = .3, Left = false }, "me"); Check(pets[0].IsBallMoving, "incoming ball starts rolling");
             for (int i = 0; i < 200 && pets[0].IsBallMoving; i++) pets[0].Step(.033); Check(!pets[0].IsBallMoving && pets[0].Visual.Bubble == L.Get("ball_caught"), "incoming ball is caught");
@@ -550,9 +543,9 @@ public sealed class App : Application
             Desktop.TestPlatform(null); Desktop.Refresh(Screen); pets[0].Step(.033); Check(!pets[0].IsPerched && pets[0].IsFalling, "character drops when the window disappears");
             for (int i = 0; i < 900 && pets[0].IsFalling; i++) pets[0].Step(.033); Check(!pets[0].IsFalling && pets[0].InsideWorkArea(), "falls back to the taskbar");
             int wallLeft = (int)pets[0].CenterX + 260; Desktop.TestPlatform(new Native.Rect { Left = wallLeft, Top = GroundY - 420, Right = wallLeft + 500, Bottom = GroundY }); Desktop.Refresh(Screen);
-            Check(pets[0].TestClimb(), "grounded window edge is chosen for a climb");
-            bool climbed = false; for (int i = 0; i < 1500 && !pets[0].IsPerched; i++) { pets[0].Step(.033); climbed |= pets[0].IsClimbing && pets[0].Visual.Climb != 0; }
-            Check(pets[0].IsPerched && climbed && Math.Abs(pets[0].FeetY - (GroundY - 420)) < 1 && pets[0].Visual.Climb == 0, "character walks to the edge, climbs it sideways and stands on top");
+            Check(pets[0].TestRise(), "a window top edge nearby is chosen for a balloon ride");
+            bool floated = false; for (int i = 0; i < 1500 && !pets[0].IsPerched; i++) { pets[0].Step(.033); floated |= pets[0].IsRising && pets[0].Visual.Balloon; }
+            Check(pets[0].IsPerched && floated && Math.Abs(pets[0].FeetY - (GroundY - 420)) < 1 && !pets[0].Visual.Balloon, "character walks under the edge, floats up with a balloon and stands on top");
             Desktop.TestPlatform(null); Desktop.Refresh(Screen); for (int i = 0; i < 900 && (pets[0].IsPerched || pets[0].IsFalling); i++) pets[0].Step(.033); Check(pets[0].InsideWorkArea(), "back on the ground after the test window closes");
             SendBubble("❤️"); Check(pets[0].Visual.Bubble == "❤️", "quick reaction shows as a bubble");
             OpenQuickChat(); Check(QuickChatVisible, "quick chat opens above the character"); HideQuickChat();
@@ -568,14 +561,17 @@ public sealed class App : Application
             pets[0].Say("typed", false); Check(pets[0].Visual.Bubble == "typed", "typed messages still show while muted");
             SetBubbles(true); Check(State.AutoBubbles && pets[0].Visual.Bubble == L.Get("bubbles_on"), "bubbles toggle back on");
             var sync = new PetWindow(this, "동기", "cat", "", 300, false, true) { RemoteId = "sync-1" }; sync.Show();
-            sync.Apply(new PetEvent { Kind = "state", UserId = "sync-1", Name = "동기", Species = "cat", X = .5, Lift = 0, Walking = true, Speed = .05 }); sync.Step(.033); double x0 = sync.CenterX; for (int i = 0; i < 30; i++) sync.Step(.033);
-            double span = Screen.Work.Right - Screen.Work.Left - sync.Width * sync.Dpi, moved = sync.CenterX - x0;
-            Check(moved > .05 * span * .6 && moved < .05 * span * 1.6, "friend walks at the pace the friend reported");
-            sync.Apply(new PetEvent { Kind = "parachute", UserId = "sync-1", Name = "동기", Species = "cat", X = .5, Lift = .4 }); sync.Step(.033); Check(sync.Visual.Parachute, "friend parachute shows");
-            sync.Apply(new PetEvent { Kind = "land", UserId = "sync-1", Name = "동기", Species = "cat", X = .5, Lift = 0 }); sync.Step(.033); Check(!sync.Visual.Parachute && Math.Abs(sync.FeetY - GroundY) < 1, "friend snaps to the ground when the friend reports standing on it");
+            double span = Screen.Work.Right - Screen.Work.Left - sync.Width * sync.Dpi;
+            sync.Apply(new PetEvent { Kind = "state", UserId = "sync-1", Name = "동기", Species = "cat", X = .9, Lift = .5, Walking = true }); double x0 = sync.CenterX; for (int i = 0; i < 60; i++) sync.Step(.033);
+            Check(Math.Abs(sync.FeetY - GroundY) < 1 && Math.Abs(sync.CenterX - x0) > 5 && Math.Abs(sync.CenterX - x0) < 200, "friend copy walks on its own and ignores position fields");
+            sync.Apply(new PetEvent { Kind = "parachute", UserId = "sync-1", Name = "동기", Species = "cat", X = .5, Lift = .4 }); for (int i = 0; i < 6; i++) sync.Step(.033);
+            Check(sync.Visual.Parachute && sync.IsFalling && Math.Abs(sync.CenterX - (Screen.Work.Left + .5 * span + sync.Width * sync.Dpi / 2)) < 2, "friend parachute starts where the friend dropped");
+            for (int i = 0; i < 900 && sync.IsFalling; i++) sync.Step(.033); Check(!sync.IsFalling && Math.Abs(sync.FeetY - GroundY) < 1, "friend copy lands on its own");
+            sync.Apply(new PetEvent { Kind = "balloon", UserId = "sync-1", Name = "동기", Species = "cat", X = .3, Lift = .3 }); for (int i = 0; i < 900 && !sync.IsPerched; i++) sync.Step(.033);
+            Check(sync.IsPerched && Math.Abs(sync.FeetY - (GroundY - .3 * (GroundY - Screen.Work.Top))) < 1, "friend balloon ride ends on the reported ledge");
+            sync.Apply(new PetEvent { Kind = "land", UserId = "sync-1", Name = "동기", Species = "cat", X = .3, Lift = 0 }); sync.Step(.033); Check(!sync.IsPerched && Math.Abs(sync.FeetY - GroundY) < 1, "friend ledge clears on landing");
             sync.Close();
-            pets[0].TestMoveTo(Screen.Work.Left - 50); pets[0].Step(.033); snapshotDue = false; pets[0].TestMoveTo(Screen.Work.Right + 50); pets[0].Step(.033);
-            Check(snapshotDue, "turning or stopping requests an immediate snapshot for friends");
+            State.Sleeping = true; snapshotDue = false; pets[0].Step(.033); Check(snapshotDue, "sleep change is sent to friends"); State.Sleeping = false; pets[0].Step(.033); snapshotDue = false;
             State.IdleMinutes = 10; State.NightSleep = false; StateStore.Save(State); var reloaded = StateStore.Load(); Check(reloaded.IdleMinutes == 10 && !reloaded.NightSleep, "settings persist"); State.IdleMinutes = 5; State.NightSleep = true;
             State.Species = "cat"; State.Name = "모찌"; State.Fullness = 86; State.Happiness = 94;
             StateStore.Save(State); var loaded = StateStore.Load(); Check(loaded.Name == State.Name && loaded.Experience == State.Experience, "state persistence round-trip");
