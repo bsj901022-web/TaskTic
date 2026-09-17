@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Diagnostics;
 using System.IO;
+using System.Windows.Media;
 
 namespace TaskbarTails;
 
@@ -15,6 +16,7 @@ public partial class MainWindow : Window
     int shownLevel = -1;
     public bool AllowClose;
     static readonly int[] IdleOptions = { 0, 3, 5, 10, 15 };
+    static readonly Brush FoodNormal = new SolidColorBrush(Color.FromRgb(0x78, 0xA5, 0x8B)), FoodFull = new SolidColorBrush(Color.FromRgb(0xE0, 0x8A, 0x5A));
     public MainWindow(App owner)
     {
         app = owner; InitializeComponent();
@@ -33,7 +35,7 @@ public partial class MainWindow : Window
         IdleBox.Items.Clear(); foreach (var m in IdleOptions) IdleBox.Items.Add(m == 0 ? L.Get("idle_off") : L.F("idle_min", m));
         IdleBox.SelectedIndex = Math.Max(0, Array.IndexOf(IdleOptions, s.IdleMinutes));
         StartupCheck.IsChecked = s.StartWithWindows; HotkeyCheck.IsChecked = s.HotkeysEnabled; NightCheck.IsChecked = s.NightSleep;
-        StretchCheck.IsChecked = s.StretchReminder; SoundCheck.IsChecked = s.ClickSound; GreetCheck.IsChecked = s.GreetFriends; RejoinCheck.IsChecked = s.AutoRejoin;
+        StretchCheck.IsChecked = s.StretchReminder; SoundCheck.IsChecked = s.ClickSound; GreetCheck.IsChecked = s.GreetFriends; RejoinCheck.IsChecked = s.AutoRejoin; WindowCheck.IsChecked = s.WindowPlay;
         FillBubbleStyles();
         NameStyleBox.SelectedIndex = Math.Clamp(s.NameStyle, 0, 2);
         UpdateHotkeyTexts(); PreviewKeyDown += Window_PreviewKeyDown;
@@ -61,12 +63,12 @@ public partial class MainWindow : Window
     {
         var s = app.State;
         PetTitle.Text = s.Name; LevelLabel.Text = L.F("level", s.Level);
-        FoodLabel.Text = $"{s.Fullness:0} / 100"; FoodBar.Value = s.Fullness;
+        FoodLabel.Text = $"{s.Fullness:0} / 100" + (s.IsFull ? "  ·  " + L.Get("full_tag") : ""); FoodBar.Value = s.Fullness; FoodBar.Foreground = s.IsFull ? FoodFull : FoodNormal;
         HappyLabel.Text = $"{s.Happiness:0} / 100"; HappyBar.Value = s.Happiness;
         XpLabel.Text = $"{s.Experience % 100} / 100"; XpBar.Value = s.Experience % 100;
-        MoodLabel.Text = s.Sleeping ? L.Get("mood_sleep") : s.Fullness < 25 ? L.Get("mood_hungry") : L.Get("mood_ok");
+        MoodLabel.Text = s.Sleeping ? L.Get("mood_sleep") : s.Fullness < 25 ? L.Get("mood_hungry") : s.IsFull ? L.Get("mood_full") : L.Get("mood_ok");
         SleepButton.Content = s.Sleeping ? L.Get("wake") : L.Get("sleep");
-        var kind = PetCatalog.Get(s.Species); ActionOne.Content = PetCatalog.FirstLabel(kind); ActionTwo.Content = PetCatalog.SecondLabel(kind);
+        var kind = PetCatalog.Get(s.Species); FeedButton.Content = L.Feed(kind.Group); ActionOne.Content = PetCatalog.FirstLabel(kind); ActionTwo.Content = PetCatalog.SecondLabel(kind);
         Preview.Species = s.Species; Preview.Sleeping = s.Sleeping; Preview.ShowName = false; Preview.FrontView = true;
         Preview.InvalidateVisual();
         VisibilityButton.Content = app.PetsVisible ? L.Get("hide_pets") : L.Get("show_pets");
@@ -84,7 +86,7 @@ public partial class MainWindow : Window
         var name = NameBox.Text.Trim();
         if (name.Length == 0) { Notice.Text = L.Get("name_required"); return; }
         var kinds = PetCatalog.Selectable; app.State.Name = name; app.State.Species = kinds[Math.Clamp(SpeciesBox.SelectedIndex, 0, kinds.Length - 1)].Id;
-        app.Changed(L.Get("new_look")); Notice.Text = L.Get("saved_look");
+        app.Changed(L.Get("new_look")); app.RefreshMenus(); Notice.Text = L.Get("saved_look");
     }
     void Scale_Changed(object sender, SelectionChangedEventArgs e)
     {
@@ -144,6 +146,7 @@ public partial class MainWindow : Window
     void Sound_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.ClickSound = SoundCheck.IsChecked == true; Save(); Sounds.Pop(app.State.ClickSound); }
     void Greet_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.GreetFriends = GreetCheck.IsChecked == true; Save(); }
     void Rejoin_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.AutoRejoin = RejoinCheck.IsChecked == true; Save(); }
+    void WindowPlay_Changed(object sender, RoutedEventArgs e) { if (!ready) return; app.State.WindowPlay = WindowCheck.IsChecked == true; Save(); }
     void Friends_Changed(object sender, RoutedEventArgs e) { if (ready) app.SetFriends(FriendsCheck.IsChecked == true); }
     void Visibility_Click(object sender, RoutedEventArgs e) => app.ToggleVisible();
     void ActionOne_Click(object sender, RoutedEventArgs e) => app.Specialty(0);

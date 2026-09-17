@@ -164,6 +164,18 @@ PASS: hidden creature kinds stay valid but are not selectable
 PASS: large name label applies
 PASS: name can be hidden
 PASS: touch reactions vary per character
+PASS: feed label depends on the character group
+PASS: overfeeding is refused, costs XP and shakes the character
+PASS: refusal motion ends
+PASS: feeding below the limit works again
+PASS: foreground window topics
+PASS: dropped character lands on a window's top edge
+PASS: perched character follows the window when it moves
+PASS: character drops when the window disappears
+PASS: falls back to the taskbar
+PASS: grounded window edge is chosen for a climb
+PASS: character walks to the edge, climbs it sideways and stands on top
+PASS: back on the ground after the test window closes
 PASS: quick reaction shows as a bubble
 PASS: quick chat opens above the character
 PASS: bubble styles unlock by level

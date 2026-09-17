@@ -30,13 +30,21 @@ public sealed class PetState
     public int MonitorIndex { get; set; }             // 0 = primary
     public int BubbleStyle { get; set; }              // cosmetic, unlocked by level
     public int NameStyle { get; set; } = 1;           // 0 hidden, 1 small, 2 large label with background
+    public bool WindowPlay { get; set; } = true;      // land on / walk along / climb other windows, react to the active window
     public DateTime LastSeenUtc { get; set; }
     [JsonIgnore] public double HoursAway { get; private set; }
 
     public int Level => 1 + Experience / 100;
     public static int UnlockLevel(int style) => style switch { 1 => 3, 2 => 5, 3 => 8, _ => 1 };
     public int EffectiveBubbleStyle => Level >= UnlockLevel(BubbleStyle) ? BubbleStyle : 0;
-    public void Feed() { Fullness = Math.Min(100, Fullness + 18); Happiness = Math.Min(100, Happiness + 3); Experience += 5; }
+    public const double FullThreshold = 85;
+    public bool IsFull => Fullness >= FullThreshold;
+    // False when the character is too full to eat: nothing is eaten and a little XP and happiness are lost instead (never below the current level).
+    public bool Feed()
+    {
+        if (IsFull) { Experience = Math.Max((Level - 1) * 100, Experience - 4); Happiness = Math.Max(0, Happiness - 4); return false; }
+        Fullness = Math.Min(100, Fullness + 18); Happiness = Math.Min(100, Happiness + 3); Experience += 5; return true;
+    }
     public void Pet() { Happiness = Math.Min(100, Happiness + 8); Experience += 3; }
     public void Play() { Sleeping = false; Happiness = Math.Min(100, Happiness + 12); Fullness = Math.Max(0, Fullness - 4); Experience += 8; }
     public void Tick(double seconds) { Fullness = Math.Max(0, Fullness - seconds / 90); Happiness = Math.Clamp(Happiness + (Sleeping ? 1 : -1) * seconds / 180, 0, 100); }

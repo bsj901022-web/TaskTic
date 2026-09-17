@@ -52,4 +52,5 @@ public sealed class PetEvent
  public bool Walking {get;set;}
  public bool Sleeping {get;set;}
  public bool Front {get;set;}
+ public bool Perched {get;set;} // standing on / climbing a window: friends draw no parachute at that height
 }

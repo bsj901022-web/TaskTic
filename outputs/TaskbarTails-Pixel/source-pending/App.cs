@@ -48,6 +48,7 @@ public sealed class App : Application
     HwndSource? hotkeySource;
     bool hotkeysRegistered;
     double? idleOverride;
+    double topicChecked, lastTopicSaid = double.NegativeInfinity; string? lastTopic;
     public bool IsNapping => napping;
     public bool IsSmokeTest => smokePath != null;
 
@@ -74,6 +75,7 @@ public sealed class App : Application
             if (!first) { MessageBox.Show(L.Get("already_running"), "Taskbar Tails"); Shutdown(); return; }
         }
         if (smokePath != null) { Directory.CreateDirectory(smokePath); StateStore.PathName = Path.Combine(smokePath, "test-state.json"); }
+        Desktop.TestOnly = smokePath != null;
         State = smokePath == null ? StateStore.Load() : new PetState();
         L.Init(State.Language);
         RefreshScreen();
@@ -116,7 +118,7 @@ public sealed class App : Application
     {
         var menu = new Forms.ContextMenuStrip();
         menu.Items.Add(L.Get("tray_open"), null, (_, _) => Dispatcher.Invoke(ShowPanel));
-        menu.Items.Add(L.Get("feed"), null, (_, _) => Dispatcher.Invoke(Feed));
+        menu.Items.Add(L.Feed(PetCatalog.Get(State.Species).Group), null, (_, _) => Dispatcher.Invoke(Feed));
         menu.Items.Add(L.F("tray_say", Hotkeys.Label(State.ChatHotkey)), null, (_, _) => Dispatcher.Invoke(OpenQuickChat));
         menu.Items.Add(L.Get("tray_toggle"), null, (_, _) => Dispatcher.Invoke(ToggleVisible));
         menu.Items.Add(L.Get("update_check"), null, (_, _) => Dispatcher.Invoke(() => { ShowPanel(); _ = CheckForUpdates(true); }));
@@ -131,6 +133,7 @@ public sealed class App : Application
         double dt = Math.Min(.1, now - last); last = now;
         State.Tick(dt);
         if (now - screenChecked > 2) { RefreshScreen(); screenChecked = now; }
+        if (State.WindowPlay && pets.Count > 0) WindowCheck(now);
         if (smokePath == null && now - fullscreenChecked > 1) { fullscreen = Native.FullscreenApp(Screen); fullscreenChecked = now; SyncVisibility(); }
         if ((smokePath == null || idleOverride != null) && now - idleChecked > 1) { idleChecked = now; IdleCheck(); }
         if (smokePath == null && now - nightChecked > 30) { nightChecked = now; NightCheck(DateTime.Now.Hour); }
@@ -143,6 +146,18 @@ public sealed class App : Application
         if (now - refreshed > .5) { Panel.Refresh(); refreshed = now; }
         if (now - saved > 15) { StateStore.Save(State); saved = now; }
         if (smokePath == null && now - lastUpdateCheck > (lastUpdateCheck < 0 ? 8 : 6 * 3600)) { lastUpdateCheck = now; _ = CheckForUpdates(false); }
+    }
+    // --- windows as platforms ---
+    // One window scan only as often as the situation needs: 4 Hz while a character is airborne or on a window, otherwise every 2 s.
+    // The foreground title is polled (title only, no enumeration) every 2 s for a one-time reaction when the user switches to something new.
+    void WindowCheck(double now)
+    {
+        bool active = pets.Any(p => !p.IsRemote && (p.IsFalling || p.IsPerched || p.IsClimbing));
+        Desktop.Scan(Screen, now, active ? .25 : 2);
+        if (now - topicChecked < 2) return; topicChecked = now;
+        var topic = Desktop.Topic(Desktop.ForegroundTitle());
+        if (topic == lastTopic) return; lastTopic = topic;
+        if (topic != null && now - lastTopicSaid > 90 && !State.Sleeping && !pets[0].IsBusy) { lastTopicSaid = now; pets[0].LookAtViewer(5, L.Get(topic)); }
     }
     // --- presence: idle nap, night sleep, stretch reminder ---
     void IdleCheck()
@@ -219,6 +234,7 @@ public sealed class App : Application
     public string Chatter()
     {
         if (State.Fullness < 30) return L.Get("chat_hungry");
+        if (State.WindowPlay && chatterRandom.Next(2) == 0) { var topic = Desktop.Topic(Desktop.ForegroundTitle()); if (topic != null) return L.Get(topic); }
         int hour = DateTime.Now.Hour;
         if (chatterRandom.Next(3) == 0)
         {
@@ -317,7 +333,16 @@ public sealed class App : Application
     }
     public void ShowPanel() { Panel.Show(); Panel.WindowState = WindowState.Normal; Panel.Activate(); }
     public void Changed(string message) { StateStore.Save(State); pets[0].Say(message); Panel.Refresh(); Broadcast("message", message); }
-    public void Feed() { State.Feed(); Changed(L.Get("yum")); }
+    public void Feed()
+    {
+        var kind = PetCatalog.Get(State.Species);
+        if (State.Feed()) { Changed(L.Get(kind.Group == "사람" ? "yum_human" : "yum")); return; }
+        // Too full: nothing eaten, a head shake and a small XP/happiness penalty (see PetState.Feed).
+        pets[0].Refuse(); Changed(L.Get("too_full_" + chatterRandom.Next(3)));
+        Panel.Notice.Text = L.F("overfed_notice", 4, PetState.FullThreshold);
+    }
+    // Menus show "먹이 주기" or "음식 먹기" depending on the character kind.
+    public void RefreshMenus() { RefreshTrayMenu(); foreach (var p in pets) p.BuildMenu(); }
     public void Pet() { State.Pet(); Sounds.Pop(State.ClickSound); var kind = PetCatalog.Get(State.Species); Changed(L.Touch(kind.Id, kind.Group)); }
     public void Play() { State.Play(); pets[0].Act(PetCatalog.Get(State.Species).FirstAction); Changed(L.Get("lets_play")); }
     public void ToggleSleep()
@@ -432,7 +457,7 @@ public sealed class App : Application
             Check(pets.Count == 1 && pets[0].IsVisible, "pet overlay created");
             Check(pets[0].InsideWorkArea(), "overlay aligned with the selected work-area bottom");
             var exp = State.Experience; Feed(); Check(State.Experience == exp + 5, "feed increases XP");
-            State.Fullness = 99; Feed(); Check(State.Fullness == 100, "fullness capped at 100");
+            State.Fullness = 84; Feed(); Check(State.Fullness == 100, "fullness capped at 100");
             Play(); Check(!State.Sleeping, "play wakes pet");
             ToggleSleep(); Check(State.Sleeping, "sleep toggles on"); ToggleSleep();
             SetFriends(true); Check(pets.Count == 3, "two local demo friends added");
@@ -495,6 +520,28 @@ public sealed class App : Application
             State.NameStyle = 2; pets[0].Step(.033); pets[0].UpdateLayout(); Check(pets[0].Visual.NameStyle == 2 && pets[0].Visual.ShowName, "large name label applies");
             State.NameStyle = 0; pets[0].Step(.033); Check(!pets[0].Visual.ShowName, "name can be hidden"); State.NameStyle = 1; pets[0].Step(.033);
             { var seen = new HashSet<string>(); for (int i = 0; i < 12; i++) seen.Add(L.Touch("cat", "동물")); Check(seen.Count >= 3 && seen.Contains(L.Get("touch_cat_0")) || seen.Count >= 3, "touch reactions vary per character"); }
+            // --- v0.6.4: feeding limits and windows as platforms ---
+            Check(L.Feed("사람") == L.Get("feed_human") && L.Feed("동물") == L.Get("feed") && L.Feed("사람") != L.Feed("동물"), "feed label depends on the character group");
+            State.Fullness = 90; var xpFull = State.Experience; Feed();
+            double shakeMax = 0; for (int i = 0; i < 6; i++) { pets[0].Step(.033); shakeMax = Math.Max(shakeMax, Math.Abs(pets[0].Visual.Shake)); }
+            Check(State.Fullness == 90 && State.Experience == Math.Max((State.Level - 1) * 100, xpFull - 4) && pets[0].IsRefusing && pets[0].IsFacingViewer && shakeMax > .5, "overfeeding is refused, costs XP and shakes the character");
+            for (int i = 0; i < 90 && pets[0].IsRefusing; i++) pets[0].Step(.033); Check(!pets[0].IsRefusing && Math.Abs(pets[0].Visual.Shake) < .001, "refusal motion ends");
+            State.Fullness = 40; xpFull = State.Experience; Feed(); Check(State.Fullness == 58 && State.Experience == xpFull + 5, "feeding below the limit works again");
+            Check(Desktop.Topic("(3) YouTube - Google Chrome") == "win_video" && Desktop.Topic("App.cs - TaskbarTails - Visual Studio Code") == "win_code" && Desktop.Topic("Untitled") == null, "foreground window topics");
+            State.WindowPlay = true; int platformTop = GroundY - 320, platformLeft = Screen.Work.Left + 200, platformRight = platformLeft + 500;
+            Desktop.TestPlatform(new Native.Rect { Left = platformLeft, Top = platformTop, Right = platformRight, Bottom = GroundY }); Desktop.Refresh(Screen);
+            pets[0].TestMoveTo(platformLeft + 250 - pets[0].Width * pets[0].Dpi / 2); pets[0].TestDrop(.8);
+            for (int i = 0; i < 900 && pets[0].IsFalling; i++) pets[0].Step(.033);
+            Check(pets[0].IsPerched && Math.Abs(pets[0].FeetY - platformTop) < 1, "dropped character lands on a window's top edge");
+            double beforeX = pets[0].CenterX; Desktop.TestPlatform(new Native.Rect { Left = platformLeft + 120, Top = platformTop - 40, Right = platformRight + 120, Bottom = GroundY }); Desktop.Refresh(Screen); pets[0].Step(.033);
+            Check(pets[0].IsPerched && Math.Abs(pets[0].CenterX - beforeX - 120) < 1 && Math.Abs(pets[0].FeetY - (platformTop - 40)) < 1, "perched character follows the window when it moves");
+            Desktop.TestPlatform(null); Desktop.Refresh(Screen); pets[0].Step(.033); Check(!pets[0].IsPerched && pets[0].IsFalling, "character drops when the window disappears");
+            for (int i = 0; i < 900 && pets[0].IsFalling; i++) pets[0].Step(.033); Check(!pets[0].IsFalling && pets[0].InsideWorkArea(), "falls back to the taskbar");
+            int wallLeft = (int)pets[0].CenterX + 260; Desktop.TestPlatform(new Native.Rect { Left = wallLeft, Top = GroundY - 420, Right = wallLeft + 500, Bottom = GroundY }); Desktop.Refresh(Screen);
+            Check(pets[0].TestClimb(), "grounded window edge is chosen for a climb");
+            bool climbed = false; for (int i = 0; i < 1500 && !pets[0].IsPerched; i++) { pets[0].Step(.033); climbed |= pets[0].IsClimbing && pets[0].Visual.Climb != 0; }
+            Check(pets[0].IsPerched && climbed && Math.Abs(pets[0].FeetY - (GroundY - 420)) < 1 && pets[0].Visual.Climb == 0, "character walks to the edge, climbs it sideways and stands on top");
+            Desktop.TestPlatform(null); Desktop.Refresh(Screen); for (int i = 0; i < 900 && (pets[0].IsPerched || pets[0].IsFalling); i++) pets[0].Step(.033); Check(pets[0].InsideWorkArea(), "back on the ground after the test window closes");
             SendBubble("❤️"); Check(pets[0].Visual.Bubble == "❤️", "quick reaction shows as a bubble");
             OpenQuickChat(); Check(QuickChatVisible, "quick chat opens above the character"); HideQuickChat();
             Check(PetState.UnlockLevel(3) == 8 && new PetState { BubbleStyle = 3 }.EffectiveBubbleStyle == 0 && new PetState { BubbleStyle = 3, Experience = 800 }.EffectiveBubbleStyle == 3, "bubble styles unlock by level");

@@ -34,6 +34,8 @@ public static class L
         if (pick == lastTouch && weighted.Count > 1) pick = weighted[(weighted.IndexOf(pick) + 1) % weighted.Count];
         lastTouch = pick; return Get(pick);
     }
+    // "먹이 주기" for animals, mascots and the robot; "음식 먹기" for human characters.
+    public static string Feed(string group) => Get(group == "사람" ? "feed_human" : "feed");
     public static string Action(string species, string key, string koLabel) => Lang == "en" && ActionEn.TryGetValue(species + ":" + key, out var n) ? n : koLabel;
 
     static readonly Dictionary<string, (string ko, string en)> Table = new()
@@ -286,6 +288,30 @@ public static class L
         ["touch_ponygirl_0"] = ("좋아, 에너지 충전!", "Nice, energy recharged!"),
         ["touch_hoodieboy_0"] = ("오케이, 좋아", "Okay, nice"),
         ["touch_suitboy_0"] = ("감사합니다, 정말로", "Thank you, truly"),
+        ["feed_human"] = ("음식 먹기", "Eat"),
+        ["yum_human"] = ("잘 먹었다, 맛있었어!", "That was delicious!"),
+        ["too_full_0"] = ("배불러… 더는 못 먹어", "So full… I can't eat any more"),
+        ["too_full_1"] = ("으, 과식은 안 돼!", "Ugh, no overeating!"),
+        ["too_full_2"] = ("잠깐, 소화 좀 시키고", "Wait, let me digest first"),
+        ["overfed_notice"] = ("배가 너무 불러서 먹지 못했어요. 경험치 -{0}. 포만감이 {1} 아래로 내려가면 다시 먹을 수 있어요.", "Too full to eat. XP -{0}. Feeding works again below {1} fullness."),
+        ["full_tag"] = ("배부름", "full"),
+        ["mood_full"] = ("배가 빵빵해요. 지금은 놀아 주는 게 좋아요!", "Stuffed! Playing is better right now."),
+        ["set_window_play"] = ("창 위에서 놀기 (창 위 착지·가장자리 걷기·옆면 오르기·활성 창 반응)", "Play on windows (land on them, walk the edges, climb, react to the active window)"),
+        ["win_landed"] = ("창 위에 착지! 전망 좋다", "Landed on a window! Nice view"),
+        ["win_perch"] = ("올라왔다! 여기 전망 좋네", "Made it up! Nice view from here"),
+        ["win_climb"] = ("영차영차, 올라간다!", "Heave-ho, up I go!"),
+        ["win_edge"] = ("끝이다! 뛰어내릴게~", "The edge! Jumping off~"),
+        ["win_gone"] = ("어, 창이 없어졌어! 내려간다", "Oh, the window's gone! Going down"),
+        ["win_down"] = ("이제 내려갈게~", "Coming down now~"),
+        ["win_video"] = ("영상 보는 중이야? 나도 볼래", "Watching something? Let me watch too"),
+        ["win_music"] = ("음악 좋다~ 같이 흔들자", "Nice music~ let's sway"),
+        ["win_game"] = ("게임? 나도 끼워 줘!", "A game? Let me join!"),
+        ["win_code"] = ("코딩 중이구나, 화이팅!", "Coding, huh? You've got this!"),
+        ["win_sheet"] = ("숫자가 많다… 눈 좀 쉬어 줘", "So many numbers… rest your eyes"),
+        ["win_docs"] = ("문서 작업 중? 오타 조심!", "Working on a document? Mind the typos!"),
+        ["win_chat"] = ("누구랑 얘기해? 내 안부도 전해 줘", "Chatting with someone? Say hi from me"),
+        ["win_shop"] = ("쇼핑 중? 내 간식도 하나…", "Shopping? Maybe a snack for me…"),
+        ["win_browse"] = ("뭐 찾아봐? 재밌는 거면 알려 줘", "What are you looking up? Tell me if it's fun"),
         ["rc_anon"] = ("Supabase에서 Anonymous Sign-Ins를 켜 주세요.", "Enable Anonymous Sign-Ins in Supabase."),
         ["rc_setup"] = ("먼저 Supabase setup.sql을 실행해 주세요.", "Run Supabase setup.sql first."),
         ["rc_species"] = ("서버가 이 캐릭터 종류를 아직 몰라요. supabase/upgrade-v05.sql을 실행해 주세요.", "The server does not know this character kind yet. Run supabase/upgrade-v05.sql."),

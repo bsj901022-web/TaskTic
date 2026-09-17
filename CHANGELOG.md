@@ -2,6 +2,20 @@
 
 릴리스마다 이 파일의 해당 절이 GitHub Release 노트로 올라갑니다. Each release's section is published as its GitHub Release notes.
 
+## v0.6.4
+
+**한국어**
+- 창 위에서 놀기(설정에서 끌 수 있음): 캐릭터를 끌어 올려 다른 프로그램 창 위에 놓으면 그 창의 윗변에 착지해 걸어 다닙니다. 창을 옮기면 따라가고, 창이 닫히거나 최소화되거나 다른 창에 가려지면 낙하산을 펴고 내려옵니다. 가장자리에서는 돌아서거나 가끔 뛰어내립니다. 작업표시줄까지 닿아 있는 창은 1.5~3분마다 옆면을 타고 올라갑니다(걷기 프레임을 옆으로 돌려 벽을 오르는 모션). 활성 창 제목을 보고 한마디도 합니다(영상·음악·게임·코딩·문서·표·메신저·쇼핑·브라우저).
+- 경량 설계: 창 목록은 캐릭터가 공중이거나 창 위에 있을 때만 초당 4회, 평소에는 2초에 한 번 읽고, 활성 창은 제목만 2초마다 확인합니다. 접근성 API나 창 내부 요소 조회는 쓰지 않습니다. 설정을 끄면 창을 전혀 조회하지 않습니다.
+- 먹이 버튼 이름이 캐릭터에 따라 바뀝니다: 동물·마스코트·로봇은 "먹이 주기", 사람은 "음식 먹기".
+- 과식 방지: 포만감이 85 이상일 때 먹이면 먹지 않고 정면을 보며 고개를 젓습니다("배불러… 더는 못 먹어"). 경험치 -4(현재 레벨 아래로는 내려가지 않음), 행복도 -4. 포만감 게이지는 배부름 상태에서 주황색으로 바뀌고 "배부름" 표시가 붙습니다.
+
+**English**
+- Play on windows (can be switched off in Settings): drop the character onto another program's window and it lands on the top edge and walks along it, follows the window when it moves, and parachutes down when the window closes, minimises or gets covered. At the ends it turns around or occasionally hops off. Windows that reach the taskbar get climbed every 1.5-3 minutes (walk frames turned sideways against the edge). The character also comments on the active window's title (video, music, games, coding, documents, spreadsheets, chat, shopping, browsing).
+- Lightweight by design: the window list is read four times a second only while the character is airborne or on a window, otherwise every 2 s; only the active window's title is checked every 2 s. No accessibility API or in-window element queries; nothing is queried when the setting is off.
+- The feed button reads "Feed" for animals, mascots and the robot and "Eat" for human characters.
+- Overfeeding guard: at 85+ fullness the character refuses to eat, faces you and shakes its head; XP -4 (never below the current level) and happiness -4. The fullness bar turns orange with a "full" tag.
+
 ## v0.6.3
 
 **한국어**

@@ -13,6 +13,7 @@ public sealed class PetVisual : FrameworkElement
     public string PetName = "모찌";
     public bool Sleeping, FrontView, Walking, FaceLeft;
     public double Phase, Jump, ActionTime, Sway, BallX, BallY;
+    public double Shake, Climb; // Shake: horizontal head-shake offset (too full to eat); Climb: sprite rotation while climbing a window edge (-90 / 90)
     public bool Parachute, BallVisible, GoldName, FaceFront;
     public string ActionKey = "";
     public string Bubble = "";
@@ -91,8 +92,8 @@ public sealed class PetVisual : FrameworkElement
         double zoom = FrontView ? Math.Min(3, Math.Min(126 / sprites.Bounds.Width, 113 / sprites.Bounds.Height)) : DevicePixelsPerSprite(SizeFactor) / (dpiScale * scale);
         double snap = dpiScale * scale; // canvas units -> device pixels
         double petTop = 174 - sprites.Bounds.Height * zoom;
-        d.DrawEllipse(Shadow, null, new Point(80, 174), Math.Max(5, sprites.Bounds.Width * zoom * .42 - Jump / 12), FrontView ? 4 : Math.Max(2, zoom * 2.2));
-        if (ShowName && !Parachute) DrawName(d, FrontView ? 119 : petTop - (NameStyle >= 2 ? 21 : 15));
+        if (Climb == 0) d.DrawEllipse(Shadow, null, new Point(80, 174), Math.Max(5, sprites.Bounds.Width * zoom * .42 - Jump / 12), FrontView ? 4 : Math.Max(2, zoom * 2.2));
+        if (ShowName && !Parachute && Climb == 0) DrawName(d, FrontView ? 119 : petTop - (NameStyle >= 2 ? 21 : 15));
         if (Bubble.Length > 0) DrawBubble(d, FrontView ? 40 : petTop - (ShowName && NameStyle >= 2 ? 26 : 18), FrontView ? 2 : 2 - headroom);
         else if (Sleeping) Text(d, "z z Z", 12, Teal, FrontView ? 108 : 80 + sprites.Bounds.Width * zoom * .45, FrontView ? 38 : petTop - 30);
         var (frame, flip) = sprites.Frame(FaceLeft, Walking && !Sleeping && !FaceFront, Phase, FrontView || (FaceFront && ActionKey.Length == 0), ActionKey, ActionTime);
@@ -100,6 +101,8 @@ public sealed class PetVisual : FrameworkElement
         double px = 80 - (sprites.Bounds.Left + sprites.Bounds.Width / 2) * zoom;
         double py = 174 - sprites.Bounds.Bottom * zoom - jumpOffset;
         if (!FrontView) { px = Math.Round(px * snap) / snap; py = Math.Round(py * snap) / snap; }
+        if (Climb != 0) d.PushTransform(new RotateTransform(Climb, 80, 174)); // feet stay on the wall, body turns sideways
+        if (Shake != 0) d.PushTransform(new TranslateTransform(Shake, 0));
         if (Parachute) d.PushTransform(new RotateTransform(Sway, 80, petTop + 6));
         if (flip) d.PushTransform(new ScaleTransform(-1, 1, 80, 0));
         d.DrawImage(frame, new Rect(px, py, frame.PixelWidth * zoom, frame.PixelHeight * zoom));
@@ -118,6 +121,8 @@ public sealed class PetVisual : FrameworkElement
                 d.DrawRectangle(Canopy[col < 5 ? 0 : col < 10 ? 1 : 2], null, new Rect(54 + col * 3.5, 96 + row * 3.5, 3.5, 3.5));
             d.Pop(); d.Pop(); d.Pop();
         }
+        if (Shake != 0) d.Pop();
+        if (Climb != 0) d.Pop();
         d.Pop(); d.Pop();
     }
 }

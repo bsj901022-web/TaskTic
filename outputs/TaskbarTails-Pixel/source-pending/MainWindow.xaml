@@ -47,7 +47,7 @@
      <Grid><TextBlock Text="{local:T happiness}" FontSize="12"/><TextBlock x:Name="HappyLabel" HorizontalAlignment="Right" FontSize="12"/></Grid><ProgressBar x:Name="HappyBar" Margin="0,9,0,16" Foreground="#E4B574"/>
      <Grid><TextBlock Text="{local:T xp}" FontSize="12"/><TextBlock x:Name="XpLabel" HorizontalAlignment="Right" FontSize="12"/></Grid><ProgressBar x:Name="XpBar" Margin="0,9,0,0" Foreground="#9B9EC6"/>
     </StackPanel></Border>
-    <UniformGrid Columns="3" Margin="0,13,0,0"><Button Content="{local:T feed}" Click="Feed_Click" Margin="0,0,6,0" Padding="8,13" Background="#36765F" Foreground="White"/><Button Content="{local:T play}" Click="Play_Click" Margin="0,0,6,0" Padding="8,13"/><Button x:Name="SleepButton" Content="{local:T sleep}" Click="Sleep_Click" Padding="8,13"/></UniformGrid>
+    <UniformGrid Columns="3" Margin="0,13,0,0"><Button x:Name="FeedButton" Content="{local:T feed}" Click="Feed_Click" Margin="0,0,6,0" Padding="8,13" Background="#36765F" Foreground="White"/><Button Content="{local:T play}" Click="Play_Click" Margin="0,0,6,0" Padding="8,13"/><Button x:Name="SleepButton" Content="{local:T sleep}" Click="Sleep_Click" Padding="8,13"/></UniformGrid>
     <UniformGrid Columns="2" Margin="0,10,0,0"><Button x:Name="ActionOne" Click="ActionOne_Click" Margin="0,0,6,0" Padding="8,10"/><Button x:Name="ActionTwo" Click="ActionTwo_Click" Padding="8,10"/></UniformGrid>
     <TextBlock Text="{local:T customize}" FontSize="12" FontWeight="Bold" Margin="0,21,0,8"/>
     <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="170"/><ColumnDefinition Width="65"/></Grid.ColumnDefinitions>
@@ -98,6 +98,7 @@
       <CheckBox x:Name="GreetCheck" Content="{local:T set_greet}" Checked="Greet_Changed" Unchecked="Greet_Changed"/>
       <CheckBox x:Name="RejoinCheck" Content="{local:T set_rejoin}" Checked="Rejoin_Changed" Unchecked="Rejoin_Changed"/>
       <CheckBox x:Name="SoundCheck" Content="{local:T set_sound}" Checked="Sound_Changed" Unchecked="Sound_Changed"/>
+      <CheckBox x:Name="WindowCheck" Content="{local:T set_window_play}" Checked="WindowPlay_Changed" Unchecked="WindowPlay_Changed"/>
      </StackPanel>
     </Grid>
     <TextBlock x:Name="HotkeyNote" Style="{StaticResource Caption}" FontSize="11" Margin="0,4,0,0" Foreground="#B5713A" Visibility="Collapsed"/>
