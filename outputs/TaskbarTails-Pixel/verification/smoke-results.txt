@@ -1,6 +1,6 @@
 PASS: pet overlay created
 PASS: overlay aligned with the selected work-area bottom
-PASS: feed increases XP
+PASS: feeding a hungry character earns XP
 PASS: fullness capped at 100
 PASS: play wakes pet
 PASS: sleep toggles on
@@ -169,6 +169,16 @@ PASS: feed label depends on the character group
 PASS: overfeeding is refused, costs XP and shakes the character
 PASS: refusal motion ends
 PASS: feeding below the limit works again
+PASS: feeding when not hungry gives no XP
+PASS: play XP waits 2 minutes between grants
+PASS: play XP returns after the cooldown
+PASS: daily care XP stops at the cap
+PASS: no care XP beyond the daily cap
+PASS: ten minutes together grant one XP
+PASS: no passive XP while sleeping
+PASS: friend activity grants social XP
+PASS: level up celebrates with sparkles and a bubble
+PASS: friend level shows on their copy
 PASS: foreground window topics
 PASS: dropped character lands on a window's top edge
 PASS: perched character follows the window when it moves

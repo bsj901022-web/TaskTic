@@ -107,6 +107,8 @@ public sealed class PetWindow : Window
  // Typed messages (mine or a friend's) are speech bubbles and always show.
  public void Say(string message,bool auto=true){if(auto&&!app.State.AutoBubbles)return;Visual.Bubble=message.Length>80?message[..80]:message;Visual.BubbleTyped=!auto;bubbleUntil=phase+Math.Clamp(3+message.Length*.12,6,12);}
  public void Bounce(){leap=.01;}
+ // Level-up burst: three seconds of sparkles and a little jump.
+ public void Celebrate(){Visual.Celebrate=3;Bounce();}
  public void Act(string key,bool announce=true)
  {
   if(key=="fetch"&&Visual.Species=="dog"&&surface==0){fetchStage=1;fetchTime=0;fetchOrigin=x;var w=app.Screen.Work;fetchTarget=Math.Clamp(x+direction*240*dpi,w.Left,Math.Max(w.Left,w.Right-Width*dpi));Visual.BallVisible=true;ball??=new BallWindow();Visual.ActionKey="";}
@@ -225,7 +227,7 @@ public sealed class PetWindow : Window
  }
  public void Step(double dt)
  {
-  phase+=dt;Visual.SizeFactor=app.State.Scale/100.0;Visual.BubbleStyle=app.State.EffectiveBubbleStyle;Visual.NameStyle=app.State.NameStyle;Visual.ShowName=app.State.NameStyle>0;Visual.GoldName=!IsRemote&&!demo&&app.State.Level>=10;
+  phase+=dt;Visual.SizeFactor=app.State.Scale/100.0;Visual.BubbleStyle=app.State.EffectiveBubbleStyle;Visual.NameStyle=app.State.NameStyle;Visual.ShowName=app.State.NameStyle>0;if(!IsRemote&&!demo)Visual.Level=app.State.Level;if(Visual.Celebrate>0)Visual.Celebrate=Math.Max(0,Visual.Celebrate-dt);
   if(!demo&&!IsRemote){Visual.PetName=app.State.Name;Visual.Species=app.State.Species;Visual.Sleeping=app.State.Sleeping;}
   // A new kind has its own motion set; never keep playing the previous kind's action key.
   if(Visual.Species!=lastSpecies){lastSpecies=Visual.Species;ResetMotion();}
@@ -318,7 +320,7 @@ public sealed class PetWindow : Window
   if(!IsRemote&&!demo&&Visual.Sleeping!=sentSleeping){sentSleeping=Visual.Sleeping;app.RequestSnapshot();}
   Place();
   // Redraw only when something visible changed (sprite frame, bubble, jump, parachute...), not 60 times a second.
-  int signature=HashCode.Combine((int)(phase*SpriteSet.WalkFps),(int)(Visual.ActionTime*SpriteSet.ActionFps),Visual.Bubble,Visual.ActionKey,HashCode.Combine(Visual.Walking,Visual.FaceLeft,Visual.Sleeping,Visual.Parachute,(int)(Visual.Jump*4),(int)(Visual.Sway*4),Visual.Species,Visual.SizeFactor),HashCode.Combine(Visual.BubbleStyle,Visual.GoldName,Visual.PetName,Visual.FaceFront,Visual.NameStyle,Visual.ShowName,(int)(Visual.Shake*4),HashCode.Combine(Visual.Balloon,Visual.BubbleTyped,Visual.Surface)));
+  int signature=HashCode.Combine((int)(phase*SpriteSet.WalkFps),(int)(Visual.ActionTime*SpriteSet.ActionFps),Visual.Bubble,Visual.ActionKey,HashCode.Combine(Visual.Walking,Visual.FaceLeft,Visual.Sleeping,Visual.Parachute,(int)(Visual.Jump*4),(int)(Visual.Sway*4),Visual.Species,Visual.SizeFactor),HashCode.Combine(Visual.BubbleStyle,Visual.GoldName,Visual.PetName,Visual.FaceFront,Visual.NameStyle,Visual.ShowName,(int)(Visual.Shake*4),HashCode.Combine(Visual.Balloon,Visual.BubbleTyped,Visual.Surface,Visual.Level,(Visual.Celebrate>0||Visual.Level>=15)?(int)(phase*8):0)));
   if(signature!=lastSignature){lastSignature=signature;Visual.InvalidateVisual();}
  }
  // Moves the overlay only when its pixel position changed. assertTop re-applies the top-most z-order (done every few seconds by App).
@@ -355,13 +357,13 @@ public sealed class PetWindow : Window
  public PetEvent Snapshot(string kind="state",string message="")
  {
   var w=app.Screen.Work;double height=Math.Max(1,app.GroundY-w.Top);
-  return new PetEvent{Kind=kind,Name=Visual.PetName,Species=Visual.Species,Action=Visual.ActionKey,Message=message,X=Math.Clamp((x-w.Left)/Span,0,1),Lift=(kind=="balloon"?riseTarget:lift)/height,Left=direction<0,Walking=Visual.Walking,Sleeping=Visual.Sleeping,Front=Visual.FaceFront,Perched=perch!=null||riseStage==2};
+  return new PetEvent{Kind=kind,Name=Visual.PetName,Species=Visual.Species,Action=Visual.ActionKey,Message=message,X=Math.Clamp((x-w.Left)/Span,0,1),Lift=(kind=="balloon"?riseTarget:lift)/height,Left=direction<0,Walking=Visual.Walking,Sleeping=Visual.Sleeping,Front=Visual.FaceFront,Perched=perch!=null||riseStage==2,Level=IsRemote||demo?Visual.Level:app.State.Level};
  }
  public void Apply(PetEvent e)
  {
   var w=app.Screen.Work;double height=Math.Max(1,app.GroundY-w.Top);Visual.PetName=e.Name;Visual.Species=PetCatalog.Valid(e.Species)?e.Species:"cat";
   if(Visual.Species!=lastSpecies){lastSpecies=Visual.Species;ResetMotion();}
-  Visual.Sleeping=e.Sleeping;
+  Visual.Sleeping=e.Sleeping;if(e.Level>0)Visual.Level=e.Level;
   switch(e.Kind){
    case "parachute": surface=0;x=w.Left+Math.Clamp(e.X,0,1)*Span;lift=Math.Max(lift,Math.Clamp(e.Lift,0,1)*height);falling=true;fallAge=0;remotePerched=false;riseStage=0;Visual.Balloon=false;break;
    case "balloon": surface=0;x=w.Left+Math.Clamp(e.X,0,1)*Span;riseX=CenterX;riseTarget=Math.Clamp(e.Lift,0,1)*height;riseStage=1;falling=false;remotePerched=false;break;
@@ -372,7 +374,7 @@ public sealed class PetWindow : Window
     break;
    case "message": Say(e.Message,e.Auto);break;
    case "state": if(e.Action!=Visual.ActionKey&&e.Action.Length>0){Visual.ActionKey=e.Action;actionStart=phase;actionUntil=phase+8;}break;
-   case "greet": case "poke": case "ball": break;
+   case "greet": case "poke": case "ball": case "levelup": break;
    default: Visual.ActionKey=e.Kind;actionStart=phase;actionUntil=phase+8;break;
   }
  }

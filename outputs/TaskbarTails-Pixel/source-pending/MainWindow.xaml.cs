@@ -66,10 +66,12 @@ public partial class MainWindow : Window
         FoodLabel.Text = $"{s.Fullness:0} / 100" + (s.IsFull ? "  ·  " + L.Get("full_tag") : ""); FoodBar.Value = s.Fullness; FoodBar.Foreground = s.IsFull ? FoodFull : FoodNormal;
         HappyLabel.Text = $"{s.Happiness:0} / 100"; HappyBar.Value = s.Happiness;
         XpLabel.Text = $"{s.Experience % 100} / 100"; XpBar.Value = s.Experience % 100;
+        var next = PetState.NextPerk(s.Level);
+        XpNote.Text = L.F("xp_today", s.CareXpToday, PetState.CareCap, s.PassiveXpToday, PetState.PassiveCap, s.SocialXpToday, PetState.SocialCap) + "\n" + (next is { } p ? L.F("next_perk", p.Level, L.Get(p.Key)) : L.Get("perks_done"));
         MoodLabel.Text = s.Sleeping ? L.Get("mood_sleep") : s.Fullness < 25 ? L.Get("mood_hungry") : s.IsFull ? L.Get("mood_full") : L.Get("mood_ok");
         SleepButton.Content = s.Sleeping ? L.Get("wake") : L.Get("sleep");
         var kind = PetCatalog.Get(s.Species); FeedButton.Content = L.Feed(kind.Group); ActionOne.Content = PetCatalog.FirstLabel(kind); ActionTwo.Content = PetCatalog.SecondLabel(kind);
-        Preview.Species = s.Species; Preview.Sleeping = s.Sleeping; Preview.ShowName = false; Preview.FrontView = true;
+        Preview.Species = s.Species; Preview.Sleeping = s.Sleeping; Preview.ShowName = false; Preview.FrontView = true; Preview.Level = s.Level;
         Preview.InvalidateVisual();
         VisibilityButton.Content = app.PetsVisible ? L.Get("hide_pets") : L.Get("show_pets");
         if (ready && BubblesCheck.IsChecked != s.AutoBubbles) { ready = false; BubblesCheck.IsChecked = s.AutoBubbles; ready = true; }

@@ -10,7 +10,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 namespace TaskbarTails;
-public sealed record RoomMember(string UserId,string Name,string Species);
+public sealed record RoomMember(string UserId,string Name,string Species,int Level=1);
 public sealed record RoomInfo(string Id,string Name,string Code);
 // One anonymous Supabase user, one live room at a time. Membership in other rooms is kept on the server,
 // so switching rooms only moves the realtime channel; LeaveRoom removes a membership for good.
@@ -186,7 +186,8 @@ public sealed class RoomClient:IDisposable
    string id=meta.TryGetProperty("user_id",out var u)?u.GetString()??entry.Name:entry.Name;
    string name=meta.TryGetProperty("pet_name",out var n)?n.GetString()??"친구":"친구";
    string species=meta.TryGetProperty("species",out var s)?s.GetString()??"cat":"cat";
-   if(add)presence[entry.Name]=new RoomMember(id,name,species);
+   int level=meta.TryGetProperty("level",out var l)&&l.ValueKind==JsonValueKind.Number?l.GetInt32():1;
+   if(add)presence[entry.Name]=new RoomMember(id,name,species,level);
   }
  }
  void UpdateMembers()
@@ -199,8 +200,8 @@ public sealed class RoomClient:IDisposable
  async Task TrackPresence(CancellationToken ct)
  {
   var pet=CurrentPet?.Invoke();if(pet==null||!Connected)return;
-  string signature=pet.Name+"|"+pet.Species;if(signature==tracked)return;tracked=signature;
-  await WsSend(new{topic,@event="presence",payload=new{type="presence",@event="track",payload=new{user_id=UserId,pet_name=pet.Name,species=pet.Species}},@ref=NextRef()},ct);
+  string signature=pet.Name+"|"+pet.Species+"|"+pet.Level;if(signature==tracked)return;tracked=signature;
+  await WsSend(new{topic,@event="presence",payload=new{type="presence",@event="track",payload=new{user_id=UserId,pet_name=pet.Name,species=pet.Species,level=pet.Level}},@ref=NextRef()},ct);
  }
  async Task Heartbeat(CancellationToken ct)
  {

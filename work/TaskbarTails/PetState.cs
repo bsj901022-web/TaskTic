@@ -39,6 +39,36 @@ public sealed class PetState
     [JsonIgnore] public double HoursAway { get; private set; }
 
     public int Level => 1 + Experience / 100;
+    // --- XP economy (v0.6.9): care actions earn XP only within limits, so feed -> play loops cannot level forever.
+    // Care (feed when hungry, play every 2 min, a few clicks) up to CareCap a day; time together 1 XP per 10 min up to
+    // PassiveCap; pokes and greetings with friends up to SocialCap. About 1.5 levels a day at most.
+    public enum XpNote { Ok, NotHungry, PlayCooldown, ClickCap, CareCap, None }
+    public const int CareCap = 80, PassiveCap = 48, SocialCap = 20, ClickCap = 12;
+    public const double FeedHungerLimit = 70, PlayXpMinutes = 2, PassiveMinutesPerXp = 10;
+    public string XpDay { get; set; } = "";
+    public int CareXpToday { get; set; }
+    public int PassiveXpToday { get; set; }
+    public int SocialXpToday { get; set; }
+    public int ClickXpToday { get; set; }
+    public DateTime LastPlayXpUtc { get; set; }
+    public double PassiveSeconds { get; set; }
+    [JsonIgnore] public int LastXp { get; private set; }
+    [JsonIgnore] public XpNote LastNote { get; private set; } = XpNote.None;
+    void RollDay() { string today = DateTime.Now.ToString("yyyy-MM-dd"); if (XpDay != today) { XpDay = today; CareXpToday = 0; PassiveXpToday = 0; SocialXpToday = 0; ClickXpToday = 0; } }
+    int GrantCare(int amount) { RollDay(); int gain = Math.Clamp(CareCap - CareXpToday, 0, amount); CareXpToday += gain; Experience += gain; return gain; }
+    public int GrantSocial(int amount) { RollDay(); int gain = Math.Clamp(SocialCap - SocialXpToday, 0, amount); SocialXpToday += gain; Experience += gain; return gain; }
+    // Time spent together while awake and present: 1 XP per 10 minutes. Returns the XP granted this tick (0 or 1).
+    public int TickPresence(double seconds, bool active)
+    {
+        if (!active || Sleeping) return 0;
+        PassiveSeconds += seconds; if (PassiveSeconds < PassiveMinutesPerXp * 60) return 0;
+        PassiveSeconds -= PassiveMinutesPerXp * 60; RollDay();
+        if (PassiveXpToday >= PassiveCap) return 0; PassiveXpToday++; Experience++; return 1;
+    }
+    // Rewards by level, shown to friends too: name colour tiers, a level badge, sparkles and a crown.
+    public static readonly (int Level, string Key)[] Perks = { (3, "perk_3"), (5, "perk_5"), (8, "perk_8"), (10, "perk_10"), (15, "perk_15"), (20, "perk_20") };
+    public static (int Level, string Key)? NextPerk(int level) { foreach (var p in Perks) if (p.Level > level) return p; return null; }
+    public static string? PerkAt(int level) { foreach (var p in Perks) if (p.Level == level) return p.Key; return null; }
     public static int UnlockLevel(int style) => style switch { 1 => 3, 2 => 5, 3 => 8, _ => 1 };
     public int EffectiveBubbleStyle => Level >= UnlockLevel(BubbleStyle) ? BubbleStyle : 0;
     public const double FullThreshold = 85;
@@ -46,11 +76,23 @@ public sealed class PetState
     // False when the character is too full to eat: nothing is eaten and a little XP and happiness are lost instead (never below the current level).
     public bool Feed()
     {
-        if (IsFull) { Experience = Math.Max((Level - 1) * 100, Experience - 4); Happiness = Math.Max(0, Happiness - 4); return false; }
-        Fullness = Math.Min(100, Fullness + 18); Happiness = Math.Min(100, Happiness + 3); Experience += 5; return true;
+        if (IsFull) { Experience = Math.Max((Level - 1) * 100, Experience - 4); Happiness = Math.Max(0, Happiness - 4); LastXp = -4; LastNote = XpNote.None; return false; }
+        bool hungry = Fullness < FeedHungerLimit;
+        Fullness = Math.Min(100, Fullness + 18); Happiness = Math.Min(100, Happiness + 3);
+        LastXp = hungry ? GrantCare(5) : 0; LastNote = !hungry ? XpNote.NotHungry : LastXp == 0 ? XpNote.CareCap : XpNote.Ok; return true;
     }
-    public void Pet() { Happiness = Math.Min(100, Happiness + 8); Experience += 3; }
-    public void Play() { Sleeping = false; Happiness = Math.Min(100, Happiness + 12); Fullness = Math.Max(0, Fullness - 4); Experience += 8; }
+    public void Pet()
+    {
+        Happiness = Math.Min(100, Happiness + 8); RollDay();
+        if (ClickXpToday >= ClickCap) { LastXp = 0; LastNote = XpNote.ClickCap; return; }
+        LastXp = GrantCare(3); ClickXpToday += LastXp; LastNote = LastXp == 0 ? XpNote.CareCap : XpNote.Ok;
+    }
+    public void Play()
+    {
+        Sleeping = false; Happiness = Math.Min(100, Happiness + 12); Fullness = Math.Max(0, Fullness - 4);
+        if ((DateTime.UtcNow - LastPlayXpUtc).TotalMinutes < PlayXpMinutes) { LastXp = 0; LastNote = XpNote.PlayCooldown; return; }
+        LastXp = GrantCare(8); if (LastXp > 0) LastPlayXpUtc = DateTime.UtcNow; LastNote = LastXp == 0 ? XpNote.CareCap : XpNote.Ok;
+    }
     public void Tick(double seconds) { Fullness = Math.Max(0, Fullness - seconds / 90); Happiness = Math.Clamp(Happiness + (Sleeping ? 1 : -1) * seconds / 180, 0, 100); }
     // Time the app was closed counts a little: 2 fullness and 1 happiness per hour, never below a friendly floor.
     public void ApplyOfflineTime(DateTime nowUtc)
@@ -81,6 +123,9 @@ public static class StateStore
             state.Fullness = double.IsFinite(state.Fullness) ? Math.Clamp(state.Fullness, 0, 100) : 72;
             state.Happiness = double.IsFinite(state.Happiness) ? Math.Clamp(state.Happiness, 0, 100) : 80;
             state.Experience = Math.Clamp(state.Experience, 0, 1000000);
+            state.XpDay ??= ""; state.CareXpToday = Math.Clamp(state.CareXpToday, 0, PetState.CareCap); state.PassiveXpToday = Math.Clamp(state.PassiveXpToday, 0, PetState.PassiveCap);
+            state.SocialXpToday = Math.Clamp(state.SocialXpToday, 0, PetState.SocialCap); state.ClickXpToday = Math.Clamp(state.ClickXpToday, 0, PetState.ClickCap);
+            state.PassiveSeconds = double.IsFinite(state.PassiveSeconds) ? Math.Clamp(state.PassiveSeconds, 0, PetState.PassiveMinutesPerXp * 60) : 0;
             state.Scale = state.Scale is 150 or 200 ? state.Scale : 100;
             state.Language = state.Language is "ko" or "en" ? state.Language : "auto";
             state.IdleMinutes = state.IdleMinutes is 0 or 3 or 5 or 10 or 15 ? state.IdleMinutes : 5;

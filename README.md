@@ -22,6 +22,7 @@ A pixel-art desktop companion that lives on the Windows taskbar. 26 characters w
 | 놀이 | 낙하산 착지, 다른 창 위에 착지·풍선 타고 올라가기, 화면 좌우 벽 오르기·천장 걷기, 활성 창에 한마디, 강아지 공 놀이, 친구에게 공 던지기, 콕 찌르기, 마주치면 인사 | Parachute drop, land on other windows, ride a balloon up to them, climb the screen edges and walk the ceiling, comment on the active window, fetch, throw a ball to a friend, poke, greetings |
 | 소통 | Ctrl+Alt+T 빠른 말풍선, 빠른 반응 이모지, 방 만들기·초대코드·방 전환 | Quick bubble (Ctrl+Alt+T), reactions, rooms with invite codes and switching |
 | 설정 | 한국어/English, 모니터 선택, 시작 시 실행, 전역 단축키 3종(빠른 말풍선·숨기기·자동 말풍선, 키 변경 가능), 자동 말풍선 끄기, 효과음, 말풍선 스타일(레벨 해금) | Korean/English, monitor, start with Windows, three rebindable hotkeys (quick bubble, hide, auto bubbles), mute automatic bubbles, sound, bubble styles |
+| 레벨 | 하루 상한이 있는 경험치(돌봄 80·함께한 시간 48·친구 20), 보상은 친구에게도 보임: Lv.5 배지·청록 이름, Lv.10 금색, Lv.15 반짝임, Lv.20 왕관 | Daily-capped XP (care 80, time together 48, friends 20); rewards friends can see: Lv.5 badge and teal name, Lv.10 gold, Lv.15 sparkles, Lv.20 crown |
 
 ## 문서 · Docs
 

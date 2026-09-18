@@ -49,6 +49,7 @@ public sealed class App : Application
     bool hotkeysRegistered;
     double? idleOverride;
     double topicChecked, lastTopicSaid = double.NegativeInfinity; string? lastTopic;
+    int knownLevel = 1; double lastIdle;
     public bool IsNapping => napping;
     public bool IsSmokeTest => smokePath != null;
 
@@ -77,7 +78,7 @@ public sealed class App : Application
         if (smokePath != null) { Directory.CreateDirectory(smokePath); StateStore.PathName = Path.Combine(smokePath, "test-state.json"); }
         Desktop.TestOnly = smokePath != null;
         State = smokePath == null ? StateStore.Load() : new PetState();
-        L.Init(State.Language);
+        L.Init(State.Language); knownLevel = State.Level;
         RefreshScreen();
         Panel = new MainWindow(this); MainWindow = Panel;
         var work = Screen.Work;
@@ -133,6 +134,7 @@ public sealed class App : Application
         double now = clock.Elapsed.TotalSeconds;
         double dt = Math.Min(.1, now - last); last = now;
         State.Tick(dt);
+        if (State.TickPresence(dt, lastIdle < 60 && !napping) > 0) AfterXp();
         if (now - screenChecked > 2) { RefreshScreen(); screenChecked = now; }
         if (State.WindowPlay && pets.Count > 0) WindowCheck(now);
         if (smokePath == null && now - fullscreenChecked > 1) { fullscreen = Native.FullscreenApp(Screen); fullscreenChecked = now; SyncVisibility(); }
@@ -164,7 +166,7 @@ public sealed class App : Application
     void IdleCheck()
     {
         if (State.IdleMinutes <= 0) { napping = false; return; }
-        double idle = idleOverride ?? Native.IdleSeconds();
+        double idle = idleOverride ?? Native.IdleSeconds(); lastIdle = idle;
         if (!napping && !State.Sleeping && idle > State.IdleMinutes * 60) { napping = true; State.Sleeping = true; pets[0].Say(L.Get("idle_nap")); Panel.Refresh(); Broadcast("state"); }
         else if (napping && idle < 3) { napping = false; if (State.Sleeping) { State.Sleeping = false; pets[0].Say(L.Get("welcome_back")); pets[0].Bounce(); Panel.Refresh(); Broadcast("state"); } }
     }
@@ -191,6 +193,7 @@ public sealed class App : Application
         if (!State.GreetFriends || pets.Count == 0 || !newcomer.IsRemote || greeted.ContainsKey(newcomer.RemoteId)) return;
         greeted[newcomer.RemoteId] = clock.Elapsed.TotalSeconds;
         pets[0].Greet(newcomer.PetName, newcomer.CenterX); newcomer.Greet(State.Name, pets[0].CenterX);
+        State.GrantSocial(2); AfterXp();
     }
     public void Poke(PetWindow remote)
     {
@@ -341,15 +344,37 @@ public sealed class App : Application
     public void Feed()
     {
         var kind = PetCatalog.Get(State.Species);
-        if (State.Feed()) { Changed(L.Get(kind.Group == "사람" ? "yum_human" : "yum")); return; }
+        if (State.Feed()) { Changed(L.Get(kind.Group == "사람" ? "yum_human" : "yum")); XpNotice(); AfterXp(); return; }
         // Too full: nothing eaten, a head shake and a small XP/happiness penalty (see PetState.Feed).
         pets[0].Refuse(); Changed(L.Get("too_full_" + chatterRandom.Next(3)));
         Panel.Notice.Text = L.F("overfed_notice", 4, PetState.FullThreshold);
     }
     // Menus show "먹이 주기" or "음식 먹기" depending on the character kind.
     public void RefreshMenus() { RefreshTrayMenu(); foreach (var p in pets) p.BuildMenu(); }
-    public void Pet() { State.Pet(); Sounds.Pop(State.ClickSound); var kind = PetCatalog.Get(State.Species); Changed(L.Touch(kind.Id, kind.Group)); }
-    public void Play() { State.Play(); pets[0].Act(PetCatalog.Get(State.Species).FirstAction); Changed(L.Get("lets_play")); }
+    public void Pet() { State.Pet(); Sounds.Pop(State.ClickSound); var kind = PetCatalog.Get(State.Species); Changed(L.Touch(kind.Id, kind.Group)); XpNotice(); AfterXp(); }
+    public void Play() { State.Play(); pets[0].Act(PetCatalog.Get(State.Species).FirstAction); Changed(L.Get("lets_play")); XpNotice(); AfterXp(); }
+    // Why this action did or did not earn XP (panel footer).
+    void XpNotice()
+    {
+        Panel.Notice.Text = State.LastNote switch
+        {
+            PetState.XpNote.Ok => L.F("xp_gain", State.LastXp, State.CareXpToday, PetState.CareCap),
+            PetState.XpNote.NotHungry => L.Get("xp_not_hungry"),
+            PetState.XpNote.PlayCooldown => L.Get("xp_play_wait"),
+            PetState.XpNote.ClickCap => L.F("xp_click_cap", PetState.ClickCap),
+            PetState.XpNote.CareCap => L.F("xp_care_cap", PetState.CareCap),
+            _ => Panel.Notice.Text
+        };
+    }
+    // Called after any XP change: a level-up celebrates locally and tells the room (friends see the burst and the new badge).
+    public void AfterXp()
+    {
+        if (State.Level <= knownLevel) { knownLevel = State.Level; return; }
+        knownLevel = State.Level; string perk = PetState.PerkAt(State.Level) is string key ? L.Get(key) : L.Get("perk_none");
+        pets[0].Celebrate(); pets[0].Say(L.F("level_up", State.Level)); Sounds.Pop(State.ClickSound);
+        Panel.Notice.Text = L.F("level_up_notice", State.Level, perk); StateStore.Save(State); Panel.Refresh();
+        Broadcast("levelup");
+    }
     public void ToggleSleep()
     {
         State.Sleeping = !State.Sleeping; napping = false;
@@ -426,7 +451,8 @@ public sealed class App : Application
         var pet = pets.FirstOrDefault(p => p.IsRemote && p.RemoteId == ev.UserId);
         if (pet == null) { var w = Screen.Work; pet = new PetWindow(this, ev.Name, ev.Species, "", w.Left + (w.Right - w.Left) * ev.X, false, true) { RemoteId = ev.UserId }; pets.Add(pet); SyncVisibility(); GreetJoin(pet); _ = RefreshRosterSafe(); }
         double now = clock.Elapsed.TotalSeconds;
-        if (ev.Kind == "poke" && ev.Target == myId) { pets[0].Bounce(); pets[0].Say(L.F("poked_by", ev.Name)); State.Happiness = Math.Min(100, State.Happiness + 2); Sounds.Pop(State.ClickSound); }
+        if (ev.Kind == "poke" && ev.Target == myId) { pets[0].Bounce(); pets[0].Say(L.F("poked_by", ev.Name)); State.Happiness = Math.Min(100, State.Happiness + 2); Sounds.Pop(State.ClickSound); State.GrantSocial(1); AfterXp(); }
+        else if (ev.Kind == "levelup") { pet.Celebrate(); pet.Say(L.F("friend_level_up", ev.Name, ev.Level)); }
         else if (ev.Kind == "greet" && ev.Target == myId) { greeted[ev.UserId] = now; pets[0].Greet(ev.Name, pet.CenterX); pet.Greet(State.Name, pets[0].CenterX); }
         else if (ev.Kind == "ball" && ev.Target == myId) { pet.Bounce(); pets[0].ReceiveBall(!ev.Left, ev.Name); }
         pet.Apply(ev);
@@ -461,7 +487,7 @@ public sealed class App : Application
             timer.Stop();
             Check(pets.Count == 1 && pets[0].IsVisible, "pet overlay created");
             Check(pets[0].InsideWorkArea(), "overlay aligned with the selected work-area bottom");
-            var exp = State.Experience; Feed(); Check(State.Experience == exp + 5, "feed increases XP");
+            State.Fullness = 50; var exp = State.Experience; Feed(); Check(State.Experience == exp + 5 && State.LastNote == PetState.XpNote.Ok, "feeding a hungry character earns XP");
             State.Fullness = 84; Feed(); Check(State.Fullness == 100, "fullness capped at 100");
             Play(); Check(!State.Sleeping, "play wakes pet");
             ToggleSleep(); Check(State.Sleeping, "sleep toggles on"); ToggleSleep();
@@ -532,6 +558,20 @@ public sealed class App : Application
             Check(State.Fullness == 90 && State.Experience == Math.Max((State.Level - 1) * 100, xpFull - 4) && pets[0].IsRefusing && pets[0].IsFacingViewer && shakeMax > .5, "overfeeding is refused, costs XP and shakes the character");
             for (int i = 0; i < 90 && pets[0].IsRefusing; i++) pets[0].Step(.033); Check(!pets[0].IsRefusing && Math.Abs(pets[0].Visual.Shake) < .001, "refusal motion ends");
             State.Fullness = 40; xpFull = State.Experience; Feed(); Check(State.Fullness == 58 && State.Experience == xpFull + 5, "feeding below the limit works again");
+            // --- v0.6.9: XP limits and level rewards ---
+            State.Fullness = 75; xpFull = State.Experience; Feed(); Check(State.Experience == xpFull && State.LastNote == PetState.XpNote.NotHungry, "feeding when not hungry gives no XP");
+            Play(); Check(State.LastXp == 0 && State.LastNote == PetState.XpNote.PlayCooldown, "play XP waits 2 minutes between grants");
+            State.LastPlayXpUtc = DateTime.UtcNow.AddMinutes(-3); Play(); Check(State.LastXp == 8, "play XP returns after the cooldown");
+            State.CareXpToday = PetState.CareCap - 2; State.Fullness = 40; Feed(); Check(State.LastXp == 2 && State.CareXpToday == PetState.CareCap, "daily care XP stops at the cap");
+            State.Fullness = 40; Feed(); Check(State.LastXp == 0 && State.LastNote == PetState.XpNote.CareCap, "no care XP beyond the daily cap");
+            State.CareXpToday = 0; State.PassiveSeconds = 0; int passive = State.Experience; Check(State.TickPresence(599, true) == 0 && State.TickPresence(2, true) == 1 && State.Experience == passive + 1, "ten minutes together grant one XP");
+            State.Sleeping = true; Check(State.TickPresence(700, true) == 0, "no passive XP while sleeping"); State.Sleeping = false;
+            Check(State.GrantSocial(2) == 2 && State.SocialXpToday >= 2, "friend activity grants social XP");
+            State.Experience = 199; State.Fullness = 40; State.CareXpToday = 0; Feed(); pets[0].Step(.033);
+            Check(State.Level == 3 && pets[0].Visual.Celebrate > 0 && pets[0].Visual.Bubble == L.F("level_up", 3), "level up celebrates with sparkles and a bubble");
+            var high = new PetWindow(this, "고수", "cat", "", 400, false, true) { RemoteId = "lv-1" }; high.Show();
+            high.Apply(new PetEvent { Kind = "state", UserId = "lv-1", Name = "고수", Species = "cat", Level = 21 }); high.Step(.033); high.Visual.InvalidateVisual(); high.UpdateLayout();
+            Check(high.Visual.Level == 21, "friend level shows on their copy"); Export(high, Path.Combine(smokePath!, "pet-level21.png")); high.Close();
             Check(Desktop.Topic("(3) YouTube - Google Chrome") == "win_video" && Desktop.Topic("App.cs - TaskbarTails - Visual Studio Code") == "win_code" && Desktop.Topic("Untitled") == null, "foreground window topics");
             State.WindowPlay = true; int platformTop = GroundY - 320, platformLeft = Screen.Work.Left + 200, platformRight = platformLeft + 500;
             Desktop.TestPlatform(new Native.Rect { Left = platformLeft, Top = platformTop, Right = platformRight, Bottom = GroundY }); Desktop.Refresh(Screen);

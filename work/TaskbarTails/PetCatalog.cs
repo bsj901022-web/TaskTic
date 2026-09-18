@@ -55,4 +55,5 @@ public sealed class PetEvent
  public bool Perched {get;set;} // standing on / climbing a window: friends draw no parachute at that height
  public double Speed {get;set;}  // walking speed as a fraction of the work-area width per second (0 = unknown, use the default pace)
  public bool Auto {get;set;}     // message: an automatic line (chatter, reaction), not something the user typed
+ public int Level {get;set;}     // sender level: friends draw the badge, name colour, sparkles and crown
 }

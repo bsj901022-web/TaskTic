@@ -18,6 +18,8 @@ public sealed class PetVisual : FrameworkElement
     public bool BubbleTyped;      // true: a typed message (speech bubble); false: something the character says by itself (thought cloud)
     public int Surface;           // 0 ground, 1 left screen edge (turned 90° clockwise), 2 right edge (90° anticlockwise), 3 ceiling (mirrored, feet up)
     public bool Parachute, BallVisible, GoldName, FaceFront;
+    public int Level = 1;         // drives name colour tier, badge, sparkles (Lv.15) and crown (Lv.20); friends send theirs in events
+    public double Celebrate;      // seconds of level-up sparkle burst left
     public string ActionKey = "";
     public string Bubble = "";
     public double SizeFactor = 1; // 1 = 100%, 1.5 = 150%, 2 = 200% (desktop overlay only)
@@ -25,7 +27,9 @@ public sealed class PetVisual : FrameworkElement
     public int NameStyle = 1;     // 1 small text, 2 bold text on a rounded label (0 = hidden via ShowName)
     public bool ShowName { get; set; } = true;
     static Brush B(string hex) { var b = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex)); b.Freeze(); return b; }
-    static readonly Brush Ink = B("#49403C"), Gold = B("#B8860B"), Teal = B("#367969"), Shadow = B("#19000000"), Rope = B("#766D61");
+    static readonly Brush Ink = B("#49403C"), Gold = B("#B8860B"), Teal = B("#367969"), Shadow = B("#19000000"), Rope = B("#766D61"), Ruby = B("#D9484E");
+    static readonly Brush Royal = MakeRoyal();
+    static Brush MakeRoyal() { var g = new LinearGradientBrush(Color.FromRgb(0xB8, 0x86, 0x0B), Color.FromRgb(0xC8, 0x4A, 0x8C), 0); g.Freeze(); return g; }
     static readonly Brush[] BubbleFill = { B("#FFFDF8"), B("#E3F4EC"), B("#ECE8F7"), B("#FDEBDD") };
     static readonly Pen[] BubbleEdge = { new(B("#DDD9CD"), 1), new(B("#A9D6C1"), 1), new(B("#C5BBE6"), 1), new(B("#EFC2A3"), 1) };
     static readonly Brush[] Canopy = { B("#8FC7AD"), B("#FFF1CB"), B("#EAA69E") };
@@ -49,22 +53,55 @@ public sealed class PetVisual : FrameworkElement
         var f = Make(value, size, color, bold);
         d.DrawText(f, new Point(x - f.Width / 2, y));
     }
-    // The name is drawn every frame, so its layout is cached until the text, colour or DPI changes.
+    // Level rewards visible to everyone in the room: 0 plain, 1 teal (Lv.5), 2 gold (Lv.10), 3 gradient (Lv.20).
+    int Tier => Level >= 20 ? 3 : Level >= 10 ? 2 : Level >= 5 ? 1 : 0;
+    Brush TierBrush => Tier switch { 3 => Royal, 2 => Gold, 1 => Teal, _ => Ink };
+    FormattedText? badgeText;
+    // The name is drawn every frame, so its layout is cached until the text, level or DPI changes. From Lv.5 a small level badge follows the name.
     void DrawName(DrawingContext d, double y)
     {
-        bool large = NameStyle >= 2 && !FrontView;
-        string key = PetName + "|" + GoldName + "|" + large + "|" + VisualTreeHelper.GetDpi(this).PixelsPerDip;
-        if (nameText == null || key != nameKey) { nameText = Make(PetName, large ? 12 : 10, GoldName ? Gold : Ink, GoldName || large); nameKey = key; }
+        bool large = NameStyle >= 2 && !FrontView, bold = large || Tier >= 2;
+        string key = PetName + "|" + Level + "|" + large + "|" + VisualTreeHelper.GetDpi(this).PixelsPerDip;
+        if (nameText == null || key != nameKey) { nameText = Make(PetName, large ? 12 : 10, TierBrush, bold); badgeText = Level >= 5 ? Make(Level.ToString(), 7.5, Brushes.White, true) : null; nameKey = key; }
+        double badgeW = badgeText == null ? 0 : Math.Ceiling(badgeText.Width) + 7, gap = badgeText == null ? 0 : 4;
+        double total = nameText.Width + gap + badgeW, left = 80 - total / 2;
         if (large)
         {
             // Readable on any wallpaper: bold text on an opaque rounded label, nudged up so it clears the sprite.
-            double w = Math.Ceiling(nameText.Width) + 14, h = Math.Ceiling(nameText.Height) + 4;
+            double w = Math.Ceiling(total) + 14, h = Math.Ceiling(nameText.Height) + 4;
             var box = new Rect(80 - w / 2, y - 3, w, h);
             d.DrawRoundedRectangle(BubbleFill[0], BubbleEdge[0], box, h / 2, h / 2);
-            d.DrawText(nameText, new Point(80 - nameText.Width / 2, y - 1));
+            d.DrawText(nameText, new Point(left, y - 1));
+            if (badgeText != null) DrawBadge(d, left + nameText.Width + gap, y - 1 + (nameText.Height - 11) / 2, badgeW);
             return;
         }
-        d.DrawText(nameText, new Point(80 - nameText.Width / 2, y));
+        d.DrawText(nameText, new Point(left, y));
+        if (badgeText != null) DrawBadge(d, left + nameText.Width + gap, y + (nameText.Height - 11) / 2, badgeW);
+    }
+    void DrawBadge(DrawingContext d, double x, double y, double w)
+    {
+        d.DrawRoundedRectangle(TierBrush, null, new Rect(x, y, w, 11), 5.5, 5.5);
+        d.DrawText(badgeText, new Point(x + (w - badgeText!.Width) / 2, y + (11 - badgeText.Height) / 2));
+    }
+    // Small twinkling pixel stars around the character: two of them from Lv.15, a burst of six for three seconds after a level-up.
+    void DrawSparkles(DrawingContext d, double cx, double cy, double rx, double ry, int count, double size, double speed)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            double a = Phase * speed + i * (Math.PI * 2 / count), tw = (Math.Sin(Phase * 5 + i * 1.7) + 1) / 2, len = size * (.45 + .55 * tw);
+            double x = Math.Round(cx + Math.Cos(a) * rx), y = Math.Round(cy + Math.Sin(a) * ry);
+            var brush = tw > .75 ? Brushes.White : Gold;
+            d.DrawRectangle(brush, null, new Rect(x - len, y - .5, len * 2, 1));
+            d.DrawRectangle(brush, null, new Rect(x - .5, y - len, 1, len * 2));
+        }
+    }
+    // Original pixel crown for Lv.20 and up, drawn above the head (7x4 cells).
+    static readonly string[] CrownRows = { "1010101", "1111111", "1111111", "0111110" };
+    void DrawCrown(DrawingContext d, double top, double cell)
+    {
+        double left = 80 - 3.5 * cell;
+        for (int r = 0; r < CrownRows.Length; r++) for (int c = 0; c < 7; c++) if (CrownRows[r][c] == '1')
+            d.DrawRectangle(r == 1 && c == 3 ? Ruby : Gold, null, new Rect(left + c * cell, top + r * cell, cell, cell));
     }
     // Grows upward from the pet and wraps long text (up to 80 characters) inside the 160px overlay.
     // Typed messages are speech bubbles (bold text, pointed tail); the character's own lines are thought clouds (lighter text, dashed edge, two little circles).
@@ -117,9 +154,14 @@ public sealed class PetVisual : FrameworkElement
         if (Surface == 0) d.DrawEllipse(Shadow, null, new Point(80, 174), Math.Max(5, bodyWidth * .42 - Jump / 12), FrontView ? 4 : Math.Max(2, zoom * 2.2));
         if (Surface == 0)
         {
-            if (ShowName && !Parachute && !Balloon) DrawName(d, FrontView ? 119 : petTop - (NameStyle >= 2 ? 21 : 15));
-            if (Bubble.Length > 0) DrawBubble(d, FrontView ? 40 : petTop - (ShowName && NameStyle >= 2 ? 26 : 18), FrontView ? 2 : 2 - headroom);
-            else if (Sleeping) Text(d, "z z Z", 12, Teal, FrontView ? 108 : 80 + bodyWidth * .45, FrontView ? 38 : petTop - 30);
+            // Lv.20+: crown above the head; the name and bubble move up to make room.
+            double crownCell = Math.Max(1.5, zoom * 1.6), crownLift = Level >= 20 && !Parachute && !Balloon ? crownCell * 4 + 3 : 0;
+            if (crownLift > 0) DrawCrown(d, petTop - crownLift + 1, crownCell);
+            if (ShowName && !Parachute && !Balloon) DrawName(d, FrontView ? 119 : petTop - (NameStyle >= 2 ? 21 : 15) - crownLift);
+            if (Bubble.Length > 0) DrawBubble(d, FrontView ? 40 : petTop - (ShowName && NameStyle >= 2 ? 26 : 18) - crownLift, FrontView ? 2 : 2 - headroom);
+            else if (Sleeping) Text(d, "z z Z", 12, Teal, FrontView ? 108 : 80 + bodyWidth * .45, FrontView ? 38 : petTop - 30 - crownLift);
+            if (Celebrate > 0) DrawSparkles(d, 80, petTop + bodyLength / 2, bodyWidth / 2 + 14, bodyLength / 2 + 8, 6, 5, 1.6);
+            else if (Level >= 15) DrawSparkles(d, 80, petTop + bodyLength / 2, bodyWidth / 2 + 9, bodyLength / 2 + 4, 2, 3, .8);
         }
         else if (Surface == 3)
         {

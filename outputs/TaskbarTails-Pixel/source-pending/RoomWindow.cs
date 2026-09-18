@@ -85,5 +85,5 @@ public sealed class RoomWindow:Window
   rooms.SelectedIndex=roomList.FindIndex(r=>r.Id==app.Room.RoomId);
  }
  public void UpdateStatus(string text){status.Text=text;code.Text=app.Room?.InviteCode.Length>0?L.F("room_code",app.Room.InviteCode):"";}
- public void UpdateRoster(IReadOnlyList<RoomMember> list){members=list;roster.ItemsSource=list.Select(m=>m.Name+" · "+PetCatalog.Label(PetCatalog.Get(m.Species))+(m.UserId==app.Room?.UserId?L.Get("me"):"")).ToArray();}
+ public void UpdateRoster(IReadOnlyList<RoomMember> list){members=list;roster.ItemsSource=list.Select(m=>m.Name+(m.Level>=5?" Lv."+m.Level:"")+" · "+PetCatalog.Label(PetCatalog.Get(m.Species))+(m.UserId==app.Room?.UserId?L.Get("me"):"")).ToArray();}
 }

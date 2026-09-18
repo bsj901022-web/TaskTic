@@ -46,6 +46,7 @@
      <Grid><TextBlock Text="{local:T fullness}" FontSize="12"/><TextBlock x:Name="FoodLabel" HorizontalAlignment="Right" FontSize="12"/></Grid><ProgressBar x:Name="FoodBar" Margin="0,9,0,16"/>
      <Grid><TextBlock Text="{local:T happiness}" FontSize="12"/><TextBlock x:Name="HappyLabel" HorizontalAlignment="Right" FontSize="12"/></Grid><ProgressBar x:Name="HappyBar" Margin="0,9,0,16" Foreground="#E4B574"/>
      <Grid><TextBlock Text="{local:T xp}" FontSize="12"/><TextBlock x:Name="XpLabel" HorizontalAlignment="Right" FontSize="12"/></Grid><ProgressBar x:Name="XpBar" Margin="0,9,0,0" Foreground="#9B9EC6"/>
+     <TextBlock x:Name="XpNote" Style="{StaticResource Caption}" FontSize="11" Margin="0,8,0,0"/>
     </StackPanel></Border>
     <UniformGrid Columns="3" Margin="0,13,0,0"><Button x:Name="FeedButton" Content="{local:T feed}" Click="Feed_Click" Margin="0,0,6,0" Padding="8,13" Background="#36765F" Foreground="White"/><Button Content="{local:T play}" Click="Play_Click" Margin="0,0,6,0" Padding="8,13"/><Button x:Name="SleepButton" Content="{local:T sleep}" Click="Sleep_Click" Padding="8,13"/></UniformGrid>
     <UniformGrid Columns="2" Margin="0,10,0,0"><Button x:Name="ActionOne" Click="ActionOne_Click" Margin="0,0,6,0" Padding="8,10"/><Button x:Name="ActionTwo" Click="ActionTwo_Click" Padding="8,10"/></UniformGrid>

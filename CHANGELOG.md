@@ -2,6 +2,18 @@
 
 릴리스마다 이 파일의 해당 절이 GitHub Release 노트로 올라갑니다. Each release's section is published as its GitHub Release notes.
 
+## v0.6.9
+
+**한국어**
+- 경험치 규칙 정리: 먹이기와 놀기를 반복해 무한히 레벨을 올리던 구멍을 막았습니다. 먹이 경험치(+5)는 포만감 70 아래일 때만, 놀이 경험치(+8)는 2분에 한 번, 클릭 인사(+3)는 하루 12까지이며 돌봄 경험치는 하루 80이 상한입니다. 대신 함께 있는 시간이 10분마다 +1(하루 48), 친구가 방에 들어와 인사하면 +2, 콕 찌르기를 받으면 +1(친구 활동 하루 20)이 붙습니다. 하루 최대 약 1.5레벨. 상태 표시줄에 경험치가 붙거나 안 붙은 이유가 나옵니다.
+- 레벨 보상, 친구에게도 보임: Lv.5 청록 이름과 이름 옆 레벨 배지, Lv.10 금색 이름, Lv.15 캐릭터 주위 반짝임, Lv.20 머리 위 왕관과 그라데이션 이름. 레벨 업 순간에는 3초간 반짝임이 터지고 "레벨 업!" 말풍선이 뜨며, 같은 방 친구 화면에서도 내 캐릭터가 축하 연출을 합니다. 참여자 명단에도 레벨이 표시됩니다.
+- 관리 화면 경험치 막대 아래에 오늘의 경험치 현황(돌봄·함께한 시간·친구)과 다음 보상이 표시됩니다.
+
+**English**
+- XP rules: the feed/play loop can no longer level forever. Feeding gives +5 only below 70 fullness, play +8 once every 2 minutes, clicks +3 up to 12 a day, and care XP caps at 80 a day. Time together adds +1 per 10 minutes (48 a day), a friend joining +2 and a received poke +1 (friend XP 20 a day). About 1.5 levels a day at most; the footer explains each grant.
+- Level rewards, visible to friends: Lv.5 teal name and a level badge, Lv.10 gold name, Lv.15 sparkles, Lv.20 a crown and a gradient name. Level-ups burst sparkles for three seconds with a "Level up!" bubble, and friends' copies of your character celebrate too. The roster shows levels.
+- The XP bar now lists today's XP (care, time together, friends) and the next reward.
+
 ## v0.6.8
 
 **한국어**
