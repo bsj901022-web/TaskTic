@@ -88,7 +88,7 @@ begin
  delete from public.tt_members where room_id=p_room and user_id=auth.uid();
  -- Nobody left: the room and its invite code disappear.
  delete from public.tt_rooms r where r.id=p_room and not exists(select 1 from public.tt_members m where m.room_id=r.id);
-end; $;
+end; $$;
 
 -- Kept for clients on v0.6.7 or older, which send events through this RPC (each call writes one realtime.messages row).
 -- v0.6.8+ clients broadcast over the websocket instead and never call it.
