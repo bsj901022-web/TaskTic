@@ -51,7 +51,9 @@ returns jsonb language plpgsql security definer set search_path = '' as $$
 declare r public.tt_rooms; u uuid:=auth.uid();
 begin
  if u is null then raise exception 'Authentication required'; end if;
- if (select count(*) from public.tt_rooms where owner_id=u)>=5 then raise exception 'You can own at most 5 rooms'; end if;
+ -- Only rooms this user still belongs to count toward the limit (empty rooms are deleted, see tt_leave_room).
+ if (select count(*) from public.tt_rooms x where x.owner_id=u and exists(select 1 from public.tt_members m where m.room_id=x.id and m.user_id=u))>=5 then
+  raise exception 'You can own at most 5 rooms'; end if;
  if char_length(trim(p_name)) not between 1 and 40 or char_length(trim(p_pet_name)) not between 1 and 12 then raise exception 'Invalid name'; end if;
  insert into public.tt_rooms(name,owner_id) values(trim(p_name),u) returning * into r;
  insert into public.tt_members(room_id,user_id,pet_name,species) values(r.id,u,trim(p_pet_name),p_species);
@@ -84,7 +86,9 @@ create or replace function public.tt_leave_room(p_room uuid)
 returns void language plpgsql security definer set search_path = '' as $$
 begin
  delete from public.tt_members where room_id=p_room and user_id=auth.uid();
-end; $$;
+ -- Nobody left: the room and its invite code disappear.
+ delete from public.tt_rooms r where r.id=p_room and not exists(select 1 from public.tt_members m where m.room_id=r.id);
+end; $;
 
 -- Kept for clients on v0.6.7 or older, which send events through this RPC (each call writes one realtime.messages row).
 -- v0.6.8+ clients broadcast over the websocket instead and never call it.
@@ -128,6 +132,10 @@ do $$ begin
   perform cron.unschedule(jobid) from cron.job where jobname='tt_purge_realtime_messages';
   perform cron.schedule('tt_purge_realtime_messages','*/10 * * * *',
    $job$ delete from realtime.messages where inserted_at < now() - interval '10 minutes' $job$);
+  -- Daily: rooms where nobody has been seen for 60 days.
+  perform cron.unschedule(jobid) from cron.job where jobname='tt_purge_idle_rooms';
+  perform cron.schedule('tt_purge_idle_rooms','40 4 * * *',
+   $job$ delete from public.tt_rooms r where not exists(select 1 from public.tt_members m where m.room_id=r.id and m.last_seen > now() - interval '60 days') $job$);
  end if;
 end $$;
 commit;

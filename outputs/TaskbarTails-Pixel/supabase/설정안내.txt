@@ -6,7 +6,8 @@
 
 [기존 프로젝트를 올리는 경우]
 - v0.4 → upgrade-v05.sql, 그 다음 upgrade-v08.sql을 한 번씩 실행하세요.
-- v0.5~v0.6.7 → upgrade-v08.sql만 실행하세요.
+- v0.5~v0.6.7 → upgrade-v08.sql, 그 다음 upgrade-v08-rooms.sql을 실행하세요.
+- upgrade-v08.sql만 실행한 프로젝트 → upgrade-v08-rooms.sql을 추가로 실행하세요(빈 방 정리, 마지막 사람이 나가면 방 삭제, 5개 제한은 참여 중인 방만 계산).
 - upgrade-v08.sql을 실행하지 않으면 v0.6.8 이상 앱이 방에 들어갈 때 이벤트 전송이 거부됩니다(친구 캐릭터가 움직이지 않음).
 
 [데이터베이스 사용량]
